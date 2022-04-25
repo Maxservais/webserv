@@ -124,22 +124,19 @@ int	main(void)
 		std::cout << buffer << std::endl;
 
 		/* LIEN */
-		connection = accept(sockfd, (struct sockaddr*)&sockaddr, &addrlen);
-		if (connection < 0)
+		int connection_2 = accept(sockfd, (struct sockaddr*)&sockaddr, &addrlen);
+		if (connection_2 < 0)
 		{
-			std::cout << "Failed to grab connection!" << std::endl;
+			std::cout << "Failed to grab connection_2!" << std::endl;
 			return (EXIT_FAILURE);
 		}
 
 		memset(buffer, 0, 1000000);
-		read(connection, buffer, 1000000);
+		read(connection_2, buffer, 1000000);
 		std::cout << buffer << std::endl;
-		if ( buffer[5] == 'p' && buffer[6] == 'a' && buffer[7] == 'g')
-		{
-			response = "HTTP/1.1 200 OK\nContent-Type: text/html; charset=utf-8\nContent-Length: 7650\n\n" + read_file_to_str("page.html");
-			send(connection, response.c_str(), response.size(), 0);
-		}
-		close(connection);
+		response = "HTTP/1.1 200 OK\nContent-Type: text/html; charset=utf-8\nContent-Length: 7650\n\n" + read_file_to_str("page.html");
+		send(connection_2, response.c_str(), response.size(), 0);
+		close(connection_2);
 	}
 
 	close(sockfd);
