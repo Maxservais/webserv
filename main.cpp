@@ -23,7 +23,7 @@ int	main(void)
 	/* Assign an IP address and port to the socket */
 	sockaddr.sin_family = AF_INET;
 	sockaddr.sin_addr.s_addr = INADDR_ANY;
-	sockaddr.sin_port = htons(9999); // convert a number to the network byte order
+	sockaddr.sin_port = htons(8080); // convert a number to the network byte order
 	if (bind(sockfd, (struct sockaddr*)&sockaddr, sizeof(sockaddr)) < 0)
 	{
 		std::cout << "Failed to bind !" << std::endl;
@@ -67,15 +67,15 @@ int	main(void)
 	char	buffer_2[1000000];
 	read(connection, buffer_2, 1000000);
 	std::cout << "Message was for second request: " << buffer_2 << std::endl;
-	
-	// int fd = open("ball.png", O_RDONLY);
-	// std::string response_2 = "HTTP/1.1 200 OK\nContent-Type: image/png; \nContent-Length: 105345\n\n";
-	// send(connection, response_2.c_str(), response_2.size(), 0);
+
+	int fd = open("ball.png", O_RDONLY);
+	response = "HTTP/1.1 200 OK\nContent-Type: image/png; \nContent-Length: 105345\n\n";
+	send(connection, response.c_str(), response.size(), 0);
 
 	/* Close the connections */
 	close(connection);
 	close(sockfd);
-	// close(fd);
+	close(fd);
 
 	return (EXIT_SUCCESS);
 }
