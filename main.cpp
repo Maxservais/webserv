@@ -21,7 +21,7 @@ int	main(void)
 	/* Assign an IP address and port to the socket */
 	sockaddr.sin_family = AF_INET;
 	sockaddr.sin_addr.s_addr = INADDR_ANY;
-	sockaddr.sin_port = htons(8080); // convert a number to the network byte order
+	sockaddr.sin_port = htons(9999); // convert a number to the network byte order
 	if (bind(sockfd, (struct sockaddr*)&sockaddr, sizeof(sockaddr)) < 0)
 	{
 		std::cout << "Failed to bind to port 8080!" << std::endl;
@@ -61,6 +61,15 @@ int	main(void)
 		//send(connection, response_2.c_str(), response_2.size(), 0);
 	// }
 	/* Close the connections */
+	close(connection);
+	connection = accept(sockfd, (struct sockaddr*)&sockaddr, &addrlen);
+	if (connection < 0)
+	{
+		std::cout << "Failed to grab connection!" << std::endl;
+		return (EXIT_FAILURE);
+	}
+	read(connection, buffer, 1000);
+		std::cout << "Message was: " << buffer << std::endl;
 	close(connection);
 	close(sockfd);
 	return (EXIT_SUCCESS);
