@@ -8,6 +8,16 @@
 #include <vector>
 
 
+std::string read_file_to_str(const std::string& path)
+{
+	std::ifstream input_file(path);
+	if (!input_file.is_open()) 
+	{
+		std::cout << "Failed to open the requested ressource" << std::endl;
+	}
+	return std::string((std::istreambuf_iterator<char>(input_file)), std::istreambuf_iterator<char>());
+}
+
 std::string convert_to_binary(const char * path)
 {
 	std::vector<char> buffer;
@@ -18,8 +28,8 @@ std::string convert_to_binary(const char * path)
 		std::cerr << path << " failed to open." << std::endl;
 		exit(EXIT_FAILURE);
 	}
-	stream.seekg(0, std::ios_base::end); // https://www.javatpoint.com/fseek-in-c The fseek() function is used to set the file pointer to the specified offset. It is used to write data into file at desired location.
-	long file_length = stream.tellg(); // ftell() in C is used to find out the position of file pointer in the file with respect to starting of the file.
+	stream.seekg(0, std::ios_base::end);
+	long file_length = stream.tellg();
 	stream.seekg(0);
 
 	buffer.resize(file_length);
@@ -48,7 +58,7 @@ int	main(void)
 	/* Assign an IP address and port to the socket */
 	sockaddr.sin_family = AF_INET;
 	sockaddr.sin_addr.s_addr = INADDR_ANY;
-	sockaddr.sin_port = htons(8080); // convert a number to the network byte order
+	sockaddr.sin_port = htons(9999); // convert a number to the network byte order
 	if (bind(sockfd, (struct sockaddr*)&sockaddr, sizeof(sockaddr)) < 0)
 	{
 		std::cout << "Failed to bind !" << std::endl;
@@ -62,44 +72,74 @@ int	main(void)
 		return (EXIT_FAILURE);
 	}
 
-	/* Grab a connection from the queue */
-	socklen_t addrlen = sizeof(sockaddr);
-	int	connection = accept(sockfd, (struct sockaddr*)&sockaddr, &addrlen);
-	if (connection < 0)
-	{
-		std::cout << "Failed to grab connection!" << std::endl;
-		return (EXIT_FAILURE);
-	}
-
-	/* Read from the connection and print output */
 	char	buffer[1000000];
-	read(connection, buffer, 1000000);
-	std::cout << "Message was: " << buffer << std::endl;
-
-	/* Send a message to the connection */
-	std::string response = "HTTP/1.1 200 OK\nContent-Type: text/html; charset=utf-8\nContent-Length: 7650\n\n<!DOCTYPE html><html> <head><meta charset=\"utf-8\">server Response</head><body><h1> This page was render direcly from the server <p>Hello there welcome to my website</p></h1><img src=\"ball.png\"></body></html>";
-	send(connection, response.c_str(), response.size(), 0);
-
-	close(connection);
-	connection = accept(sockfd, (struct sockaddr*)&sockaddr, &addrlen);
-	if (connection < 0)
+	while(1)
 	{
-		std::cout << "Failed to grab connection!" << std::endl;
-		return (EXIT_FAILURE);
+		socklen_t addrlen = sizeof(sockaddr);
+
+		/* HEADERS */
+		int	connection = accept(sockfd, (struct sockaddr*)&sockaddr, &addrlen);
+		if (connection < 0)
+		{
+			std::cout << "Failed to grab connection!" << std::endl;
+			return (EXIT_FAILURE);
+		}
+
+		std::cout << buffer << std::endl;
+		memset(buffer, 0, 1000000);
+		read(connection, buffer, 1000000);
+		std::cout << buffer << std::endl;
+
+		std::string response = "HTTP/1.1 200 OK\nContent-Type: text/html; charset=utf-8\nContent-Length: 7650\n\n" + read_file_to_str("index.html");
+		send(connection, response.c_str(), response.size(), 0);
+
+		close(connection);
+
+		/* IMAGE */
+		connection = accept(sockfd, (struct sockaddr*)&sockaddr, &addrlen);
+		if (connection < 0)
+		{
+			std::cout << "Failed to grab connection!" << std::endl;
+			return (EXIT_FAILURE);
+		}
+
+		memset(buffer, 0, 1000000);
+		read(connection, buffer, 1000000);
+		std::cout << buffer << std::endl;
+
+		const char * path = "ball.png";
+		response = convert_to_binary(path);
+		send(connection, response.c_str(), response.size(), 0);
+
+		close(connection);
+
+		/* POST */
+		connection = accept(sockfd, (struct sockaddr*)&sockaddr, &addrlen);
+		if (connection < 0)
+		{
+			std::cout << "Failed to grab connection!" << std::endl;
+			return (EXIT_FAILURE);
+		}
+		memset(buffer, 0, 1000000);
+		read(connection, buffer, 1000000);
+		std::cout << buffer << std::endl;
+
+		/* LIEN */
+		int connection_2 = accept(sockfd, (struct sockaddr*)&sockaddr, &addrlen);
+		if (connection_2 < 0)
+		{
+			std::cout << "Failed to grab connection_2!" << std::endl;
+			return (EXIT_FAILURE);
+		}
+
+		memset(buffer, 0, 1000000);
+		read(connection_2, buffer, 1000000);
+		std::cout << buffer << std::endl;
+		response = "HTTP/1.1 200 OK\nContent-Type: text/html; charset=utf-8\nContent-Length: 7650\n\n" + read_file_to_str("page.html");
+		send(connection_2, response.c_str(), response.size(), 0);
+		close(connection_2);
 	}
 
-	char	buffer_2[1000000];
-	read(connection, buffer_2, 1000000);
-	std::cout << "Message was for second request: " << buffer_2 << std::endl;
-
-	const char * path = "ball.png";
-	response = convert_to_binary(path);
-	send(connection, response.c_str(), response.size(), 0);
-
-	/* Close the connections */
-	close(connection);
 	close(sockfd);
-	// close(fd);
-
 	return (EXIT_SUCCESS);
 }
