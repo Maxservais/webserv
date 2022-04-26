@@ -45,7 +45,7 @@ std::string convert_to_binary(const char * path)
 	stream.seekg(0);
 
 	buffer.resize(file_length);
-	stream.read(&buffer[0], file_length); // /!\ a proteger, je regarde ca
+	stream.read(&buffer[0], file_length);
 
 	std::string file_str(buffer.begin(), buffer.end());
 	stream.close();
@@ -66,7 +66,7 @@ int main()
 
 	sockaddr.sin_family = AF_INET;
 	sockaddr.sin_addr.s_addr = INADDR_ANY;
-	sockaddr.sin_port = htons(SERVER_PORT); // convert a number to the network byte order
+	sockaddr.sin_port = htons(SERVER_PORT);
 	if (bind(sockfd, (struct sockaddr*)&sockaddr, sizeof(sockaddr)) < 0)
 	{
 		std::cout << "Failed to bind !" << std::endl;
@@ -123,7 +123,6 @@ int main()
 				response = "HTTP/1.1 200 OK\nContent-Type: text/html; charset=utf-8\nContent-Length: 7650\n\n" + read_file_to_str("page.html");
 			else 
 				response = "HTTP/1.1 200 OK\nContent-Type: text/html; charset=utf-8\nContent-Length: 7650\n\n" + read_file_to_str("error404.html");
-			// send(connection, response.c_str(), response.size(), 0);
 		}
 
 		else if (vector[0] == "DELETE")
