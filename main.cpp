@@ -121,7 +121,7 @@ std::string dispatcher(std::vector<std::string> vector)
 	return (response);
 }
 
-int create_tcp_server_socket()
+int setup_server()
 {
 	int			sockfd;
 	struct sockaddr_in	sockaddr;
@@ -158,37 +158,120 @@ int main()
 	int			sockfd = 0;
 	sockaddr_in	sockaddr;
 
-	sockfd = create_tcp_server_socket();
+	sockfd = setup_server();
 	if(sockfd == -1)
 	{
 		std::cout << "Failed to create a server" << std::endl;
 		return (EXIT_FAILURE);
 	}
+	socklen_t addrlen = sizeof(sockaddr);
 
+	// SELECT
+	fd_set current_sockets;
+	fd_set ready_sockets;
+
+	// intialize current_set
+	FD_ZERO(&current_sockets);
+	FD_SET(sockfd, &current_sockets);
+	
 	while(1)
 	{
-		socklen_t addrlen = sizeof(sockaddr);
+		// select is destructive, goign to change the set we pass in so need temporary copy,
+		// so each time go through loop copy current set of socket to the ready_sockets set
+		ready_sockets = current_sockets;
 
-		int	connection = accept(sockfd, (struct sockaddr*)&sockaddr, &addrlen);
-		if (connection < 0)
+		// then call select : tell it range fd to check (max possible fd)
+		// `readset'
+		// 	the set of FDs to examine for readability
+		// `writeset'
+		// 	the set of FDs to examine for writability
+		// `exceptfds'
+		// `timeout'
+		// 	NULL for infinite timeout (so wait for ever or until one of the fd has something for me to read)
+
+		if (select(FD_SETSIZE, &ready_sockets, NULL, NULL, NULL) < 0)
 		{
-			std::cout << "Failed to grab connection!" << std::endl;
+			std::cout << "Select issue" << std::endl;
 			return (EXIT_FAILURE);
 		}
+		//when select returns, we know that one of our fd has work for us to do, but which one ? Select changes our fd set
+		//when it returns : ready_sockets contains only the fd that are ready for reading
+		//have to go through and check
+		for (int i = 0; i < FD_SETSIZE; i++)
+		{
+			if(FD_ISSET(i, &ready_sockets)) // go through the range of possible fd and for each one use FDISSET to check if it is set
+			// if it is we know that i is a fd with data we can read now
+			{
+				if (i == sockfd) // tell us our ready fd is our server socket : new connection we can accept
+				// call accept to get that new connection
+				{
+					int	connection = accept(sockfd, (struct sockaddr*)&sockaddr, &addrlen);
+					if (connection < 0)
+					{
+						std::cout << "Failed to grab connection!" << std::endl;
+						return (EXIT_FAILURE);
+					}
+					// once got that new connection, use FD_SET to add the newly accepted socket to the set of socket we are watching
+					FD_SET(connection, &current_sockets);
+				}
+				else // socket ready to read from is one of these client socket, in that case just want to read the data and handle the connection
+				{
+					memset(buffer, 0, 1000000);
+					read(i, buffer, 1000000);
+					std::cout << buffer << std::endl;
+					
+					std::vector<std::string> vector = parser(buffer);
+					std::string response = dispatcher(vector);
 
-		memset(buffer, 0, 1000000);
-		read(connection, buffer, 1000000);
-		std::cout << buffer << std::endl;
+					send(i, response.c_str(), response.size(), 0);
 
-		std::vector<std::string> vector = parser(buffer);
-		std::string response = dispatcher(vector);
-		
-		send(connection, response.c_str(), response.size(), 0);
-		close(connection);
+					FD_CLR(i, &current_sockets);
+					close(i);
+				}
+			}
+		}
 	}
 	close(sockfd);
 	return (EXIT_SUCCESS);
 }
+
+// int main()
+// {
+// 	char		buffer[1000000];
+// 	int			sockfd = 0;
+// 	sockaddr_in	sockaddr;
+
+// 	sockfd = setup_server();
+// 	if(sockfd == -1)
+// 	{
+// 		std::cout << "Failed to create a server" << std::endl;
+// 		return (EXIT_FAILURE);
+// 	}
+
+// 	while(1)
+// 	{
+// 		socklen_t addrlen = sizeof(sockaddr);
+
+// 		int	connection = accept(sockfd, (struct sockaddr*)&sockaddr, &addrlen);
+// 		if (connection < 0)
+// 		{
+// 			std::cout << "Failed to grab connection!" << std::endl;
+// 			return (EXIT_FAILURE);
+// 		}
+
+// 		memset(buffer, 0, 1000000);
+// 		read(connection, buffer, 1000000);
+// 		std::cout << buffer << std::endl;
+
+// 		std::vector<std::string> vector = parser(buffer);
+// 		std::string response = dispatcher(vector);
+		
+// 		send(connection, response.c_str(), response.size(), 0);
+// 		close(connection);
+// 	}
+// 	close(sockfd);
+// 	return (EXIT_SUCCESS);
+// }
 
 // int main()
 // {
