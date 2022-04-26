@@ -8,6 +8,8 @@
 #include <fcntl.h>
 #include <vector>
 
+#define SERVER_PORT 9999
+
 std::vector<std::string> split_file_name(std::string name)
 {
 	std::vector<std::string> splitted_file_name;
@@ -51,60 +53,88 @@ std::string convert_to_binary(const char * path)
 
 int main()
 {
-	// int			sockfd;
-	// sockaddr_in	sockaddr;
+	int			sockfd;
+	sockaddr_in	sockaddr;
 
-	// sockfd = socket(AF_INET, SOCK_STREAM, 0);
-	// if (sockfd < 0)
-	// {
-	// 	std::cout << "Failed to create socket!" << std::endl;
-	// 	return (EXIT_FAILURE);
-	// }
+	sockfd = socket(AF_INET, SOCK_STREAM, 0);
+	if (sockfd < 0)
+	{
+		std::cout << "Failed to create socket!" << std::endl;
+		return (EXIT_FAILURE);
+	}
 
-	// sockaddr.sin_family = AF_INET;
-	// sockaddr.sin_addr.s_addr = INADDR_ANY;
-	// sockaddr.sin_port = htons(8080); // convert a number to the network byte order
-	// if (bind(sockfd, (struct sockaddr*)&sockaddr, sizeof(sockaddr)) < 0)
-	// {
-	// 	std::cout << "Failed to bind !" << std::endl;
-	// 	return (EXIT_FAILURE);
-	// }
+	sockaddr.sin_family = AF_INET;
+	sockaddr.sin_addr.s_addr = INADDR_ANY;
+	sockaddr.sin_port = htons(SERVER_PORT); // convert a number to the network byte order
+	if (bind(sockfd, (struct sockaddr*)&sockaddr, sizeof(sockaddr)) < 0)
+	{
+		std::cout << "Failed to bind !" << std::endl;
+		return (EXIT_FAILURE);
+	}
 
-	// if (listen(sockfd, 10) < 0)
-	// {
-	// 	std::cout << "Failed to listen on socket!" << std::endl;
-	// 	return (EXIT_FAILURE);
-	// }
+	if (listen(sockfd, 10) < 0)
+	{
+		std::cout << "Failed to listen on socket!" << std::endl;
+		return (EXIT_FAILURE);
+	}
 
-	// socklen_t addrlen = sizeof(sockaddr);
-	// char	buffer[1000000];
-	// while(1)
-	// {
-	// 	int	connection = accept(sockfd, (struct sockaddr*)&sockaddr, &addrlen);
-	// 	if (connection < 0)
-	// 	{
-	// 		std::cout << "Failed to grab connection!" << std::endl;
-	// 		return (EXIT_FAILURE);
-	// 	}
+	char	buffer[1000000];
+	while(1)
+	{
+		socklen_t addrlen = sizeof(sockaddr);
 
-	// 	memset(buffer, 0, 1000000);
-	// 	read(connection, buffer, 1000000);
-	// 	std::cout << buffer << std::endl;
+		int	connection = accept(sockfd, (struct sockaddr*)&sockaddr, &addrlen);
+		if (connection < 0)
+		{
+			std::cout << "Failed to grab connection!" << std::endl;
+			return (EXIT_FAILURE);
+		}
+		else
+			std::cout << "CONNECTION : " << connection << std::endl;
 
-	char buffer[100] = "GET /favicon.ico HTTP/1.1";
-	std::vector<std::string> vector;
-	std::string a;
-	std::string b;
-	int i = 0;
-	while(buffer[i] != ' ')
-		a.push_back(buffer[i++]);
-	i++;
-	while(buffer[i] != ' ')
-		b.push_back(buffer[i++]);
-	vector.push_back(a);
-	vector.push_back(b);
+		memset(buffer, 0, 1000000);
+		read(connection, buffer, 1000000);
+		std::cout << buffer << std::endl;
 
-	// 	close(connection);
+		std::vector<std::string> vector;
+		std::string a;
+		std::string b;
+		int i = 0;
+		while(buffer[i] != ' ')
+			a.push_back(buffer[i++]);
+		i++;
+		while(buffer[i] != ' ')
+			b.push_back(buffer[i++]);
+		vector.push_back(a);
+		vector.push_back(b);
 
-	// }
+		if (vector[0] == "GET")
+		{
+			std::string response;
+			if (vector[1] == "/index.html" || vector[1] == "/")
+				response = "HTTP/1.1 200 OK\nContent-Type: text/html; charset=utf-8\nContent-Length: 7650\n\n" + read_file_to_str("index.html");
+			else if (vector[1] == "/ball.png" || vector[1] == "/favicon.ico")
+			{
+				const char * path = "ball.png";
+				response = convert_to_binary(path);
+				std::string response_len = std::to_string(response.length());
+				std::string ret = "HTTP/1.1 200 OK\r\nContent-Type: image/png; Content-Transfer-Encoding: binary; Content-Length: " + response_len + ";charset=ISO-8859-4 \r\n\r\n" + response;
+			}
+			else if (vector[1] == "/page.html")
+				response = "HTTP/1.1 200 OK\nContent-Type: text/html; charset=utf-8\nContent-Length: 7650\n\n" + read_file_to_str("page.html");
+			else 
+				response = "HTTP/1.1 200 OK\nContent-Type: text/html; charset=utf-8\nContent-Length: 7650\n\n" + read_file_to_str("error404.html");
+
+			send(connection, response.c_str(), response.size(), 0);
+		}
+		else if (vector[0] == "POST")
+			std::cout << "I AM A POST" << std::endl;
+		else if (vector[0] == "DELETE")
+			std::cout << "I AM A DELETE" << std::endl;
+		else 
+			std::cout << "NOT A POST OR GET" << std::endl;
+		close(connection);
+	}
+	close(sockfd);
+	return (EXIT_SUCCESS);
 }
