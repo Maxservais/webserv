@@ -57,6 +57,70 @@ std::string convert_to_binary(const char * path)
 	return (file_str);
 }
 
+std::vector<std::string> parser(char * buffer)
+{
+	std::vector<std::string> vector;
+	std::string a;
+	std::string b;
+	int i = 0;
+	while(buffer[i] != ' ')
+		a.push_back(buffer[i++]);
+	i++;
+	while(buffer[i] != ' ')
+		b.push_back(buffer[i++]);
+	vector.push_back(a);
+	vector.push_back(b);
+	return(vector);
+}
+
+std::string dispatcher(std::vector<std::string> vector)
+{
+	std::string response;
+	if (vector[0] == "GET")
+	{
+		if (vector[1] == "/index.html" || vector[1] == "/")
+			response = "HTTP/1.1 200 OK\nContent-Type: text/html; charset=utf-8\nContent-Length: 7650\n\n" + read_file_to_str("index.html");
+		else if (vector[1] == "/ball.png" || vector[1] == "/favicon.ico")
+		{
+			const char * path = "ball.png";
+			response = convert_to_binary(path);
+			std::string response_len = std::to_string(response.length());
+			std::string ret = "HTTP/1.1 200 OK\r\nContent-Type: image/png; Content-Transfer-Encoding: binary; Content-Length: " + response_len + ";charset=ISO-8859-4 \r\n\r\n" + response;
+		}
+		else if (vector[1] == "/page.html")
+			response = "HTTP/1.1 200 OK\nContent-Type: text/html; charset=utf-8\nContent-Length: 7650\n\n" + read_file_to_str("page.html");
+		else 
+			response = "HTTP/1.1 200 OK\nContent-Type: text/html; charset=utf-8\nContent-Length: 7650\n\n" + read_file_to_str("error404.html");
+	}
+
+	else if (vector[0] == "DELETE")
+	{
+		if ( vector[1] == "/ball.png" || vector[1] == "/page.html" || vector[1] == "/index.html")
+		{
+			vector[1].erase(0,1);
+			const char * file_name = const_cast<char*>(vector[1].c_str());
+			if (remove(file_name) != 0)
+				response = "HTTP/1.1 204 No Content\n\nContent-Type: text/plain\n";
+			else
+				response = "HTTP/1.1 200 OK\nContent-Type: text/html; charset=utf-8\nContent-Length: 48\n\n<html><body><h1>File deleted.</h1></body></html>";
+		}
+		else
+			response = "HTTP/1.1 204 No Content\n\nContent-Type: text/plain\n";
+	}
+
+	else if (vector[0] == "POST")
+	{
+		std::cout << "I AM A POST" << std::endl;
+		response = "HTTP/1.1 204 No Content\n\nContent-Type: text/plain\n";
+	}
+	else
+	{
+		std::cout << "NOT A POST OR GET" << std::endl;
+		response = "HTTP/1.1 204 No Content\n\nContent-Type: text/plain\n";
+	}
+	return (response);
+}
+
 int create_tcp_server_socket()
 {
 	int			sockfd;
@@ -90,203 +154,136 @@ int create_tcp_server_socket()
 
 int main()
 {
-	fd_set read_fd_set;
-	struct sockaddr_in	sockaddr;
-	int sockfd = 0;
-	int connection;
-	int i;
-	int ret;
-	char	buffer[BUFFER_SIZE];
-	int		connections[MAX_CONNECTIONS];
+	char		buffer[1000000];
+	int			sockfd = 0;
+	sockaddr_in	sockaddr;
 
-	/* Get the socket server fd */
-	if (sockfd == create_tcp_server_socket())
+	sockfd = create_tcp_server_socket();
+	if(sockfd == -1)
 	{
 		std::cout << "Failed to create a server" << std::endl;
 		return (EXIT_FAILURE);
 	}
 
-	/* Initialize connections and set the first entry to server fd */
-	for (i = 0; i < MAX_CONNECTIONS; i++)
-		connections[i] = -1;
-	connections[0] = sockfd;
-
 	while(1)
 	{
-		FD_ZERO(&read_fd_set); // Clear all entries from the set.
-		
-		/* Set the fd_set before passing it to the select call */
-		for (i = 0; i < MAX_CONNECTIONS; i++)
-		{
-			if(connections[i] >= 0)
-				FD_SET(connections[i], &read_fd_set); // Add fd to the set.
-		}
-		
-		/* Invoke select() and then wait! */
-		ret = select(FD_SETSIZE, &read_fd_set, NULL, NULL, NULL);
-		if (ret >= 0)
-		{
-			/* Check if the fd with event is the server fd */
-			if (FD_ISSET(sockfd, &read_fd_set))
-			{
-				/* accept the new connection */
-				socklen_t addrlen = sizeof(sockaddr);
-				connection = accept(sockfd, (struct sockaddr*)&sockaddr, &addrlen);
-				if (connection < 0)
-				{
-					std::cout << "Failed to grab connection!" << std::endl;
-					return (EXIT_FAILURE);
-				}
-				for (i=0; i < MAX_CONNECTIONS;i++) 
-				{
-					if (connections[i] < 0)
-					{
-						connections[i] = connection; 
-						break;
-					}
-				}
-				ret--;
-				if (!ret)
-					continue;
-			}
+		socklen_t addrlen = sizeof(sockaddr);
 
-			/* Check if the fd with event is a non-server fd */
-			for (i=1; i < MAX_CONNECTIONS;i++)
-			{
-				if ((connections[i] > 0) && (FD_ISSET(connections[i], &read_fd_set))) // Return true if fd is in the set.
-				{
-					/* read incoming data */
-					memset(buffer, 0, BUFFER_SIZE);
-					ret = recv(connections[i], buffer, BUFFER_SIZE, 0);
-					if (ret == 0)
-					{
-						std::cout << "Connection closed for fd" << std::endl;
-						// close(connection[i]);
-						// connection[i] = -1;
-					}
-					if (ret > 0)
-						std::cout << buffer << std::endl;
-					if (ret == -1)
-					{
-						std::cout << "recv() failed" << std::endl;
-						break;
-					}
-					ret--;
-					if(!ret)
-						continue;
-				}
-			}
-		}
-		for (i=0;i < MAX_CONNECTIONS;i++)
+		int	connection = accept(sockfd, (struct sockaddr*)&sockaddr, &addrlen);
+		if (connection < 0)
 		{
-			if (connections[i] > 0)
-			close(connections[i]);
+			std::cout << "Failed to grab connection!" << std::endl;
+			return (EXIT_FAILURE);
 		}
+
+		memset(buffer, 0, 1000000);
+		read(connection, buffer, 1000000);
+		std::cout << buffer << std::endl;
+
+		std::vector<std::string> vector = parser(buffer);
+		std::string response = dispatcher(vector);
+		
+		send(connection, response.c_str(), response.size(), 0);
+		close(connection);
 	}
-	return(EXIT_SUCCESS);
+	close(sockfd);
+	return (EXIT_SUCCESS);
 }
 
 // int main()
 // {
-// 	int			sockfd;
-// 	sockaddr_in	sockaddr;
+// 	fd_set read_fd_set;
+// 	struct sockaddr_in	sockaddr;
+// 	int sockfd = 0;
+// 	int connection;
+// 	int i;
+// 	int ret;
+// 	char	buffer[BUFFER_SIZE];
+// 	int		connections[MAX_CONNECTIONS];
 
-// 	sockfd = socket(AF_INET, SOCK_STREAM, 0);
-// 	if (sockfd < 0)
+// 	/* Get the socket server fd */
+// 	if (sockfd == create_tcp_server_socket())
 // 	{
-// 		std::cout << "Failed to create socket!" << std::endl;
+// 		std::cout << "Failed to create a server" << std::endl;
 // 		return (EXIT_FAILURE);
 // 	}
 
-// 	sockaddr.sin_family = AF_INET;
-// 	sockaddr.sin_addr.s_addr = INADDR_ANY;
-// 	sockaddr.sin_port = htons(SERVER_PORT);
-// 	if (bind(sockfd, (struct sockaddr*)&sockaddr, sizeof(sockaddr)) < 0)
-// 	{
-// 		std::cout << "Failed to bind !" << std::endl;
-// 		return (EXIT_FAILURE);
-// 	}
+// 	/* Initialize connections and set the first entry to server fd */
+// 	for (i = 0; i < MAX_CONNECTIONS; i++)
+// 		connections[i] = -1;
+// 	connections[0] = sockfd;
 
-// 	if (listen(sockfd, 10) < 0)
-// 	{
-// 		std::cout << "Failed to listen on socket!" << std::endl;
-// 		return (EXIT_FAILURE);
-// 	}
-
-// 	char	buffer[1000000];
 // 	while(1)
 // 	{
-// 		socklen_t addrlen = sizeof(sockaddr);
-
-// 		int	connection = accept(sockfd, (struct sockaddr*)&sockaddr, &addrlen);
-// 		if (connection < 0)
+// 		FD_ZERO(&read_fd_set); // Clear all entries from the set.
+		
+// 		/* Set the fd_set before passing it to the select call */
+// 		for (i = 0; i < MAX_CONNECTIONS; i++)
 // 		{
-// 			std::cout << "Failed to grab connection!" << std::endl;
-// 			return (EXIT_FAILURE);
+// 			if(connections[i] >= 0)
+// 				FD_SET(connections[i], &read_fd_set); // Add fd to the set.
 // 		}
-
-// 		memset(buffer, 0, 1000000);
-// 		read(connection, buffer, 1000000);
-// 		std::cout << buffer << std::endl;
-
-// 		std::vector<std::string> vector;
-// 		std::string a;
-// 		std::string b;
-// 		int i = 0;
-// 		while(buffer[i] != ' ')
-// 			a.push_back(buffer[i++]);
-// 		i++;
-// 		while(buffer[i] != ' ')
-// 			b.push_back(buffer[i++]);
-// 		vector.push_back(a);
-// 		vector.push_back(b);
-
-// 		std::string response;
-// 		if (vector[0] == "GET")
+		
+// 		/* Invoke select() and then wait! */
+// 		ret = select(FD_SETSIZE, &read_fd_set, NULL, NULL, NULL);
+// 		if (ret >= 0)
 // 		{
-// 			if (vector[1] == "/index.html" || vector[1] == "/")
-// 				response = "HTTP/1.1 200 OK\nContent-Type: text/html; charset=utf-8\nContent-Length: 7650\n\n" + read_file_to_str("index.html");
-// 			else if (vector[1] == "/ball.png" || vector[1] == "/favicon.ico")
+// 			/* Check if the fd with event is the server fd */
+// 			if (FD_ISSET(sockfd, &read_fd_set))
 // 			{
-// 				const char * path = "ball.png";
-// 				response = convert_to_binary(path);
-// 				std::string response_len = std::to_string(response.length());
-// 				std::string ret = "HTTP/1.1 200 OK\r\nContent-Type: image/png; Content-Transfer-Encoding: binary; Content-Length: " + response_len + ";charset=ISO-8859-4 \r\n\r\n" + response;
+// 				/* accept the new connection */
+// 				socklen_t addrlen = sizeof(sockaddr);
+// 				connection = accept(sockfd, (struct sockaddr*)&sockaddr, &addrlen);
+// 				if (connection < 0)
+// 				{
+// 					std::cout << "Failed to grab connection!" << std::endl;
+// 					return (EXIT_FAILURE);
+// 				}
+// 				for (i=0; i < MAX_CONNECTIONS;i++) 
+// 				{
+// 					if (connections[i] < 0)
+// 					{
+// 						connections[i] = connection; 
+// 						break;
+// 					}
+// 				}
+// 				ret--;
+// 				if (!ret)
+// 					continue;
 // 			}
-// 			else if (vector[1] == "/page.html")
-// 				response = "HTTP/1.1 200 OK\nContent-Type: text/html; charset=utf-8\nContent-Length: 7650\n\n" + read_file_to_str("page.html");
-// 			else 
-// 				response = "HTTP/1.1 200 OK\nContent-Type: text/html; charset=utf-8\nContent-Length: 7650\n\n" + read_file_to_str("error404.html");
-// 		}
 
-// 		else if (vector[0] == "DELETE")
-// 		{
-// 			if ( vector[1] == "/ball.png" || vector[1] == "/page.html" || vector[1] == "/index.html")
+// 			/* Check if the fd with event is a non-server fd */
+// 			for (i=1; i < MAX_CONNECTIONS;i++)
 // 			{
-// 				vector[1].erase(0,1);
-// 				const char * file_name = const_cast<char*>(vector[1].c_str());
-// 				if (remove(file_name) != 0)
-// 					response = "HTTP/1.1 204 No Content\n\nContent-Type: text/plain\n";
-// 				else
-// 					response = "HTTP/1.1 200 OK\nContent-Type: text/html; charset=utf-8\nContent-Length: 48\n\n<html><body><h1>File deleted.</h1></body></html>";
+// 				if ((connections[i] > 0) && (FD_ISSET(connections[i], &read_fd_set))) // Return true if fd is in the set.
+// 				{
+// 					/* read incoming data */
+// 					memset(buffer, 0, BUFFER_SIZE);
+// 					ret = recv(connections[i], buffer, BUFFER_SIZE, 0);
+// 					if (ret == 0)
+// 					{
+// 						std::cout << "Connection closed for fd" << std::endl;
+// 						// close(connection[i]);
+// 						// connection[i] = -1;
+// 					}
+// 					if (ret > 0)
+// 						std::cout << buffer << std::endl;
+// 					if (ret == -1)
+// 					{
+// 						std::cout << "recv() failed" << std::endl;
+// 						break;
+// 					}
+// 					ret--;
+// 					if(!ret)
+// 						continue;
+// 				}
 // 			}
-// 			else
-// 				response = "HTTP/1.1 204 No Content\n\nContent-Type: text/plain\n";
 // 		}
-
-// 		else if (vector[0] == "POST")
+// 		for (i=0;i < MAX_CONNECTIONS;i++)
 // 		{
-// 			std::cout << "I AM A POST" << std::endl;
-// 			response = "HTTP/1.1 204 No Content\n\nContent-Type: text/plain\n";
+// 			if (connections[i] > 0)
+// 			close(connections[i]);
 // 		}
-// 		else
-// 		{
-// 			std::cout << "NOT A POST OR GET" << std::endl;
-// 			response = "HTTP/1.1 204 No Content\n\nContent-Type: text/plain\n";
-// 		}
-// 		send(connection, response.c_str(), response.size(), 0);
-// 		close(connection);
 // 	}
-// 	close(sockfd);
-// 	return (EXIT_SUCCESS);
+// 	return(EXIT_SUCCESS);
 // }
