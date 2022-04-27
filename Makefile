@@ -5,7 +5,7 @@ CXX			=	c++
 CXXFLAGS	=	-Wall -Wextra -Werror -std=c++98
 
 SRC_FILES	=	main.cpp \
-				parser_dispatcher_tmp.cpp \
+				parser_dispatcher.cpp \
 				server_setup.cpp \
 				utils.cpp \
 				parsing/Log.cpp \
