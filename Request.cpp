@@ -6,7 +6,7 @@
 /*   By: adidion <adidion@student.s19.be>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/26 16:43:47 by adidion           #+#    #+#             */
-/*   Updated: 2022/04/27 14:47:37 by adidion          ###   ########.fr       */
+/*   Updated: 2022/04/27 14:54:34 by adidion          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -92,16 +92,22 @@ std::string Request::getVersion()
 	return (v.at(2));
 }
 
+// returns the file without the "/", if it exists
+// return an empty string in case of error
 std::string Request::getFile_clean()
 {
 	std::string str = getFile();
-	str.erase(0, 1);
+	if (str.find("/") == 0)
+		str.erase(0, 1);
 	return (str);
 }
 
-//std::string Request::getFile_extention()
-//{
-//	std::string str = getFile();
-//	str.erase(0, 1);
-//	return (str);
-//}
+// returns the extension of the file
+// returns an empty string in case of error
+std::string Request::getFile_extention()
+{
+	std::string str = getFile();
+	str.erase(0, str.rfind("."));
+	str.erase(0, 1);
+	return (str);
+}

@@ -6,7 +6,7 @@
 /*   By: adidion <adidion@student.s19.be>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/26 16:25:31 by adidion           #+#    #+#             */
-/*   Updated: 2022/04/27 14:44:26 by adidion          ###   ########.fr       */
+/*   Updated: 2022/04/27 14:49:53 by adidion          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,6 +42,7 @@ class	Request
 		std::string getFile();
 		std::string getFile_clean();
 		std::string getVersion();
+		std::string getFile_extention();
 		std::vector<std::string> split_words(std::string buffer);
 };
 
