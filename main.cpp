@@ -2,7 +2,8 @@
 
 int main()
 {
-	if (select_loop() == -1)
+	Log log;
+	if (select_loop(log) == -1)
 		return (EXIT_FAILURE);
 	return (EXIT_SUCCESS);
 }

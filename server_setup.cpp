@@ -26,7 +26,7 @@ int setup_server()
 	return (sockfd);
 }
 
-std::string read_request(int i)
+std::string read_parse_request(int i, Log log)
 {
 	char		buffer[1000000];
 
@@ -34,12 +34,14 @@ std::string read_request(int i)
 	read(i, buffer, 1000000);
 	std::cout << buffer << std::endl;
 	
-	std::vector<std::string> vector = parser(buffer);
-	std::string response = dispatcher(vector);
+	Request request(buffer);
+	log.add_one(request);
+
+	std::string response = dispatcher(request);
 	return (response);
 }
 
-int select_loop()
+int select_loop(Log log)
 {
 	int			sockfd = 0;
 	sockaddr_in	sockaddr;
@@ -72,7 +74,7 @@ int select_loop()
 				}
 				else
 				{
-					std::string response = read_request(i);
+					std::string response = read_parse_request(i, log);
 					send(i, response.c_str(), response.size(), 0);
 
 					FD_CLR(i, &current_sockets);

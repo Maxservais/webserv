@@ -8,6 +8,8 @@ SRC_FILES	=	main.cpp \
 				parser_dispatcher_tmp.cpp \
 				server_setup.cpp \
 				utils.cpp \
+				parsing/Log.cpp \
+				parsing/Request.cpp \
 
 OBJ_FILES	=	$(SRC_FILES:.cpp=.o)
 
