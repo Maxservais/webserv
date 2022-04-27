@@ -6,11 +6,12 @@
 /*   By: adidion <adidion@student.s19.be>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/26 16:25:31 by adidion           #+#    #+#             */
-/*   Updated: 2022/04/27 11:36:32 by adidion          ###   ########.fr       */
+/*   Updated: 2022/04/27 13:52:58 by adidion          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef REQUEST_HPP
+#define REQUEST_HPP
 
 #include <sys/socket.h>
 #include <netinet/in.h>

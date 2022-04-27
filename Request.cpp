@@ -6,7 +6,7 @@
 /*   By: adidion <adidion@student.s19.be>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/26 16:43:47 by adidion           #+#    #+#             */
-/*   Updated: 2022/04/27 11:32:23 by adidion          ###   ########.fr       */
+/*   Updated: 2022/04/27 14:17:37 by adidion          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,7 +35,7 @@ Request::Request(const Request &obj)
 
 Request	&Request::operator=(const Request &obj)
 {
-	*this = obj;
+	(void) obj;//*this = obj;
 	return (*this);
 }
 
@@ -78,7 +78,7 @@ std::string Request::getFile()
 {
 	std::vector<std::string> v = split_words(buff);
 	if (v.size() < 2)
-		return (std::string());
+		return (std::string("/"));
 	return (v.at(1));
 }
 
@@ -90,4 +90,12 @@ std::string Request::getVersion()
 	if (v.size() < 3)
 		return (std::string());
 	return (v.at(2));
+}
+
+std::string Request::getFile_clean()
+{
+	std::vector<std::string> v = split_words(buff);
+	if (v.size() < 2)
+		return (std::string());
+	return (v.at(1));
 }
