@@ -6,7 +6,7 @@
 /*   By: adidion <adidion@student.s19.be>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/26 16:43:47 by adidion           #+#    #+#             */
-/*   Updated: 2022/04/27 14:17:37 by adidion          ###   ########.fr       */
+/*   Updated: 2022/04/27 14:47:37 by adidion          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -94,8 +94,14 @@ std::string Request::getVersion()
 
 std::string Request::getFile_clean()
 {
-	std::vector<std::string> v = split_words(buff);
-	if (v.size() < 2)
-		return (std::string());
-	return (v.at(1));
+	std::string str = getFile();
+	str.erase(0, 1);
+	return (str);
 }
+
+//std::string Request::getFile_extention()
+//{
+//	std::string str = getFile();
+//	str.erase(0, 1);
+//	return (str);
+//}
