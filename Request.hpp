@@ -6,7 +6,7 @@
 /*   By: adidion <adidion@student.s19.be>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/26 16:25:31 by adidion           #+#    #+#             */
-/*   Updated: 2022/04/26 18:22:58 by adidion          ###   ########.fr       */
+/*   Updated: 2022/04/27 11:36:32 by adidion          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,6 +20,10 @@
 #include <fstream>
 #include <fcntl.h>
 #include <vector>
+#include <iostream>
+#include <algorithm>
+#include <sstream>
+#include <iterator>
 
 class	Request
 {
@@ -32,9 +36,11 @@ class	Request
 		Request(const Request &obj);
 		Request &operator=(const Request &objz);
 		~Request();
-		std::string getMethod() const;
 		std::string getBuff() const;
-		std::string getFile() const;
+		std::string getMethod();
+		std::string getFile();
+		std::string getVersion();
+		std::vector<std::string> split_words(std::string buffer);
 };
 
 #endif
