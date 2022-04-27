@@ -24,7 +24,7 @@ int	main(void)
 	/* Assign an IP address and port to the socket */
 	sockaddr.sin_family = AF_INET;
 	sockaddr.sin_addr.s_addr = INADDR_ANY;
-	sockaddr.sin_port = htons(8080); // convert a number to the network byte order
+	sockaddr.sin_port = htons(9999); // convert a number to the network byte order
 	if (bind(sockfd, (struct sockaddr*)&sockaddr, sizeof(sockaddr)) < 0)
 	{
 		std::cout << "Failed to bind !" << std::endl;
@@ -70,6 +70,7 @@ int	main(void)
 	read(connection, buffer_2, 1000000);
 	std::cout << "Message was for second request: " << buffer_2 << std::endl;
 
+	/* https://stackoverflow.com/questions/2602013/read-whole-ascii-file-into-c-stdstring */
 	std::ifstream image("ball.png");
 	std::stringstream buffer_s;
 	buffer_s << image.rdbuf();
