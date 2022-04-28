@@ -1,5 +1,4 @@
 #include "webserv.hpp"
-#include <limits.h>
 
 int setup_server()
 {
@@ -38,8 +37,9 @@ std::string read_parse_request(int i, Log log)
 	Request request(buffer);
 	log.add_one(request);
 
-	std::string response = dispatcher(request);
-	return (response);
+	Response response(request, "ressources", "index.html", "error404.html");
+	// std::string response = dispatcher(request);
+	return (response.get_response());
 }
 
 int select_loop(Log log)

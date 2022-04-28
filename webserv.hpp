@@ -58,6 +58,28 @@ class	Log
 		size_t	size() const;
 };
 
+//RESPONSE COMPOSER
+class Response
+{
+	private:
+		Request &req;
+		std::string path;
+		std::string default_page;
+		std::string error_404;
+		std::string response;
+	public:
+		Response(Request &request, std::string path, std::string default_page, std::string error_404);
+		Response	&operator=(const Response &obj);
+		~Response();
+		bool exists();
+		std::string full_code(int code);
+		std::string content_length(std::string file);
+		std::string content_type();
+		std::string body(std::string file);
+		std::string compose_response();
+		std::string get_response();
+};
+
 //PARSER_DISPATCHER_TMP
 std::string read_file_to_str(const std::string& path);
 bool exists (Request request);
