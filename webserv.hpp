@@ -67,8 +67,9 @@ class Response
 		std::string default_page;
 		std::string error_404;
 		std::string response;
+		int port;
 	public:
-		Response(Request &request, std::string path, std::string default_page, std::string error_404);
+		Response(Request &request, std::string path, std::string default_page, std::string error_404, int port);
 		Response	&operator=(const Response &obj);
 		~Response();
 		bool exists();

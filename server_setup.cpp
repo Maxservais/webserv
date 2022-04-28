@@ -37,7 +37,7 @@ std::string read_parse_request(int i, Log log)
 	Request request(buffer);
 	log.add_one(request);
 
-	Response response(request, "ressources", "index.html", "error404.html");
+	Response response(request, "ressources", "index.html", "error404.html", SERVER_PORT);
 	return (response.get_response());
 }
 

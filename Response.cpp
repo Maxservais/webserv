@@ -1,7 +1,8 @@
 #include "webserv.hpp"
 
-Response::Response(Request &request, std::string path, std::string default_page, std::string error_404) : req(request), path(path), default_page(default_page), error_404(error_404)
+Response::Response(Request &request, std::string path, std::string default_page, std::string error_404, int port) : req(request), path(path), default_page(default_page), error_404(error_404), port(port)
 {
+	(void)this->port; // thats for antoine
 	return;
 }
 
@@ -132,7 +133,7 @@ std::string Response::compose_response()
 		if (exists())
 		{
 			remove((this->path + req.getFile()).c_str());
-			this->response = req.getVersion() + full_code(200) + content_type() + content_length(this->path + "file.html") + body(this->path + "file.html");
+			this->response = req.getVersion() + full_code(200) + content_type() + content_length(this->path + "/file.html") + body(this->path + "/file.html");
 		}
 		else
 			this->response = req.getVersion() + full_code(204) + content_type();
@@ -144,5 +145,6 @@ std::string Response::compose_response()
 
 std::string Response::get_response()
 {
+	std::cout << compose_response() << std::endl;
 	return (compose_response());
 }
