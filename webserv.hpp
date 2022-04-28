@@ -65,6 +65,29 @@ class	Log
 		size_t	size() const;
 };
 
+//RESPONSE COMPOSER
+class Response
+{
+	private:
+		Request &req;
+		std::string path;
+		std::string default_page;
+		std::string error_404;
+		std::string response;
+		int port;
+	public:
+		Response(Request &request, std::string path, std::string default_page, std::string error_404, int port);
+		Response	&operator=(const Response &obj);
+		~Response();
+		bool exists();
+		std::string full_code(int code);
+		std::string content_length(std::string file);
+		std::string content_type();
+		std::string body(std::string file);
+		std::string compose_response();
+		std::string get_response();
+};
+
 /* 3. EXCEPTIONS */
 
 class SocketErr : public std::exception

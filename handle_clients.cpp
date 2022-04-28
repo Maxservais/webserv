@@ -1,19 +1,18 @@
 #include "webserv.hpp"
 
-const char *read_parse_request(int i, Log log)
+std::string read_parse_request(int i, Log log) // reference or pointer for log
 {
-	char		buffer[BUFFER_SIZE];
+	char		buffer[1000000];
 
-	memset(buffer, 0, BUFFER_SIZE);
-	read(i, buffer, BUFFER_SIZE);
+	memset(buffer, 0, 1000000);
+	read(i, buffer, 1000000);
 	std::cout << buffer << std::endl;
 	
 	Request request(buffer);
-	log.add_one(request);
+	(void)log;
+	// log.add_one(request);
 
-	std::string response = dispatcher(request);
-	return (response.c_str());
-
+	Response response(request, "ressources", "index.html", "error404.html", SERVER_PORT);
 	// need to deal with error here!!! If there is an issue, we need to remove client from the list of sockets!!!!
 	// int nBytes = recv(blabla)
 	// if ((0 == nBytes) || (SOCKET_ERROR == nBytes))
@@ -27,6 +26,8 @@ const char *read_parse_request(int i, Log log)
 	// 	(pClientContext->GetSocket()));
 	// 	}
 	// remove client from socket list!!!
+// }
+	return (response.get_response());
 }
 
 int	send_data(int socket, const char *data, int len)
@@ -80,16 +81,19 @@ void	handle_clients(Log log, int *sockfd, struct sockaddr_in *sockaddr)
 				/* Else, handle the connection and then remove the socket from the set of FDs */
 				else
 				{
-					const char *response = read_parse_request(i, log);
+					std::string response = read_parse_request(i, log);
+					const char * ret = response.c_str();
 					try 
 					{
-						send_data(i, response, strlen(response));
+						send_data(i, ret, strlen(ret));
+
 					}
 					catch (std::exception &e)
 					{
 						// close sockets?
 						std::cerr << e.what() << std::endl;
 					}
+
 					FD_CLR(i, &current_sockets);
 					close(i);
 				}
