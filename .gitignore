@@ -1,4 +1,5 @@
-*a.out*
-.vscode
-.DS_STORE
+*.out
 *.o
+.DS_Store
+*.vscode
+*.dSYM

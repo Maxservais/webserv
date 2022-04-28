@@ -4,7 +4,12 @@ CXX			=	c++
 
 CXXFLAGS	=	-Wall -Wextra -Werror -std=c++98
 
-SRC_FILES	=	main.cpp
+SRC_FILES	=	main.cpp \
+				parser_dispatcher.cpp \
+				server_setup.cpp \
+				utils.cpp \
+				parsing/Log.cpp \
+				parsing/Request.cpp \
 
 OBJ_FILES	=	$(SRC_FILES:.cpp=.o)
 
