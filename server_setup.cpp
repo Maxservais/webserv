@@ -19,7 +19,7 @@ int setup_server()
 		return(ft_error("Failed to bind!"));
 	}
 
-	if (listen(sockfd, INT_MAX) < 0)
+	if (listen(sockfd, 8000) < 0) // INT_MAX ?
 	{
 		close(sockfd);
 		return(ft_error("Failed to listen on socket!"));
