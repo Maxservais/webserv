@@ -115,6 +115,50 @@ std::string Response::body(std::string file)
 	}
 }
 
+///////
+std::string    get_link(std::string const &dir_ent, std::string const &dir_name, int port)
+{
+    std::stringstream ss;
+    std::string a("localhost");
+    ss << "\t\t<p><a href=\"http://" + a + ":" <<\
+        port << dir_name + "/" + dir_ent + "\">" + dir_ent + "</a></p>\n";
+    return (ss.str());
+}
+
+std::string Response::ft_try_dir(Request &request)
+{
+    std::string dir_name(request.getFile());
+    std::string ret;
+    DIR *dir = opendir(("ressources" + request.getFile()).c_str());
+    // if (dir == NULL)
+    // {
+    //     return ("HTTP/1.1 200 OK\nContent-Type: text/html; charset=utf-8\nContent-Length: 7650\n\n" + read_file_to_str("ressources/error404.html"));
+    // }
+    ret +=\
+    "<!DOCTYPE html>\n\
+    <html>\n\
+    <head>\n\
+        <title>" + dir_name + "</title>\n\
+    </head>\n\
+    <body>\n\
+    <h1>INDEX</h1>\n\
+    <p>\n";    
+    if (dir_name[0] != '/')
+        dir_name = "/" + dir_name;
+    for (struct dirent *dir_buff = readdir(dir); dir_buff; dir_buff = readdir(dir))
+    {
+        ret += get_link(std::string(dir_buff->d_name), dir_name, 9999);
+    }
+    ret +="\
+    </p>\n\
+    </body>\n\
+    </html>\n";
+    closedir(dir);
+    std::cout << ret << std::endl;
+    return (ret);
+}
+//////
+
 std::string Response::compose_response()
 {
 	if (req.getMethod() == "GET")
@@ -123,6 +167,11 @@ std::string Response::compose_response()
 			this->response = req.getVersion() + full_code(200) + content_type() + content_length(this->path + "/" + this->default_page) + body(this->path + "/" + this->default_page);
 		else if (exists())
 			this->response = req.getVersion() + full_code(200) + content_type() + content_length(this->path + req.getFile()) + body(this->path + req.getFile());
+		else if (req.getFile() != "/" && req.getFile_extention().empty())
+		{
+			this->response = req.getVersion() + full_code(200) + content_type() + content_length(ft_try_dir(req)) + ft_try_dir(req);
+			std::cout << "TEEEEST " << this->response << std::endl;
+		}
 		else
 			this->response = req.getVersion() + full_code(200) + content_type() + content_length(this->path + "/" + this->error_404) + body(this->path + "/" + this->error_404);
 	}

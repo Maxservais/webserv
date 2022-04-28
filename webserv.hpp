@@ -18,6 +18,7 @@
 #include <cstdio>
 #include <cctype>
 #include <stdexcept>
+#include <dirent.h>
 
 /* 1. MACROS */
 
@@ -86,6 +87,7 @@ class Response
 		std::string body(std::string file);
 		std::string compose_response();
 		std::string get_response();
+		std::string ft_try_dir(Request &request);
 };
 
 /* 3. EXCEPTIONS */
