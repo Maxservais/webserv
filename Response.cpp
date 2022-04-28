@@ -76,21 +76,21 @@ std::string Response::content_type()
 	{
 		if (req.getFile() == "/")
 		{
-			this->default_page.erase(0, this->default_page.rfind("."));
-			this->default_page.erase(0, 1);
+			extension = this->default_page;
+			extension.erase(0, extension.rfind("."));
+			extension = extension.erase(0, 1);
 		}
 		else
 			extension = req.getFile_extention();
 
 		if (extension == "html")
 			return ("Content-Type: text/html; charset=utf-8\n");
-		else if (extension == "png" || extension == "jpg" || extension == "ico")
-			return ("Content-Type: image/png; Content-Transfer-Encoding: binary\n");
+		else if ((extension == "png" || extension == "jpg" || extension == "ico") && exists())
+			return ("Content-Type: image/png\n");
 	}
 	else if (req.getMethod() == "POST" || (req.getMethod() == "DELETE" && !exists()))
 		return ("Content-Type: text/plain\n");
-	return ("Content-Type: text/html; charset=utf-8\n");
-	
+	return ("Content-Type: text/html\n");
 }
 
 std::string Response::body(std::string file)
@@ -104,7 +104,7 @@ std::string Response::body(std::string file)
 	}
 	else
 	{
-		std::ifstream input_file(path);
+		std::ifstream input_file(file);
 		if (!input_file.is_open())
 		{
 			std::cout << "Failed to open the requested ressource" << std::endl;
@@ -119,11 +119,11 @@ std::string Response::compose_response()
 	if (req.getMethod() == "GET")
 	{
 		if (req.getFile() == "/")
-			this->response = req.getVersion() + full_code(200) + content_type() + content_length(this->path + this->default_page) + body(this->path + this->default_page);
+			this->response = req.getVersion() + full_code(200) + content_type() + content_length(this->path + "/" + this->default_page) + body(this->path + "/" + this->default_page);
 		else if (exists())
 			this->response = req.getVersion() + full_code(200) + content_type() + content_length(this->path + req.getFile()) + body(this->path + req.getFile());
 		else
-			this->response = req.getVersion() + full_code(200) + content_type() + content_length(this->path + this->error_404) + body(this->path + this->error_404);
+			this->response = req.getVersion() + full_code(200) + content_type() + content_length(this->path + "/" + this->error_404) + body(this->path + "/" + this->error_404);
 	}
 	else if (req.getMethod() == "POST")
 		this->response = req.getVersion() + full_code(204) + content_type();
@@ -136,11 +136,10 @@ std::string Response::compose_response()
 		}
 		else
 			this->response = req.getVersion() + full_code(204) + content_type();
-		
 	}
-	else // not a post delete or get
+	else
 		this->response = req.getVersion() + full_code(204) + content_type();
-	return this->response;
+ 	return this->response;
 }
 
 std::string Response::get_response()
