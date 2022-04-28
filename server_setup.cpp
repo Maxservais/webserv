@@ -38,7 +38,6 @@ std::string read_parse_request(int i, Log log)
 	log.add_one(request);
 
 	Response response(request, "ressources", "index.html", "error404.html");
-	// std::string response = dispatcher(request);
 	return (response.get_response());
 }
 
