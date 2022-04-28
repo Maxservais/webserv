@@ -123,7 +123,7 @@ std::string dispatcher(std::vector<std::string> vector)
 
 int setup_server()
 {
-	int			sockfd;
+	int					sockfd;
 	struct sockaddr_in	sockaddr;
 
 	sockfd = socket(AF_INET, SOCK_STREAM, 0);
@@ -138,7 +138,7 @@ int setup_server()
 
 	if (bind(sockfd, (struct sockaddr*)&sockaddr, sizeof(sockaddr)) < 0)
 	{
-		std::cout << "Failed to bind !" << std::endl;
+		std::cout << "Failed to bind!" << std::endl;
 		close(sockfd);
 		return -1;
 	}
@@ -159,7 +159,7 @@ int main()
 	sockaddr_in	sockaddr;
 
 	sockfd = setup_server();
-	if(sockfd == -1)
+	if(sockfd == -1) // INSTEAD OF THAT, WE CAN THROW EXCEPTIONS!!!
 	{
 		std::cout << "Failed to create a server" << std::endl;
 		return (EXIT_FAILURE);
@@ -170,7 +170,7 @@ int main()
 	fd_set current_sockets;
 	fd_set ready_sockets;
 
-	// intialize current_set
+	// intialize current_set 
 	FD_ZERO(&current_sockets);
 	FD_SET(sockfd, &current_sockets);
 	
@@ -192,7 +192,7 @@ int main()
 		if (select(FD_SETSIZE, &ready_sockets, NULL, NULL, NULL) < 0)
 		{
 			std::cout << "Select issue" << std::endl;
-			return (EXIT_FAILURE);
+			return (EXIT_FAILURE); 
 		}
 		//when select returns, we know that one of our fd has work for us to do, but which one ? Select changes our fd set
 		//when it returns : ready_sockets contains only the fd that are ready for reading
