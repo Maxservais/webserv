@@ -1,4 +1,5 @@
 #include "webserv.hpp"
+#include <limits.h>
 
 int setup_server()
 {
@@ -18,7 +19,7 @@ int setup_server()
 		return(ft_error("Failed to bind!"));
 	}
 
-	if (listen(sockfd, 10) < 0)
+	if (listen(sockfd, INT_MAX) < 0)
 	{
 		close(sockfd);
 		return(ft_error("Failed to listen on socket!"));
