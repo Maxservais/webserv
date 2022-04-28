@@ -86,7 +86,7 @@ std::string Response::content_type()
 		if (extension == "html")
 			return ("Content-Type: text/html; charset=utf-8\n");
 		else if ((extension == "png" || extension == "jpg" || extension == "ico") && exists())
-			return ("Content-Type: image/png\n");
+			return ("Content-Type: image/" + extension + "\n");
 	}
 	else if (req.getMethod() == "POST" || (req.getMethod() == "DELETE" && !exists()))
 		return ("Content-Type: text/plain\n");
