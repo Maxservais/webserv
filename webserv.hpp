@@ -150,5 +150,7 @@ void	handle_clients(Log log, int *sockfd, struct sockaddr_in *sockaddr);
 
 /* 4.3 UTILS */
 int ft_error(std::string message);
+// int set_up_signals();
+// void handler(int sig_num);
 
 #endif

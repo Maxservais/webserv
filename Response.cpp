@@ -54,6 +54,8 @@ std::string Response::full_code(int code)
 			break;
 		case 414:
 			ret = " 414 URI Too Long\n";
+		case 501:
+			ret = " 501 Not Implemented\n";
 			break;
 	}
 	return (ret);
@@ -178,18 +180,18 @@ std::string Response::compose_response()
 		if (exists())
 		{
 			remove((this->path + req.getFile()).c_str());
-			this->response = req.getVersion() + full_code(200) + content_type() + content_length(this->path + "/file.html", IS_FILE) + body(this->path + "/file.html");
+			this->response = req.getVersion() + full_code(200) + "Content-Type: text/html\nContent-Length: 48\n\n <html><body><h1>File deleted.</h1></body></html>";
 		}
 		else
-			this->response = req.getVersion() + full_code(204) + content_type();
+			this->response = req.getVersion() + full_code(204);
 	}
 	else
-		this->response = req.getVersion() + full_code(204) + content_type();
+		this->response = req.getVersion() + full_code(501);
  	return this->response;
 }
 
 std::string Response::get_response()
 {
-	// std::cout << compose_response() << std::endl;
+	std::cout << compose_response() << std::endl;
 	return (compose_response());
 }
