@@ -31,7 +31,7 @@ void	setup_server(int *sockfd, struct sockaddr_in *sockaddr)
 	}
 
 	/* Wait for incoming connections */
-	if (listen(*sockfd, BACKLOG) < 0)
+	if (listen(*sockfd, SOMAXCONN) < 0)
 	{
 		close(*sockfd);
 		throw ListenErr();

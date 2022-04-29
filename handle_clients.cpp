@@ -2,10 +2,10 @@
 
 std::string read_parse_request(int i, Log log) // reference or pointer for log
 {
-	char		buffer[1000000];
+	char		buffer[BUFFER_SIZE];
 
-	memset(buffer, 0, 1000000);
-	read(i, buffer, 1000000);
+	memset(buffer, 0, BUFFER_SIZE);
+	read(i, buffer, BUFFER_SIZE);
 	// std::cout << buffer << std::endl;
 	
 	Request request(buffer);
@@ -13,6 +13,17 @@ std::string read_parse_request(int i, Log log) // reference or pointer for log
 	// log.add_one(request);
 
 	Response response(request, "ressources", "index.html", "error404.html", SERVER_PORT);
+
+	// if (ret == 0 || ret == -1)
+	// {
+	// 	this->close(socket);
+	// 	if (!ret)
+	// 		std::cout << "\rConnection was closed by client.\n" << std::endl;
+	// 	else
+	// 		std::cout << "\rRead error, closing connection.\n" << std::endl;
+	// 	return (-1);
+	// }
+
 	// need to deal with error here!!! If there is an issue, we need to remove client from the list of sockets!!!!
 	// int nBytes = recv(blabla)
 	// if ((0 == nBytes) || (SOCKET_ERROR == nBytes))
@@ -38,7 +49,7 @@ int	send_data(int socket, const char *data, int len)
 	{
 		bytes_sent = send(socket, (char *)data, len, 0);
 		if (bytes_sent == -1)
-			throw SendErr();
+			throw SendErr(); // close socket???
 		data += bytes_sent;
 		len -= bytes_sent;
 	}
@@ -51,6 +62,8 @@ void	handle_clients(Log log, int *sockfd, struct sockaddr_in *sockaddr)
 	socklen_t	addrlen = sizeof(*sockaddr);
 	fd_set		current_sockets;
 	fd_set		ready_sockets;
+	// add writing sets here
+	struct timeval	timeout;
 
 	/* Initiliaze current set */
 	FD_ZERO(&current_sockets);
@@ -60,8 +73,10 @@ void	handle_clients(Log log, int *sockfd, struct sockaddr_in *sockaddr)
 	
 	while(true)
 	{
+		timeout.tv_sec  = 1;
+		timeout.tv_usec = 0;
 		ready_sockets = current_sockets;
-		if (select(max_socket_val + 1, &ready_sockets, NULL, NULL, NULL) < 0)
+		if (select(max_socket_val + 1, &ready_sockets, NULL, NULL, &timeout) < 0)
 			throw SelectErr();
 		for (int i = 0; i <= max_socket_val; i++)
 		{
@@ -83,18 +98,17 @@ void	handle_clients(Log log, int *sockfd, struct sockaddr_in *sockaddr)
 				{
 					std::string response = read_parse_request(i, log);
 					int len = response.size();
-					const char * ret = response.c_str();
+					const char *ret = response.c_str();
 					try
 					{
 						send_data(i, ret, len);
-
 					}
 					catch (std::exception &e)
 					{
 						// close sockets?
 						std::cerr << e.what() << std::endl;
 					}
-
+					memset((void *)ret, 0, strlen(ret));
 					FD_CLR(i, &current_sockets);
 					close(i);
 				}
