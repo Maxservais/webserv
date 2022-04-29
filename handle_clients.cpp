@@ -36,7 +36,8 @@ int	send_data(int socket, const char *data, int len)
 
 	while(len > 0)
 	{
-		bytes_sent = send(socket, data, len, 0);
+		bytes_sent = send(socket, (char *)data, len, 0);
+		std::cout << "bytes sent : " << bytes_sent << std::endl;
 		if (bytes_sent == -1)
 			throw SendErr();
 		data += bytes_sent;
@@ -82,10 +83,11 @@ void	handle_clients(Log log, int *sockfd, struct sockaddr_in *sockaddr)
 				else
 				{
 					std::string response = read_parse_request(i, log);
+					int len = response.size();
 					const char * ret = response.c_str();
-					try 
+					try
 					{
-						send_data(i, ret, strlen(ret));
+						send_data(i, ret, len);
 
 					}
 					catch (std::exception &e)
