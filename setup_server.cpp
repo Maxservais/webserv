@@ -15,19 +15,19 @@ void	setup_server(int *sockfd, struct sockaddr_in *sockaddr)
 	sockaddr->sin_addr.s_addr = INADDR_ANY;
 	memset(sockaddr->sin_zero, '\0', sizeof sockaddr->sin_zero);
 
-	/* Bind the socket to the port */
-	if (bind(*sockfd, (struct sockaddr*)sockaddr, sizeof(*sockaddr)) < 0)
-	{
-		close(*sockfd);
-		throw BindErr();
-	}
-
 	/* Allow re-use of the port */
 	int optval = 1;
 	if (setsockopt(*sockfd, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval)) == -1)
 	{
 		close(*sockfd);
 		throw SetsockErr();
+	}
+
+	/* Bind the socket to the port */
+	if (bind(*sockfd, (struct sockaddr*)sockaddr, sizeof(*sockaddr)) < 0)
+	{
+		close(*sockfd);
+		throw BindErr();
 	}
 
 	/* Wait for incoming connections */
