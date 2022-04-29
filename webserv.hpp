@@ -26,6 +26,8 @@
 #define BACKLOG 20
 #define BUFFER_SIZE 1000000
 #define MAX_CONNECTIONS 10
+#define IS_FILE 0
+#define IS_DIR 1
 
 /* 2. CUSTOM CLASSES */
 
@@ -82,7 +84,7 @@ class Response
 		~Response();
 		bool exists();
 		std::string full_code(int code);
-		std::string content_length(std::string file);
+		std::string content_length(std::string file, int hint);
 		std::string content_type();
 		std::string body(std::string file);
 		std::string compose_response();

@@ -37,7 +37,6 @@ int	send_data(int socket, const char *data, int len)
 	while(len > 0)
 	{
 		bytes_sent = send(socket, (char *)data, len, 0);
-		std::cout << "bytes sent : " << bytes_sent << std::endl;
 		if (bytes_sent == -1)
 			throw SendErr();
 		data += bytes_sent;
