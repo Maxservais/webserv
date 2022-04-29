@@ -1,4 +1,6 @@
 #include "webserv.hpp"
+//#include <sys/types.h>
+#include <dirent.h>
 
 std::string read_file_to_str(const std::string& path)
 {
@@ -61,6 +63,48 @@ bool exists(const std::string& path)
 	return true;
 }
 
+std::string	get_link(std::string const &dir_ent, std::string const &dir_name, int port)
+{
+	std::stringstream ss;
+	std::string a("localhost");
+	ss << "\t\t<p><a href=\"http://" + a + ":" <<\
+		port << dir_name + "/" + dir_ent + "\">" + dir_ent + "</a></p>\n";
+	return (ss.str());
+}
+
+std::string ft_try_dir(Request &request)
+{
+	std::string dir_name(request.getFile());
+	std::string ret;
+	DIR *dir = opendir(("ressources" + request.getFile()).c_str());
+	if (dir == NULL)
+	{
+		return ("HTTP/1.1 200 OK\nContent-Type: text/html; charset=utf-8\nContent-Length: 7650\n\n" + read_file_to_str("ressources/error404.html"));
+	}
+	ret +=\
+	"<!DOCTYPE html>\n\
+	<html>\n\
+	<head>\n\
+		<title>" + dir_name + "</title>\n\
+	</head>\n\
+	<body>\n\
+	<h1>INDEX</h1>\n\
+	<p>\n";	
+	if (dir_name[0] != '/')
+		dir_name = "/" + dir_name;
+	for (struct dirent *dir_buff = readdir(dir); dir_buff; dir_buff = readdir(dir))
+	{
+		ret += get_link(std::string(dir_buff->d_name), dir_name, 9999);
+	}
+	ret +="\
+	</p>\n\
+	</body>\n\
+	</html>\n";
+	closedir(dir);
+	std::cout << ret << std::endl;
+	return (ret);
+}
+
 std::string dispatcher(Request &request)
 {
 	std::string response;
@@ -70,6 +114,7 @@ std::string dispatcher(Request &request)
 			response = "HTTP/1.1 200 OK\nContent-Type: text/html; charset=utf-8\nContent-Length: " + get_length_file("ressources/index.html") + "\n\n" + read_file_to_str("ressources/index.html");
 		if (exists("ressources" + request.getFile()))
 		{
+			std::cout << "a" << std::endl;
 			if (request.getFile_extention() == "html")
 				response = "HTTP/1.1 200 OK\nContent-Type: text/html; charset=utf-8\nContent-Length: " + get_length_file("ressources" + request.getFile()) + "\n\n" + read_file_to_str("ressources" + request.getFile());
 			else if (request.getFile_extention() == "png" || request.getFile_extention() == "ico" || request.getFile_extention() == "jpg")
@@ -78,6 +123,8 @@ std::string dispatcher(Request &request)
 				std::string response_len = std::to_string(response.length());
 				response = "HTTP/1.1 200 OK\r\nContent-Type: image/png; Content-Transfer-Encoding: binary; Content-Length: " + response_len + ";charset=ISO-8859-4 \r\n\r\n" + response;
 			}
+			else if (request.getFile() != "/")
+				return (ft_try_dir(request));
 		}
 		else
 			response = "HTTP/1.1 200 OK\nContent-Type: text/html; charset=utf-8\nContent-Length: 7650\n\n" + read_file_to_str("ressources/error404.html");
