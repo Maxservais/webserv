@@ -6,7 +6,7 @@ std::string read_parse_request(int i, Log log) // reference or pointer for log
 
 	memset(buffer, 0, 1000000);
 	read(i, buffer, 1000000);
-	std::cout << buffer << std::endl;
+	// std::cout << buffer << std::endl;
 	
 	Request request(buffer);
 	(void)log;

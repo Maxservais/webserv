@@ -23,7 +23,7 @@
 /* 1. MACROS */
 
 #define SERVER_PORT 9999
-#define BACKLOG 20
+#define BACKLOG 800
 #define BUFFER_SIZE 1000000
 #define MAX_CONNECTIONS 10
 #define IS_FILE 0
