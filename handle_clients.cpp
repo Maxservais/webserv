@@ -6,7 +6,7 @@ std::string read_parse_request(int i, Log log) // reference or pointer for log
 
 	memset(buffer, 0, 1000000);
 	read(i, buffer, 1000000);
-	std::cout << buffer << std::endl;
+	// std::cout << buffer << std::endl;
 	
 	Request request(buffer);
 	(void)log;
@@ -36,7 +36,7 @@ int	send_data(int socket, const char *data, int len)
 
 	while(len > 0)
 	{
-		bytes_sent = send(socket, data, len, 0);
+		bytes_sent = send(socket, (char *)data, len, 0);
 		if (bytes_sent == -1)
 			throw SendErr();
 		data += bytes_sent;
@@ -82,10 +82,11 @@ void	handle_clients(Log log, int *sockfd, struct sockaddr_in *sockaddr)
 				else
 				{
 					std::string response = read_parse_request(i, log);
+					int len = response.size();
 					const char * ret = response.c_str();
-					try 
+					try
 					{
-						send_data(i, ret, strlen(ret));
+						send_data(i, ret, len);
 
 					}
 					catch (std::exception &e)

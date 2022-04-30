@@ -2,7 +2,7 @@
 
 Response::Response(Request &request, std::string path, std::string default_page, std::string error_404, int port) : req(request), path(path), default_page(default_page), error_404(error_404), port(port)
 {
-	(void)this->port; // thats for antoine
+	(void)this->port;
 	return;
 }
 
@@ -59,10 +59,12 @@ std::string Response::full_code(int code)
 	return (ret);
 }
 
-std::string Response::content_length(std::string file)
+std::string Response::content_length(std::string file, int hint)
 {
+	if(hint == IS_DIR)
+		return ("Content-Length: " + std::to_string(ft_try_dir(req).size()) + "\n\n");
 	if (req.getFile_extention() == "png" || req.getFile_extention() == "jpg" || req.getFile_extention() == "ico")
-		return ("Content-Length: " + body(file) + "\n\n");
+		return ("Content-Length: " + std::to_string(body(file).size()) + "\n\n");
 	std::ifstream in(file.c_str());
 	unsigned int i = 0;
 	while (in.get() != EOF) i++; 
@@ -122,20 +124,17 @@ std::string   	get_link(const std::string &dir_ent, std::string &dir_name, int p
 	std::stringstream ss;
 	std::string a("localhost");
 	if (dir_ent == ".")
-	ss << "\t\t<p><a href=\"http://" + a + ":" <<\
-		port << dir_name + "\">" + dir_ent + "</a></p>\n";
+	ss << "<p><a href=\"http://" + a + ":" << port << dir_name + "\">" + dir_ent + "</a></p>\n";
 	else if (dir_ent == "..")
 	{
 		std::string str(dir_name);
 		std::string::iterator it = str.begin() + str.rfind("/");
 		std::string::iterator ite = str.end();
 		str.erase(it, ite);
-		ss << "\t\t<p><a href=\"http://" + a + ":" <<\
-		port << str + "\">" + dir_ent + "</a></p>\n";
+		ss << "<p><a href=\"http://" + a + ":" << port << str + "\">" + dir_ent + "</a></p>\n";
 	}
 	else
-		ss << "\t\t<p><a href=\"http://" + a + ":" <<\
-		port << dir_name + "/" + dir_ent + "\">" + dir_ent + "</a></p>\n";
+		ss << "<p><a href=\"http://" + a + ":" << port << dir_name + "/" + dir_ent + "\">" + dir_ent + "</a></p>\n";
 	return (ss.str());
 }
 
@@ -144,29 +143,17 @@ std::string Response::ft_try_dir(Request &request)
 	std::string dir_name(request.getFile_clean());
 	std::string ret;
 	DIR *dir = opendir((this->path + request.getFile()).c_str());
-	//if (dir == NULL)
-	//{
-	//	return ("HTTP/1.1 200 OK\nContent-Type: text/html; charset=utf-8\nContent-Length: 7650\n\n" + read_file_to_str("ressources/error404.html"));
-	//}
+	if (dir == NULL)
+		return ("");
 	ret +=\
-	"<!DOCTYPE html>\n\
-	<html>\n\
-	<head>\n\
-	<title>" + dir_name + "</title>\n\
-	</head>\n\
-	<body>\n\
-	<h1>AutoIndex of " + dir_name + "</h1>\n\
-	<p>\n";	
+	"<!DOCTYPE html>\n<html>\n<head>\n<title>" + dir_name + "</title>\n</head>\n<body>\n<h1>AutoIndex of " + dir_name + "</h1>\n<p>\n";	
 	if (dir_name[0] != '/')
 		dir_name = "/" + dir_name;
 	for (struct dirent *dir_buff = readdir(dir); dir_buff; dir_buff = readdir(dir))
 	{
 		ret += get_link(std::string(dir_buff->d_name), dir_name, this->port);
 	}
-	ret +="\
-	</p>\n\
-	</body>\n\
-	</html>\n";
+	ret +="</p>\n</body>\n</html>\n";
 	closedir(dir);
 	return (ret);
 }
@@ -176,27 +163,24 @@ std::string Response::compose_response()
 	if (req.getMethod() == "GET")
 	{
 		if (req.getFile() == "/")
-			this->response = req.getVersion() + full_code(200) + content_type() + content_length(this->path + "/" + this->default_page) + body(this->path + "/" + this->default_page);
-		else if (req.getFile().size() > 1 && req.getFile_extention().empty())
-		{
-			if (!opendir((this->path + req.getFile()).c_str()))
-				this->response = req.getVersion() + full_code(200) + content_type() + content_length(this->path + "/" + this->error_404) + body(this->path + "/" + this->error_404);
-			else
-				this->response = req.getVersion() + full_code(200) + content_type() + "Content-Length: 1000000\n\n" + ft_try_dir(req);
-		}
+			this->response = req.getVersion() + full_code(200) + content_type() + content_length(this->path + "/" + this->default_page, IS_FILE) + body(this->path + "/" + this->default_page);
+		else if (ft_try_dir(req) != "")
+			this->response = req.getVersion() + full_code(200) + content_type() + content_length(ft_try_dir(req), IS_DIR) + ft_try_dir(req);
 		else if (exists())
-			this->response = req.getVersion() + full_code(200) + content_type() + content_length(this->path + req.getFile()) + body(this->path + req.getFile());
+			this->response = req.getVersion() + full_code(200) + content_type() + content_length(this->path + req.getFile(), IS_FILE) + body(this->path + req.getFile());
 		else
-			this->response = req.getVersion() + full_code(200) + content_type() + content_length(this->path + "/" + this->error_404) + body(this->path + "/" + this->error_404);
+			this->response = req.getVersion() + full_code(200) + content_type() + content_length(this->path + "/" + this->error_404, IS_FILE) + body(this->path + "/" + this->error_404);
 	}
+	
 	else if (req.getMethod() == "POST")
 		this->response = req.getVersion() + full_code(204) + content_type();
+	
 	else if (req.getMethod() == "DELETE")
 	{
 		if (exists())
 		{
 			remove((this->path + req.getFile()).c_str());
-			this->response = req.getVersion() + full_code(200) + content_type() + content_length(this->path + "/file.html") + body(this->path + "/file.html");
+			this->response = req.getVersion() + full_code(200) + content_type() + content_length(this->path + "/file.html", IS_FILE) + body(this->path + "/file.html");
 		}
 		else
 			this->response = req.getVersion() + full_code(204) + content_type();
@@ -208,6 +192,6 @@ std::string Response::compose_response()
 
 std::string Response::get_response()
 {
-	std::cout << compose_response() << std::endl;
+	// std::cout << compose_response() << std::endl;
 	return (compose_response());
 }
