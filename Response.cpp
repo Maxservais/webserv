@@ -59,6 +59,32 @@ std::string Response::full_code(int code)
 	return (ret);
 }
 
+// std::string ft_env()
+// {
+// 	std::string a = "Content-type:text/html\r\n\r\n\
+// 	<html>\n\
+// 	<head>\n\
+// 	<title>CGI Environnement Variables<\title>\n\
+// 	</head>\n\
+// 	<body>\n\
+// 	<table border = \"0\" cellspacing = \"2\"";
+// 	for (int i = 0; i < 24; i++)
+// 	{
+// 		a += ("<tr><td>" + env[i] + "</td><td>");
+// 		char * value = (getenv(env[i].c_str()));
+// 		//std::string b(value);
+// 		if (value != 0)
+// 		{
+// 		std::cout << "coucou" << std::endl;
+// 			a += value;
+// 		}
+// 		else
+// 			a += "Environnement variable doesn't exist.";
+// 		a += "</td></tr>\n";
+// 	}
+// 	return (a);
+//}
+
 std::string Response::content_length(std::string file, int hint)
 {
 	if(hint == IS_DIR)
@@ -92,6 +118,10 @@ std::string Response::content_type()
 		{
 			return ("Content-Type: image/" + extension + "\n");
 		}
+		//else if (extension == "cgi")
+		//{
+		//	return (ft_env());
+		//}
 	}
 	else if (req.getMethod() == "POST" || (req.getMethod() == "DELETE" && !exists()))
 		return ("Content-Type: text/plain\n");
@@ -192,6 +222,6 @@ std::string Response::compose_response()
 
 std::string Response::get_response()
 {
-	// std::cout << compose_response() << std::endl;
+	//std::cout << compose_response() << std::endl;
 	return (compose_response());
 }

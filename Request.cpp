@@ -6,12 +6,12 @@
 /*   By: adidion <adidion@student.s19.be>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/26 16:43:47 by adidion           #+#    #+#             */
-/*   Updated: 2022/04/27 14:54:34 by adidion          ###   ########.fr       */
+/*   Updated: 2022/05/02 11:36:19 by adidion          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Request.hpp"
-#include <cctype>
+// #include <cctype>
 
 Request::Request()
 {
@@ -79,7 +79,13 @@ std::string Request::getFile()
 	std::vector<std::string> v = split_words(buff);
 	if (v.size() < 2)
 		return (std::string("/"));
-	return (v.at(1));
+	std::string a = v.at(1);
+	if (a.find("?") != std::string::npos)
+	{
+		a.erase(a.find("?"), *a.end());
+	}
+	std::cout << "coucou" << v.at(1) << std::endl;
+	return (a);
 }
 
 //return the HTTP version of the request (ex : HTTP/1.1)
