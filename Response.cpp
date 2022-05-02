@@ -192,6 +192,6 @@ std::string Response::compose_response()
 
 std::string Response::get_response()
 {
-	std::cout << compose_response() << std::endl;
+	// std::cout << compose_response() << std::endl;
 	return (compose_response());
 }
