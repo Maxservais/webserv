@@ -13,7 +13,7 @@ int main()
 	}
 	catch (std::exception &e)
 	{
-		std::cerr << e.what() << std::endl;
+		std::cerr << "Program termination. Exception caught!" << std::endl;
 		return (EXIT_FAILURE);
 	}
 
@@ -24,7 +24,7 @@ int main()
 	}
 	catch (std::exception &e)
 	{
-		std::cerr << e.what() << std::endl;
+		std::cerr << "Program termination. Exception caught!" << std::endl;
 		return (EXIT_FAILURE);
 	}
 	return (EXIT_SUCCESS);

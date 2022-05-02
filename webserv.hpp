@@ -69,7 +69,6 @@ class	Log
 		size_t	size() const;
 };
 
-//RESPONSE COMPOSER
 class Response
 {
 	private:
@@ -132,6 +131,12 @@ class SendErr : public std::exception
 {
 	const char * what () const throw () { return ("Failed to send!"); }
 };
+
+class ConnectionErr : public std::exception
+{
+	const char * what () const throw () { return ("Read error occurred while receiving on the socket, closing connection"); }
+};
+
 
 /* 4. MAIN FUNCTIONS */
 
