@@ -37,3 +37,12 @@ void	setup_server(int *sockfd, struct sockaddr_in *sockaddr)
 		throw ListenErr();
 	}
 }
+
+/* DOCUMENTATION:
+- The socket() API returns a socket descriptor.
+- The setsockopt() API allows the application to reuse the local address when the
+server is restarted before the required wait time expires.
+- After the socket descriptor is created, the bind() API gets a unique name for the socket.
+- The listen() API call allows the server to accept incoming client connections.
+*/
+

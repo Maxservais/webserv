@@ -1,47 +1,27 @@
 #include "webserv.hpp"
 
-std::string read_parse_request(int i, Log log) // reference or pointer for log
+std::string build_response(int i, Log log) // reference or pointer for log?
 {
-	char		buffer[BUFFER_SIZE];
-
+	/* Parse request */
+	char	buffer[BUFFER_SIZE];
 	memset(buffer, 0, BUFFER_SIZE);
-	read(i, buffer, BUFFER_SIZE);
-	// std::cout << buffer << std::endl;
-	
+	int ret = read(i, buffer, BUFFER_SIZE); // should we use receiv instead?
+	if (ret == 0 || ret == -1)
+			throw ConnectionErr();
 	Request request(buffer);
+	
+	/* Log what needs to be logged */
 	(void)log;
 	// log.add_one(request);
 
+	/* Build response */
 	Response response(request, "ressources", "index.html", "error404.html", SERVER_PORT);
-
-	// if (ret == 0 || ret == -1)
-	// {
-	// 	this->close(socket);
-	// 	if (!ret)
-	// 		std::cout << "\rConnection was closed by client.\n" << std::endl;
-	// 	else
-	// 		std::cout << "\rRead error, closing connection.\n" << std::endl;
-	// 	return (-1);
-	// }
-
-	// need to deal with error here!!! If there is an issue, we need to remove client from the list of sockets!!!!
-	// int nBytes = recv(blabla)
-	// if ((0 == nBytes) || (SOCKET_ERROR == nBytes))
-	// {
-	// 	if (0 != nBytes) //Some error occurred, 
-	// 	//client didn't close the connection
-	// 	{
-	// 		printf("\nError occurred while 
-	// 	receiving on the socket: %d.", 
-	// 	GetSocketSpecificError
-	// 	(pClientContext->GetSocket()));
-	// 	}
-	// remove client from socket list!!!
-// }
+	
+	/* Return response */
 	return (response.get_response());
 }
 
-int	send_data(int socket, const char *data, int len)
+void	send_data(int socket, const char *data, int len)
 {
 	int	bytes_sent;
 
@@ -49,11 +29,16 @@ int	send_data(int socket, const char *data, int len)
 	{
 		bytes_sent = send(socket, (char *)data, len, 0);
 		if (bytes_sent == -1)
-			throw SendErr(); // close socket???
+			throw SendErr();
 		data += bytes_sent;
 		len -= bytes_sent;
 	}
-	return (0);
+}
+
+void	disconnect_client(int client_fd, fd_set *current_sockets)
+{
+	close(client_fd);
+	FD_CLR(client_fd, current_sockets);
 }
 
 void	handle_clients(Log log, int *sockfd, struct sockaddr_in *sockaddr)
@@ -96,21 +81,21 @@ void	handle_clients(Log log, int *sockfd, struct sockaddr_in *sockaddr)
 				/* Else, handle the connection and then remove the socket from the set of FDs */
 				else
 				{
-					std::string response = read_parse_request(i, log);
-					int len = response.size();
-					const char *ret = response.c_str();
 					try
 					{
+						std::string response = build_response(i, log);
+						int len = response.size();
+						const char *ret = response.c_str();
 						send_data(i, ret, len);
+						memset((void *)ret, 0, len);
+						disconnect_client(i, &current_sockets);
 					}
 					catch (std::exception &e)
 					{
-						// close sockets?
+						disconnect_client(i, &current_sockets);
+						close(*sockfd);
 						std::cerr << e.what() << std::endl;
 					}
-					memset((void *)ret, 0, strlen(ret));
-					FD_CLR(i, &current_sockets);
-					close(i);
 				}
 			}
 		}
