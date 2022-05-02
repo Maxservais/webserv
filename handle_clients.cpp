@@ -45,6 +45,13 @@ int	send_data(int socket, const char *data, int len)
 	return (0);
 }
 
+void shutdown_signal(int *sockfd)
+{
+	close(*sockfd);
+	std::cout << "TEST" << std::endl;
+	exit(EXIT_SUCCESS);
+}
+
 void	handle_clients(Log log, int *sockfd, struct sockaddr_in *sockaddr)
 {
 	int			max_socket_val = *sockfd;
@@ -57,12 +64,13 @@ void	handle_clients(Log log, int *sockfd, struct sockaddr_in *sockaddr)
 
 	/* Add sockfd to the current set of file descriptors */
 	FD_SET(*sockfd, &current_sockets);
-	
+
 	while(true)
 	{
 		ready_sockets = current_sockets;
 		if (select(max_socket_val + 1, &ready_sockets, NULL, NULL, NULL) < 0)
 			throw SelectErr();
+
 		for (int i = 0; i <= max_socket_val; i++)
 		{
 			if(FD_ISSET(i, &ready_sockets))

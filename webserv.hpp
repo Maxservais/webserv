@@ -19,8 +19,9 @@
 #include <cctype>
 #include <stdexcept>
 #include <dirent.h>
+#include <signal.h>
 
-/* 1. MACROS */
+/* 1. MACROS AND GLOBAL*/
 
 #define SERVER_PORT 9999
 #define BACKLOG 800
@@ -132,7 +133,6 @@ class SendErr : public std::exception
 	const char * what () const throw () { return ("Failed to send!"); }
 };
 
-
 /* 4. MAIN FUNCTIONS */
 
 /* 4.0 PARSER_DISPATCHER_TMP */
@@ -150,7 +150,5 @@ void	handle_clients(Log log, int *sockfd, struct sockaddr_in *sockaddr);
 
 /* 4.3 UTILS */
 int ft_error(std::string message);
-// int set_up_signals();
-// void handler(int sig_num);
 
 #endif

@@ -6,10 +6,6 @@ int main()
 	sockaddr_in	sockaddr;
 	Log			log;
 
-	/* Set-up the signals */
-	// if (set_up_signals() != 0)
-	// 	return (EXIT_FAILURE);
-
 	/* Set-up the server */
 	try
 	{
