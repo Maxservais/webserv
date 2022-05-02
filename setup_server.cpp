@@ -20,8 +20,18 @@ void	setup_server(int *sockfd, struct sockaddr_in *sockaddr)
 	if (setsockopt(*sockfd, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval)) == -1)
 	{
 		close(*sockfd);
-		throw SetsockErr();
+		throw SocketErr();
 	}
+
+	/* Set socket to be nonblocking. All of the sockets for the incoming connections
+	will also be nonblocking since they will inherit that state from the listening socket. */
+	int rc = ioctl(*sockfd, FIONBIO, (char *)&optval);
+	if (rc < 0)
+	{
+		close(*sockfd);
+		throw SocketErr();
+	}
+	// fcntl(*sockfd, F_SETFL, O_NONBLOCK);
 
 	/* Bind the socket to the port */
 	if (bind(*sockfd, (struct sockaddr*)sockaddr, sizeof(*sockaddr)) < 0)

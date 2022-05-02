@@ -43,6 +43,7 @@ void	disconnect_client(int client_fd, fd_set *current_sockets)
 
 void	handle_clients(Log log, int *sockfd, struct sockaddr_in *sockaddr)
 {
+	int			err;
 	int			max_socket_val = *sockfd;
 	socklen_t	addrlen = sizeof(*sockaddr);
 	fd_set		current_sockets;
@@ -56,13 +57,21 @@ void	handle_clients(Log log, int *sockfd, struct sockaddr_in *sockaddr)
 	/* Add sockfd to the current set of file descriptors */
 	FD_SET(*sockfd, &current_sockets);
 	
+	/* Loop, waiting for incoming connects or for incoming data on any of the connected sockets */
 	while(true)
 	{
-		timeout.tv_sec  = 1;
+		// BOUCLE WHILE ICI POUR LE NOMBRE DE SERVEURS / PORTS
+
+		
+		/* Timeout specifies how long we're willing to wait for a fd to become ready */
+		timeout.tv_sec  = 3 * 60;
 		timeout.tv_usec = 0;
 		ready_sockets = current_sockets;
-		if (select(max_socket_val + 1, &ready_sockets, NULL, NULL, &timeout) < 0)
+		err = select(max_socket_val + 1, &ready_sockets, NULL, NULL, &timeout);
+		if (err < 0)
 			throw SelectErr();
+		else if (err == 0)
+			throw TimeOutErr();
 		for (int i = 0; i <= max_socket_val; i++)
 		{
 			if(FD_ISSET(i, &ready_sockets))
@@ -108,4 +117,5 @@ void	handle_clients(Log log, int *sockfd, struct sockaddr_in *sockaddr)
 - FD_ISSET – Helps in identifying if a socket belongs to a specified set
 - FD_SET – Assigns a socket to a specified set
 - FD_ZERO – Resets the set
+- timeout specifies how long we're willing to wait for a fd to become ready
 */

@@ -5,6 +5,7 @@
 
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <sys/ioctl.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <fcntl.h> // do we need this?
@@ -107,11 +108,6 @@ class BindErr : public std::exception
 	const char * what () const throw () { return ("Failed to bind!"); }
 };
 
-class SetsockErr : public std::exception
-{
-	const char * what () const throw () { return ("setsockopt!"); }
-};
-
 class ListenErr : public std::exception
 {
 	const char * what () const throw () { return ("Failed to listen on socket!"); }
@@ -133,6 +129,11 @@ class SendErr : public std::exception
 };
 
 class ConnectionErr : public std::exception
+{
+	const char * what () const throw () { return ("Read error occurred while receiving on the socket, closing connection"); }
+};
+
+class TimeOutErr : public std::exception
 {
 	const char * what () const throw () { return ("Read error occurred while receiving on the socket, closing connection"); }
 };
