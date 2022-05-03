@@ -5,7 +5,7 @@ std::string build_response(int i, Log log) // reference or pointer for log?
 	/* Parse request */
 	char	buffer[BUFFER_SIZE];
 	memset(buffer, 0, BUFFER_SIZE);
-	int ret = read(i, buffer, BUFFER_SIZE); // should we use receiv instead?
+	int ret = recv(i, buffer, BUFFER_SIZE, 0);
 	if (ret == 0 || ret == -1)
 			throw ConnectionErr();
 	Request request(buffer);

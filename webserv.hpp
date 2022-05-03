@@ -8,7 +8,7 @@
 #include <sys/ioctl.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <fcntl.h> // do we need this?
+#include <fcntl.h> // do we need this? yes
 #include <stdio.h> // do we need this?
 #include <string.h> // can we use <string> instead?
 #include <errno.h> // do we need this?
