@@ -8,8 +8,7 @@ SRC_FILES	=	main.cpp				\
 				Response.cpp			\
 				setup_server.cpp		\
 				handle_clients.cpp		\
-				utils.cpp				\
-				parsing/Log.cpp			\
+				parsing/Config.cpp		\
 				parsing/Request.cpp		\
 
 OBJ_FILES	=	$(SRC_FILES:.cpp=.o)

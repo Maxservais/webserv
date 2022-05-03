@@ -20,6 +20,7 @@
 #include <stdexcept>
 #include <dirent.h>
 #include <signal.h>
+#include <map>
 
 /* 1. MACROS AND GLOBAL*/
 
@@ -32,6 +33,7 @@
 
 /* 2. CUSTOM CLASSES */
 
+/* 2.1 PARSING OF THE REQUESTS */
 class	Request
 {
 	private:
@@ -92,6 +94,79 @@ class Response
 		std::string ft_try_dir(Request &request);
 };
 
+/* 2.2 PARSING OF THE CONFIG FILE */
+
+class Location
+{
+	public:
+		Location(void);
+		Location(std::string block);
+		Location(Location const & src);
+		~Location();
+		Location& operator=(Location const & rhs);
+
+		std::string get_ALL(void) const;
+		std::string get_root(void) const;
+		std::string get_index(void) const;
+		std::string get_cgi_extension(void) const;
+		std::string get_cgi_path(void) const;
+		std::vector<std::string> get_methods(void) const;
+		bool get_directory_listing(void) const;
+
+	private:
+		std::string _ALL;
+		std::string _root;
+		std::string _index;
+		std::string _cgi_extension;
+		std::string _cgi_path;
+		std::vector<std::string> _methods;
+		bool _directory_listing;
+};
+
+class Server
+{
+	public:
+		Server(void);
+		Server(std::string block);
+		Server(Server const & src);
+		~Server();
+		Server& operator=(const Server &rhs);
+
+		std::string get_ALL(void) const;
+		std::string get_port(void) const;
+		std::string get_server_name(void) const;
+		std::string get_max_body_size(void) const;
+		std::string get_root(void) const;
+		std::string get_index(void) const;
+		std::vector<std::string> get_methods(void) const;
+		std::map<int,std::string> get_errors(void) const;
+		std::map<std::string, Location*> get_locations(void) const;
+
+	private:
+		std::string _ALL;
+		std::string _port;
+		std::string _server_name;
+		std::string _max_body_size;
+		std::string _root;
+		std::string _index;
+		std::vector<std::string> _methods;
+		std::map<int,std::string> _errors;
+		std::map<std::string, Location*> _locations;
+};
+
+class Config
+{
+	public:
+		Config(void);
+		Config(std::string conf_file);
+		Config(Config const & src);
+		~Config();
+		Config& operator=(const Config &rhs);
+		std::vector<Server*> get_servers(void) const;
+	private:
+		std::vector<Server*> _servers;
+};
+
 /* 3. EXCEPTIONS */
 
 class SocketErr : public std::exception
@@ -137,7 +212,6 @@ class ConnectionErr : public std::exception
 	const char * what () const throw () { return ("Read error occurred while receiving on the socket, closing connection"); }
 };
 
-
 /* 4. MAIN FUNCTIONS */
 
 /* 4.0 PARSER_DISPATCHER_TMP */
@@ -152,8 +226,5 @@ void	setup_server(int *sockfd, struct sockaddr_in *sockaddr);
 
 /* 4.2 HANDLE CLIENTS */
 void	handle_clients(Log log, int *sockfd, struct sockaddr_in *sockaddr);
-
-/* 4.3 UTILS */
-int ft_error(std::string message);
 
 #endif

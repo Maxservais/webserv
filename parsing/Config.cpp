@@ -1,4 +1,4 @@
-#include "Config.hpp"
+#include "../webserv.hpp"
 
 /* ************************************************************************** */
 /*  UTILS                                                                     */
@@ -21,7 +21,6 @@ Location::Location() { return; }
 
 Location::Location(std::string block) : _ALL(block)
 {
-	std::cout << "~~~~~~~~~NEW LOCATION BLOCK~~~~~~~~~" << std::endl;
 	std::string tmp = this->_ALL;
 	std::string token;
 	std::vector<std::string> vec_tmp;
@@ -31,39 +30,39 @@ Location::Location(std::string block) : _ALL(block)
 		token = tmp.substr(0, pos);
 		if (!token.empty())
 			vec_tmp.push_back(token);
-		tmp.erase(0,pos + 1); // the + 2 is for removing the tabs
+		tmp.erase(0,pos + 1);
 	}
+	if (!tmp.empty() && tmp[0] != '}')
+		vec_tmp.push_back(tmp);
 
-	std::vector<std::string>::iterator terator;
-	for(terator = vec_tmp.begin(); terator != vec_tmp.end(); ++terator)
-		std::cout << "loc : " << (*terator) << std::endl;
-	
-	// size_t i = 0;
-	// while (i < vec_tmp.size())
-	// {
-	// 	if (vec_tmp[i].find("root") != std::string::npos)
-	// 		this->_root.assign(vec_tmp[i].begin() + vec_tmp[i].find(" ") + 1, vec_tmp[i].end() - 1);
-	// 	else if (vec_tmp[i].find("index") != std::string::npos)
-	// 		this->_index.assign(vec_tmp[i].begin() + vec_tmp[i].find(" ") + 1, vec_tmp[i].end() - 1);
-	// 	else if (vec_tmp[i].find("cgi_extension") != std::string::npos)
-	// 		this->_cgi_extension.assign(vec_tmp[i].begin() + vec_tmp[i].find(" ") + 1, vec_tmp[i].end() - 1);
-	// 	else if (vec_tmp[i].find("index") != std::string::npos)
-	// 		this->_cgi_path.assign(vec_tmp[i].begin() + vec_tmp[i].find(" ") + 1, vec_tmp[i].end() - 1);
-	// 	else if (vec_tmp[i].find("method") != std::string::npos)
-	// 	{
-	// 		this->_methods = split_spaces(vec_tmp[i]);
-	// 		this->_methods.erase(this->_methods.begin());
-	// 		this->_methods[this->_methods.size() - 1].pop_back(); // removes the ;
-	// 	}
-	// 	else if (vec_tmp[i].find("directory_listing") != std::string::npos)
-	// 	{
-	// 		if (vec_tmp[i].find("on"))
-	// 			this->_directory_listing = true;
-	// 		else
-	// 			this->_directory_listing = false;
-	// 	}
-	// 	i++;
-	// }
+	size_t i = 0;
+	while (i < vec_tmp.size())
+	{
+		if (vec_tmp[i].find("root") != std::string::npos)
+			this->_root.assign(vec_tmp[i].begin() + vec_tmp[i].find(" ") + 1, vec_tmp[i].end() - 1);
+		else if (vec_tmp[i].find("index") != std::string::npos)
+			this->_index.assign(vec_tmp[i].begin() + vec_tmp[i].find(" ") + 1, vec_tmp[i].end() - 1);
+		else if (vec_tmp[i].find("cgi_extension") != std::string::npos)
+			this->_cgi_extension.assign(vec_tmp[i].begin() + vec_tmp[i].find(" ") + 1, vec_tmp[i].end() - 1);
+		else if (vec_tmp[i].find("cgi_path") != std::string::npos)
+			this->_cgi_path.assign(vec_tmp[i].begin() + vec_tmp[i].find(" ") + 1, vec_tmp[i].end() - 1);
+		else if (vec_tmp[i].find("index") != std::string::npos)
+			this->_cgi_path.assign(vec_tmp[i].begin() + vec_tmp[i].find(" ") + 1, vec_tmp[i].end() - 1);
+		else if (vec_tmp[i].find("method") != std::string::npos)
+		{
+			this->_methods = split_spaces(vec_tmp[i]);
+			this->_methods.erase(this->_methods.begin());
+			this->_methods[this->_methods.size() - 1].pop_back(); // removes the ;
+		}
+		else if (vec_tmp[i].find("directory_listing") != std::string::npos)
+		{
+			if (vec_tmp[i].find("on"))
+				this->_directory_listing = true;
+			else
+				this->_directory_listing = false;
+		}
+		i++;
+	}
 	return;
 }
 
@@ -99,7 +98,6 @@ Server::Server() { return; }
 
 Server::Server(std::string block) : _ALL(block)
 {
-	// std::cout << "~~~~~~~~~NEW SERVER BLOCK~~~~~~~~~" << std::endl;
 	std::string tmp = this->_ALL;
 	std::string token;
 	std::vector<std::string> vec_tmp;
@@ -153,29 +151,7 @@ Server::Server(std::string block) : _ALL(block)
 		}
 		i++;
 	}
-
-	// std::cout << "ERRORS" << std::endl;
-	// std::map<int, std::string>::iterator it;
-	// for(it = this->_errors.begin(); it != this->_errors.end(); ++it)
-	// 	std::cout << "test for loop : " << (*it).first << " - " << (*it).second << std::endl;
-
-	// std::cout << "\nLOCATIONS" << std::endl;
-	// std::map<std::string, Location*>::iterator bla;
-	// for(bla = this->_locations.begin(); bla != this->_locations.end(); ++bla)
-	// 	std::cout << "test for loop : " << (*bla).first << " - " << (*bla).second->get_ALL() << std::endl;
-
-	// std::cout << "\nMETHODS" << std::endl;
-	// std::vector<std::string>::iterator terator;
-	// for(terator = this->_methods.begin(); terator != this->_methods.end(); ++terator)
-	// 	std::cout << "methods : " << (*terator) << std::endl;
-
-	// std::cout << "\nREST" << std::endl;
-	// std::cout << this->_port << std::endl;
-	// std::cout << this->_server_name << std::endl;
-	// std::cout << this->_max_body_size << std::endl;
-	// std::cout << this->_root << std::endl;
-	// std::cout << this->_index << std::endl;
-	// std::cout << "\n" << std::endl;
+	return;
 }
 
 Server::Server(Server const & src)
