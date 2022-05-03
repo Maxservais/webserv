@@ -1,6 +1,6 @@
 #include "../webserv.hpp"
 
-void check_Server_block(Config obj)
+void check_Server_block(Config &obj)
 {
 	if (obj.get_servers().empty())
 	{
@@ -17,6 +17,17 @@ void check_Server_block(Config obj)
 		|| obj.get_servers()[i]->get_errors().empty()
 		|| obj.get_servers()[i]->get_locations().empty())
 			throw MissStatErr();
+	}
+	for (size_t i = 0; i < obj.get_servers().size(); i++)
+	{
+		for (size_t j = 0; j < obj.get_servers()[i]->get_methods().size(); j++)
+		{
+			std::cout << obj.get_servers()[i]->get_methods()[j] << std::endl;
+			// if (obj.get_servers()[i]->get_methods()[j] != "GET" 
+			// || obj.get_servers()[i]->get_methods()[j] != "POST"
+			// || obj.get_servers()[i]->get_methods()[j] != "DELETE")
+			// 	throw MethErr();
+		}
 	}
 }
 

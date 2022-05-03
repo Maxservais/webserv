@@ -240,6 +240,11 @@ class MissStatErr : public std::exception
 	const char * what () const throw () { return ("Missing element in the configuration file"); }
 };
 
+class MethErr : public std::exception
+{
+	const char * what () const throw () { return ("Invalid methods in the configuration file"); }
+};
+
 /* 4. MAIN FUNCTIONS */
 
 /* 4.0 PARSER_DISPATCHER_TMP */
