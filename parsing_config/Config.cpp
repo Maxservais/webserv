@@ -18,7 +18,7 @@ std::string Location::get_ALL(void) const {return this->_ALL; }
 
 Server::Server() { return; }
 
-Server::Server(std::string block) : _ALL(block) { return; }
+Server::Server(std::string block) : _ALL(block) { std::cout << "TEST--> " << this->_ALL << std::endl ; }
 
 Server::Server(Server const & src)
 {
@@ -30,7 +30,7 @@ Server::~Server() { return; }
 
 std::string Server::get_ALL(void) const {return this->_ALL; }
 
-std::map<std::string, Location> Server::get_locations(void) const { return this->_locations; }
+std::map<std::string, Location*> Server::get_locations(void) const { return this->_locations; }
 
 //
 
@@ -41,7 +41,7 @@ Config::Config(std::string conf_file)
 	std::ifstream input(conf_file);
 	std::string ALL;
 	if (!input.is_open())
-		std::cout << "Failed to open the requested ressource" << std::endl;
+		std::cout << "Failed to open the requested ressource" << std::endl; // try catch needed here
 	else
 		ALL = std::string((std::istreambuf_iterator<char>(input)), std::istreambuf_iterator<char>());
 	
@@ -51,9 +51,16 @@ Config::Config(std::string conf_file)
 	{
 		token = ALL.substr(0, pos);
 		if (!token.empty())
-			this->_servers.push_back(token);
+		{
+			Server *tmp = new Server(token);
+			// std::cout << "TOKEN -->" << tmp.get_ALL() << std::endl;
+			this->_servers.push_back(tmp);
+		}
 		ALL.erase(0,pos + 8);
 	}
+	Server *tmp_bis = new Server(ALL);
+	this->_servers.push_back(tmp_bis);
+	// std::cout << "TOKEN -->" << tmp_bis.get_ALL() << std::endl;
 	return;
 }
 
@@ -65,4 +72,4 @@ Config::Config(Config const & src)
 
 Config::~Config() { return; }
 
-std::vector<Server> Config::get_servers(void) const { return this->_servers; }
+std::vector<Server*> Config::get_servers(void) const { return this->_servers; }

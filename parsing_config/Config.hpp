@@ -39,7 +39,7 @@ class Server
 		// Server* operator=(Server const & rhs);
 
 		std::string get_ALL(void) const;
-		std::map<std::string, Location> get_locations(void) const;
+		std::map<std::string, Location*> get_locations(void) const;
 
 	private:
 		std::string _ALL;
@@ -51,7 +51,7 @@ class Server
 		// std::string _root;
 		// std::string _index;
 		// std::map<int,std::string> _errors;
-		std::map<std::string, Location> _locations;
+		std::map<std::string, Location*> _locations;
 };
 
 class Config
@@ -62,9 +62,9 @@ class Config
 		Config(Config const & src);
 		~Config();
 		// Config* operator=(Config const & rhs);
-		std::vector<Server> get_servers(void) const;
+		std::vector<Server*> get_servers(void) const;
 	private:
-		std::vector<Server> _servers;
+		std::vector<Server*> _servers;
 };
 
 #endif
