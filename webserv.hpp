@@ -105,6 +105,8 @@ class Location
 		~Location();
 		Location& operator=(Location const & rhs);
 
+		void fill_variables(std::vector<std::string> vec);
+	
 		std::string get_ALL(void) const;
 		std::string get_root(void) const;
 		std::string get_index(void) const;
@@ -131,6 +133,9 @@ class Server
 		Server(Server const & src);
 		~Server();
 		Server& operator=(const Server &rhs);
+
+		void fill_variables(std::vector<std::string> vec);
+		size_t fill_location(std::vector<std::string> vec, size_t i);
 
 		std::string get_ALL(void) const;
 		std::string get_port(void) const;
@@ -212,6 +217,17 @@ class ConnectionErr : public std::exception
 	const char * what () const throw () { return ("Read error occurred while receiving on the socket, closing connection"); }
 };
 
+class ArgvErr : public std::exception
+{
+	const char * what () const throw () { return ("./webserv [path to configuration file]"); }
+};
+
+class ConfOpenErr : public std::exception
+{
+	const char * what () const throw () { return ("Cannot open configuration file"); }
+};
+
+
 /* 4. MAIN FUNCTIONS */
 
 /* 4.0 PARSER_DISPATCHER_TMP */
@@ -220,6 +236,7 @@ bool exists (Request request);
 std::string get_length_file(std::string file);
 std::string convert_to_binary(const char * path);
 std::string dispatcher(Request &request);
+void conf_check(int argc, char **argv);
 
 /* 4.1 SETUP SERVER */
 void	setup_server(int *sockfd, struct sockaddr_in *sockaddr);

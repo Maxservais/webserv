@@ -10,6 +10,7 @@ SRC_FILES	=	main.cpp				\
 				handle_clients.cpp		\
 				parsing/Config.cpp		\
 				parsing/Request.cpp		\
+				parsing/conf_check.cpp	\
 
 OBJ_FILES	=	$(SRC_FILES:.cpp=.o)
 

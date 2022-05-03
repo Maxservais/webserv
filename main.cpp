@@ -1,10 +1,21 @@
 #include "webserv.hpp"
 
-int main()
+int main(int argc, char **argv)
 {
 	int			sockfd;
 	sockaddr_in	sockaddr;
 	Log			log;
+
+	/* Parse the config file */
+	try
+	{
+		conf_check(argc, argv);
+	}
+	catch (std::exception &e)
+	{
+		std::cerr << "Program termination. Exception caught!" << std::endl;
+		return (EXIT_FAILURE);
+	}
 
 	/* Set-up the server */
 	try

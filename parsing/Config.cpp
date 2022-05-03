@@ -21,48 +21,20 @@ Location::Location() { return; }
 
 Location::Location(std::string block) : _ALL(block)
 {
-	std::string tmp = this->_ALL;
 	std::string token;
-	std::vector<std::string> vec_tmp;
+	std::vector<std::string> vec;
 	size_t pos = 0;
-	while((pos = tmp.find("\t")) != std::string::npos )
+	while((pos = this->_ALL.find("\t")) != std::string::npos )
 	{
-		token = tmp.substr(0, pos);
+		token = this->_ALL.substr(0, pos);
 		if (!token.empty())
-			vec_tmp.push_back(token);
-		tmp.erase(0,pos + 1);
+			vec.push_back(token);
+		this->_ALL.erase(0,pos + 1);
 	}
-	if (!tmp.empty() && tmp[0] != '}')
-		vec_tmp.push_back(tmp);
+	if (!this->_ALL.empty() && this->_ALL[0] != '}')
+		vec.push_back(this->_ALL);
 
-	size_t i = 0;
-	while (i < vec_tmp.size())
-	{
-		if (vec_tmp[i].find("root") != std::string::npos)
-			this->_root.assign(vec_tmp[i].begin() + vec_tmp[i].find(" ") + 1, vec_tmp[i].end() - 1);
-		else if (vec_tmp[i].find("index") != std::string::npos)
-			this->_index.assign(vec_tmp[i].begin() + vec_tmp[i].find(" ") + 1, vec_tmp[i].end() - 1);
-		else if (vec_tmp[i].find("cgi_extension") != std::string::npos)
-			this->_cgi_extension.assign(vec_tmp[i].begin() + vec_tmp[i].find(" ") + 1, vec_tmp[i].end() - 1);
-		else if (vec_tmp[i].find("cgi_path") != std::string::npos)
-			this->_cgi_path.assign(vec_tmp[i].begin() + vec_tmp[i].find(" ") + 1, vec_tmp[i].end() - 1);
-		else if (vec_tmp[i].find("index") != std::string::npos)
-			this->_cgi_path.assign(vec_tmp[i].begin() + vec_tmp[i].find(" ") + 1, vec_tmp[i].end() - 1);
-		else if (vec_tmp[i].find("method") != std::string::npos)
-		{
-			this->_methods = split_spaces(vec_tmp[i]);
-			this->_methods.erase(this->_methods.begin());
-			this->_methods[this->_methods.size() - 1].pop_back(); // removes the ;
-		}
-		else if (vec_tmp[i].find("directory_listing") != std::string::npos)
-		{
-			if (vec_tmp[i].find("on"))
-				this->_directory_listing = true;
-			else
-				this->_directory_listing = false;
-		}
-		i++;
-	}
+	fill_variables(vec);
 	return;
 }
 
@@ -78,6 +50,39 @@ Location& Location::operator=(const Location &rhs)
 {
 	(void) rhs;
 	return (*this);
+}
+
+/* Filler */
+void Location::fill_variables(std::vector<std::string> vec)
+{
+	size_t i = 0;
+	while (i < vec.size())
+	{
+		if (vec[i].find("root") != std::string::npos)
+			this->_root.assign(vec[i].begin() + vec[i].find(" ") + 1, vec[i].end() - 1);
+		else if (vec[i].find("index") != std::string::npos)
+			this->_index.assign(vec[i].begin() + vec[i].find(" ") + 1, vec[i].end() - 1);
+		else if (vec[i].find("cgi_extension") != std::string::npos)
+			this->_cgi_extension.assign(vec[i].begin() + vec[i].find(" ") + 1, vec[i].end() - 1);
+		else if (vec[i].find("cgi_path") != std::string::npos)
+			this->_cgi_path.assign(vec[i].begin() + vec[i].find(" ") + 1, vec[i].end() - 1);
+		else if (vec[i].find("index") != std::string::npos)
+			this->_cgi_path.assign(vec[i].begin() + vec[i].find(" ") + 1, vec[i].end() - 1);
+		else if (vec[i].find("method") != std::string::npos)
+		{
+			this->_methods = split_spaces(vec[i]);
+			this->_methods.erase(this->_methods.begin());
+			this->_methods[this->_methods.size() - 1].pop_back(); // removes the ;
+		}
+		else if (vec[i].find("directory_listing") != std::string::npos)
+		{
+			if (vec[i].find("on"))
+				this->_directory_listing = true;
+			else
+				this->_directory_listing = false;
+		}
+		i++;
+	}
 }
 
 /* Getters */
@@ -98,59 +103,17 @@ Server::Server() { return; }
 
 Server::Server(std::string block) : _ALL(block)
 {
-	std::string tmp = this->_ALL;
 	std::string token;
-	std::vector<std::string> vec_tmp;
+	std::vector<std::string> vec;
 	size_t pos = 0;
-	while((pos = tmp.find("\n")) != std::string::npos )
+	while((pos = this->_ALL.find("\n")) != std::string::npos )
 	{
-		token = tmp.substr(0, pos);
+		token = this->_ALL.substr(0, pos);
 		if (!token.empty())
-			vec_tmp.push_back(token);
-		tmp.erase(0,pos + 2); // the + 2 is for removing the tabs
+			vec.push_back(token);
+		this->_ALL.erase(0,pos + 2); // the + 2 is for removing the tabs
 	}
-
-	size_t i = 0;
-	while (i < vec_tmp.size())
-	{
-		if (vec_tmp[i].find("listen") != std::string::npos)
-			this->_port.assign(vec_tmp[i].begin() + vec_tmp[i].find(" ") + 1, vec_tmp[i].end() - 1);
-		else if (vec_tmp[i].find("server_name") != std::string::npos)
-			this->_server_name.assign(vec_tmp[i].begin() + vec_tmp[i].find(" ") + 1, vec_tmp[i].end() - 1);
-		else if (vec_tmp[i].find("max_body_size") != std::string::npos)
-			this->_max_body_size.assign(vec_tmp[i].begin() + vec_tmp[i].find(" ") + 1, vec_tmp[i].end() - 1);
-		else if (vec_tmp[i].find("root") != std::string::npos)
-			this->_root.assign(vec_tmp[i].begin() + vec_tmp[i].find(" ") + 1, vec_tmp[i].end() - 1);
-		else if (vec_tmp[i].find("index") != std::string::npos)
-			this->_index.assign(vec_tmp[i].begin() + vec_tmp[i].find(" ") + 1, vec_tmp[i].end() - 1);
-		else if (vec_tmp[i].find("error") != std::string::npos)
-		{
-			std::vector<std::string> splited = split_spaces(vec_tmp[i]);
-			splited[2].pop_back();
-			this->_errors.insert(std::pair<int, std::string>(std::stoi(splited[1]), splited[2])); // stoi cpp11
-		}
-		else if (vec_tmp[i].find("method") != std::string::npos)
-		{
-			this->_methods = split_spaces(vec_tmp[i]);
-			this->_methods.erase(this->_methods.begin());
-			this->_methods[this->_methods.size() - 1].pop_back(); // removes the ;
-		}
-		else if (vec_tmp[i].find("location") != std::string::npos)
-		{
-			Location * loc_tmp;
-			token.clear();
-			while(vec_tmp[i] != "}")
-			{
-				token += vec_tmp[i];
-				i++;
-			}
-			loc_tmp = new Location(token);
-			tmp.clear();
-			tmp.assign(token.begin() + token.find("/"), token.begin() + token.find("{"));
-			this->_locations.insert(std::pair<std::string, Location*>(tmp,loc_tmp));
-		}
-		i++;
-	}
+	fill_variables(vec);
 	return;
 }
 
@@ -173,6 +136,58 @@ Server::~Server()
 		delete (*it).second;
 	this->_locations.clear();
 	return;
+}
+
+/* Filler */
+size_t Server::fill_location(std::vector<std::string> vec, size_t i)
+{
+	std::string token;
+	std::string tmp;
+	Location * loc_tmp;
+
+	while(vec[i] != "}")
+	{
+		token += vec[i];
+		i++;
+	}
+	loc_tmp = new Location(token);
+	tmp.clear();
+	tmp.assign(token.begin() + token.find("/"), token.begin() + token.find("{"));
+	this->_locations.insert(std::pair<std::string, Location*>(tmp,loc_tmp));
+	return i;
+}
+
+void Server::fill_variables(std::vector<std::string> vec)
+{
+	size_t i = 0;
+	while (i < vec.size())
+	{
+		if (vec[i].find("listen") != std::string::npos)
+			this->_port.assign(vec[i].begin() + vec[i].find(" ") + 1, vec[i].end() - 1);
+		else if (vec[i].find("server_name") != std::string::npos)
+			this->_server_name.assign(vec[i].begin() + vec[i].find(" ") + 1, vec[i].end() - 1);
+		else if (vec[i].find("max_body_size") != std::string::npos)
+			this->_max_body_size.assign(vec[i].begin() + vec[i].find(" ") + 1, vec[i].end() - 1);
+		else if (vec[i].find("root") != std::string::npos)
+			this->_root.assign(vec[i].begin() + vec[i].find(" ") + 1, vec[i].end() - 1);
+		else if (vec[i].find("index") != std::string::npos)
+			this->_index.assign(vec[i].begin() + vec[i].find(" ") + 1, vec[i].end() - 1);
+		else if (vec[i].find("error") != std::string::npos)
+		{
+			std::vector<std::string> splited = split_spaces(vec[i]);
+			splited[2].pop_back();
+			this->_errors.insert(std::pair<int, std::string>(std::stoi(splited[1]), splited[2])); // stoi cpp11
+		}
+		else if (vec[i].find("method") != std::string::npos)
+		{
+			this->_methods = split_spaces(vec[i]);
+			this->_methods.erase(this->_methods.begin());
+			this->_methods[this->_methods.size() - 1].pop_back(); // removes the ;
+		}
+		else if (vec[i].find("location") != std::string::npos)
+			i = fill_location(vec, i);
+		i++;
+	}
 }
 
 /* Getters */
