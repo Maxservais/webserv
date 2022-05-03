@@ -15,18 +15,24 @@ class Location
 		Location(std::string block);
 		Location(Location const & src);
 		~Location();
-		// Location& operator=(Location const & rhs);
+		Location& operator=(Location const & rhs);
 
 		std::string get_ALL(void) const;
+		std::string get_root(void) const;
+		std::string get_index(void) const;
+		std::string get_cgi_extension(void) const;
+		std::string get_cgi_path(void) const;
+		std::vector<std::string> get_methods(void) const;
+		bool get_directory_listing(void) const;
 
 	private:
 		std::string _ALL;
-		// std::string _root;
-		// std::vector<std::string> _methods;
-		// std::string _index;
-		// bool directory_listing;
-		// std::string _cgi_extension;
-		// std::string _cgi_path;
+		std::string _root;
+		std::string _index;
+		std::string _cgi_extension;
+		std::string _cgi_path;
+		std::vector<std::string> _methods;
+		bool _directory_listing;
 };
 
 class Server
@@ -49,16 +55,15 @@ class Server
 		std::map<std::string, Location*> get_locations(void) const;
 
 	private:
-		std::string _ALL; //
-		std::string _port; //
-		std::string _server_name; //
-
-		std::string _max_body_size; //
-		std::string _root; //
-		std::string _index; //
+		std::string _ALL;
+		std::string _port;
+		std::string _server_name;
+		std::string _max_body_size;
+		std::string _root;
+		std::string _index;
 		std::vector<std::string> _methods;
-		std::map<int,std::string> _errors; //
-		std::map<std::string, Location*> _locations; //
+		std::map<int,std::string> _errors;
+		std::map<std::string, Location*> _locations;
 };
 
 class Config

@@ -1,4 +1,3 @@
-
 #include "Config.hpp"
 
 /* ************************************************************************** */
@@ -17,9 +16,56 @@ std::vector<std::string> split_spaces(std::string s)
 /*  LOCATION                                                                  */
 /* ************************************************************************** */
 
+/* Canon */
 Location::Location() { return; }
 
-Location::Location(std::string block) : _ALL(block) { return; }
+Location::Location(std::string block) : _ALL(block)
+{
+	std::cout << "~~~~~~~~~NEW LOCATION BLOCK~~~~~~~~~" << std::endl;
+	std::string tmp = this->_ALL;
+	std::string token;
+	std::vector<std::string> vec_tmp;
+	size_t pos = 0;
+	while((pos = tmp.find("\t")) != std::string::npos )
+	{
+		token = tmp.substr(0, pos);
+		if (!token.empty())
+			vec_tmp.push_back(token);
+		tmp.erase(0,pos + 1); // the + 2 is for removing the tabs
+	}
+
+	std::vector<std::string>::iterator terator;
+	for(terator = vec_tmp.begin(); terator != vec_tmp.end(); ++terator)
+		std::cout << "loc : " << (*terator) << std::endl;
+	
+	// size_t i = 0;
+	// while (i < vec_tmp.size())
+	// {
+	// 	if (vec_tmp[i].find("root") != std::string::npos)
+	// 		this->_root.assign(vec_tmp[i].begin() + vec_tmp[i].find(" ") + 1, vec_tmp[i].end() - 1);
+	// 	else if (vec_tmp[i].find("index") != std::string::npos)
+	// 		this->_index.assign(vec_tmp[i].begin() + vec_tmp[i].find(" ") + 1, vec_tmp[i].end() - 1);
+	// 	else if (vec_tmp[i].find("cgi_extension") != std::string::npos)
+	// 		this->_cgi_extension.assign(vec_tmp[i].begin() + vec_tmp[i].find(" ") + 1, vec_tmp[i].end() - 1);
+	// 	else if (vec_tmp[i].find("index") != std::string::npos)
+	// 		this->_cgi_path.assign(vec_tmp[i].begin() + vec_tmp[i].find(" ") + 1, vec_tmp[i].end() - 1);
+	// 	else if (vec_tmp[i].find("method") != std::string::npos)
+	// 	{
+	// 		this->_methods = split_spaces(vec_tmp[i]);
+	// 		this->_methods.erase(this->_methods.begin());
+	// 		this->_methods[this->_methods.size() - 1].pop_back(); // removes the ;
+	// 	}
+	// 	else if (vec_tmp[i].find("directory_listing") != std::string::npos)
+	// 	{
+	// 		if (vec_tmp[i].find("on"))
+	// 			this->_directory_listing = true;
+	// 		else
+	// 			this->_directory_listing = false;
+	// 	}
+	// 	i++;
+	// }
+	return;
+}
 
 Location::Location(Location const & src)
 {
@@ -29,12 +75,26 @@ Location::Location(Location const & src)
 
 Location::~Location() { return; }
 
+Location& Location::operator=(const Location &rhs)
+{
+	(void) rhs;
+	return (*this);
+}
+
+/* Getters */
 std::string Location::get_ALL(void) const {return this->_ALL; }
+std::string Location::get_root(void) const { return this->_root; }
+std::string Location::get_index(void) const { return this->_index; }
+std::string Location::get_cgi_extension(void) const { return this->_cgi_extension; }
+std::string Location::get_cgi_path(void) const { return this->_cgi_path; }
+std::vector<std::string> Location::get_methods(void) const { return this->_methods; }
+bool Location::get_directory_listing(void) const { return this->_directory_listing; }
 
 /* ************************************************************************** */
 /*  SERVER                                                                    */
 /* ************************************************************************** */
 
+/* Canon */
 Server::Server() { return; }
 
 Server::Server(std::string block) : _ALL(block)
@@ -139,6 +199,7 @@ Server::~Server()
 	return;
 }
 
+/* Getters */
 std::string Server::get_ALL(void) const {return this->_ALL; }
 std::string Server::get_port(void) const { return this->_port; }
 std::string Server::get_server_name(void) const { return this->_server_name; }
@@ -153,6 +214,7 @@ std::map<std::string, Location*> Server::get_locations(void) const { return this
 /*  CONFIG                                                                    */
 /* ************************************************************************** */
 
+/* Canon */
 Config::Config() { return; }
 
 Config::Config(std::string conf_file)
@@ -173,14 +235,12 @@ Config::Config(std::string conf_file)
 		if (!token.empty())
 		{
 			tmp = new Server(token);
-			// std::cout << "TOKEN -->" << tmp.get_ALL() << std::endl;
 			this->_servers.push_back(tmp);
 		}
 		ALL.erase(0,pos + 8);
 	}
 	tmp = new Server(ALL);
 	this->_servers.push_back(tmp);
-	// std::cout << "TOKEN -->" << tmp_bis.get_ALL() << std::endl;
 	return;
 }
 
@@ -205,4 +265,5 @@ Config& Config::operator=(const Config &rhs)
 	return (*this);
 }
 
+/* Getters */
 std::vector<Server*> Config::get_servers(void) const { return this->_servers; }
