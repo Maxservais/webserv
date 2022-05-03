@@ -11,6 +11,7 @@ SRC_FILES	=	main.cpp				\
 				utils.cpp				\
 				parsing/Log.cpp			\
 				parsing/Request.cpp		\
+				Cgi.cpp					\
 
 OBJ_FILES	=	$(SRC_FILES:.cpp=.o)
 

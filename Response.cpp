@@ -59,32 +59,6 @@ std::string Response::full_code(int code)
 	return (ret);
 }
 
-// std::string ft_env()
-// {
-// 	std::string a = "Content-type:text/html\r\n\r\n\
-// 	<html>\n\
-// 	<head>\n\
-// 	<title>CGI Environnement Variables<\title>\n\
-// 	</head>\n\
-// 	<body>\n\
-// 	<table border = \"0\" cellspacing = \"2\"";
-// 	for (int i = 0; i < 24; i++)
-// 	{
-// 		a += ("<tr><td>" + env[i] + "</td><td>");
-// 		char * value = (getenv(env[i].c_str()));
-// 		//std::string b(value);
-// 		if (value != 0)
-// 		{
-// 		std::cout << "coucou" << std::endl;
-// 			a += value;
-// 		}
-// 		else
-// 			a += "Environnement variable doesn't exist.";
-// 		a += "</td></tr>\n";
-// 	}
-// 	return (a);
-//}
-
 std::string Response::content_length(std::string file, int hint)
 {
 	if(hint == IS_DIR)
@@ -118,13 +92,16 @@ std::string Response::content_type()
 		{
 			return ("Content-Type: image/" + extension + "\n");
 		}
-		//else if (extension == "cgi")
-		//{
-		//	return (ft_env());
-		//}
+		else if (extension == "cgi")
+		{
+			Cgi a(req);
+			return (a.executeCgi());
+		}
 	}
 	else if (req.getMethod() == "POST" || (req.getMethod() == "DELETE" && !exists()))
+	{
 		return ("Content-Type: text/plain\n");
+	}
 	return ("Content-Type: text/html\n");
 }
 
@@ -192,7 +169,11 @@ std::string Response::compose_response()
 {
 	if (req.getMethod() == "GET")
 	{
-		if (req.getFile() == "/")
+		if (req.getFile_extention() == "cgi")
+		{
+			response = req.getVersion() + full_code(200) + content_type() + content_length(content_type(), IS_DIR);
+		}
+		else if (req.getFile() == "/")
 			this->response = req.getVersion() + full_code(200) + content_type() + content_length(this->path + "/" + this->default_page, IS_FILE) + body(this->path + "/" + this->default_page);
 		else if (ft_try_dir(req) != "")
 			this->response = req.getVersion() + full_code(200) + content_type() + content_length(ft_try_dir(req), IS_DIR) + ft_try_dir(req);
@@ -222,6 +203,7 @@ std::string Response::compose_response()
 
 std::string Response::get_response()
 {
-	//std::cout << compose_response() << std::endl;
+	if (req.getFile_extention() == "cgi")
+	std::cout << compose_response() << std::endl;
 	return (compose_response());
 }

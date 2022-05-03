@@ -60,6 +60,8 @@ class	Request
 		std::string getFile_clean();
 		std::string getVersion();
 		std::string getFile_extention();
+		std::string getQuery();
+		std::string getPostImput();
 		std::vector<std::string> split_words(std::string buffer);
 };
 
@@ -102,6 +104,20 @@ class Response
 		std::string compose_response();
 		std::string get_response();
 		std::string ft_try_dir(Request &request);
+};
+
+// CGI HANDLER
+class	Cgi
+{
+	private:
+		char **env;
+		Request request;
+	public:
+		Cgi(Request a);
+		Cgi &operator=( Cgi &obj );
+		~Cgi();
+		void setEnv();
+		std::string executeCgi();
 };
 
 /* 3. EXCEPTIONS */
