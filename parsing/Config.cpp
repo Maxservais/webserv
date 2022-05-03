@@ -232,7 +232,7 @@ Config::Config(std::string conf_file)
 	}
 	tmp = new Server(ALL);
 	this->_servers.push_back(tmp);
-	return;
+	std::cout << "test -->" << this->_servers.size() << std::endl;
 }
 
 Config::Config(Config const & src)

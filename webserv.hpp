@@ -106,7 +106,8 @@ class Location
 		Location& operator=(Location const & rhs);
 
 		void fill_variables(std::vector<std::string> vec);
-	
+		void check_Location(void) const;
+
 		std::string get_ALL(void) const;
 		std::string get_root(void) const;
 		std::string get_index(void) const;
@@ -136,6 +137,8 @@ class Server
 
 		void fill_variables(std::vector<std::string> vec);
 		size_t fill_location(std::vector<std::string> vec, size_t i);
+
+		// void check_Server(void) const;
 
 		std::string get_ALL(void) const;
 		std::string get_port(void) const;
@@ -227,6 +230,15 @@ class ConfOpenErr : public std::exception
 	const char * what () const throw () { return ("Cannot open configuration file"); }
 };
 
+class EmptyConfErr : public std::exception
+{
+	const char * what () const throw () { return ("Invalid configuration file"); }
+};
+
+class MissStatErr : public std::exception
+{
+	const char * what () const throw () { return ("Missing element in the configuration file"); }
+};
 
 /* 4. MAIN FUNCTIONS */
 
@@ -236,7 +248,7 @@ bool exists (Request request);
 std::string get_length_file(std::string file);
 std::string convert_to_binary(const char * path);
 std::string dispatcher(Request &request);
-void conf_check(int argc, char **argv);
+int conf_check(int argc, char **argv);
 
 /* 4.1 SETUP SERVER */
 void	setup_server(int *sockfd, struct sockaddr_in *sockaddr);

@@ -7,15 +7,8 @@ int main(int argc, char **argv)
 	Log			log;
 
 	/* Parse the config file */
-	try
-	{
-		conf_check(argc, argv);
-	}
-	catch (std::exception &e)
-	{
-		std::cerr << "Program termination. Exception caught!" << std::endl;
+	if (conf_check(argc, argv))
 		return (EXIT_FAILURE);
-	}
 
 	/* Set-up the server */
 	try
