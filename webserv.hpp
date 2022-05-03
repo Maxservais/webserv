@@ -8,10 +8,7 @@
 #include <sys/ioctl.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <fcntl.h> // do we need this? yes
-#include <stdio.h> // do we need this?
-#include <string.h> // can we use <string> instead?
-#include <errno.h> // do we need this?
+#include <fcntl.h>
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -24,6 +21,7 @@
 /* 1. MACROS */
 
 #define SERVER_PORT 9999
+#define SERVER_PORT1 8888
 #define BACKLOG 800
 #define BUFFER_SIZE 1000000
 #define MAX_CONNECTIONS 10
@@ -149,10 +147,12 @@ std::string convert_to_binary(const char * path);
 std::string dispatcher(Request &request);
 
 /* 4.1 SETUP SERVER */
-void	setup_server(int *sockfd, struct sockaddr_in *sockaddr);
+// void	setup_server(int *sockfd, struct sockaddr_in *sockaddr);
+void	setup_server(int *sockfd, int *sockfd1, struct sockaddr_in *sockaddr, struct sockaddr_in *sockaddr1);
 
 /* 4.2 HANDLE CLIENTS */
-void	handle_clients(Log log, int *sockfd, struct sockaddr_in *sockaddr);
+// void	handle_clients(Log log, int *sockfd, struct sockaddr_in *sockaddr);
+void	handle_clients(Log log, int *sockfd, struct sockaddr_in *sockaddr, int *sockfd1, struct sockaddr_in *sockaddr1);
 
 /* 4.3 UTILS */
 int ft_error(std::string message);

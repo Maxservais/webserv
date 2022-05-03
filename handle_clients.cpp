@@ -41,11 +41,12 @@ void	disconnect_client(int client_fd, fd_set *current_sockets)
 	FD_CLR(client_fd, current_sockets);
 }
 
-void	handle_clients(Log log, int *sockfd, struct sockaddr_in *sockaddr)
+void	handle_clients(Log log, int *sockfd, struct sockaddr_in *sockaddr, int *sockfd1, struct sockaddr_in *sockaddr1)
 {
 	int			err;
-	int			max_socket_val = *sockfd;
+	int			max_socket_val = *sockfd1;
 	socklen_t	addrlen = sizeof(*sockaddr);
+	socklen_t	addrlen1 = sizeof(*sockaddr1);
 	fd_set		current_sockets;
 	fd_set		ready_sockets;
 	// add writing sets here
@@ -56,6 +57,7 @@ void	handle_clients(Log log, int *sockfd, struct sockaddr_in *sockaddr)
 
 	/* Add sockfd to the current set of file descriptors */
 	FD_SET(*sockfd, &current_sockets);
+	FD_SET(*sockfd1, &current_sockets);
 	
 	/* Loop, waiting for incoming connects or for incoming data on any of the connected sockets */
 	while(true)
@@ -87,6 +89,15 @@ void	handle_clients(Log log, int *sockfd, struct sockaddr_in *sockaddr)
 					if (connection > max_socket_val)
 						max_socket_val = connection;
 				}
+				else if (i == *sockfd1)
+				{
+					int	connection = accept(*sockfd1, (struct sockaddr*)sockaddr1, &addrlen1);
+					if (connection < 0)
+						throw AcceptErr();
+					FD_SET(connection, &current_sockets);
+					if (connection > max_socket_val)
+						max_socket_val = connection;
+				}
 				/* Else, handle the connection and then remove the socket from the set of FDs */
 				else
 				{
@@ -103,6 +114,7 @@ void	handle_clients(Log log, int *sockfd, struct sockaddr_in *sockaddr)
 					{
 						disconnect_client(i, &current_sockets);
 						close(*sockfd);
+						close(*sockfd1);
 						std::cerr << e.what() << std::endl;
 					}
 				}
@@ -110,6 +122,7 @@ void	handle_clients(Log log, int *sockfd, struct sockaddr_in *sockaddr)
 		}
 	}
 	close(*sockfd);
+	close(*sockfd1);
 }
 
 /* DOCUMENTATION:
