@@ -15,7 +15,7 @@ class Location
 		Location(std::string block);
 		Location(Location const & src);
 		~Location();
-		// Location* operator=(Location const & rhs);
+		// Location& operator=(Location const & rhs);
 
 		std::string get_ALL(void) const;
 
@@ -36,21 +36,21 @@ class Server
 		Server(std::string block);
 		Server(Server const & src);
 		~Server();
-		// Server* operator=(Server const & rhs);
+		// Server& operator=(Server const & rhs);
 
 		std::string get_ALL(void) const;
 		std::map<std::string, Location*> get_locations(void) const;
 
 	private:
 		std::string _ALL;
-		// std::string _port;
-		// std::string _server_name;
+		std::string _port;
+		std::string _server_name;
 
-		// std::string _max_body_size;
-		// std::vector<std::string> _methods;
-		// std::string _root;
-		// std::string _index;
-		// std::map<int,std::string> _errors;
+		std::string _max_body_size;
+		std::vector<std::string> _methods;
+		std::string _root;
+		std::string _index;
+		std::map<int,std::string> _errors;
 		std::map<std::string, Location*> _locations;
 };
 
@@ -61,7 +61,7 @@ class Config
 		Config(std::string conf_file);
 		Config(Config const & src);
 		~Config();
-		// Config* operator=(Config const & rhs);
+		Config& operator=(Config const & rhs);
 		std::vector<Server*> get_servers(void) const;
 	private:
 		std::vector<Server*> _servers;
