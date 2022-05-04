@@ -204,11 +204,6 @@ class AcceptErr : public std::exception
 	const char * what () const throw () { return ("Failed to grab connection!"); }
 };
 
-class SendErr : public std::exception
-{
-	const char * what () const throw () { return ("Failed to send!"); }
-};
-
 class ConnectionErr : public std::exception
 {
 	const char * what () const throw () { return ("Read error occurred while receiving on the socket, closing connection"); }
@@ -216,7 +211,7 @@ class ConnectionErr : public std::exception
 
 class TimeOutErr : public std::exception
 {
-	const char * what () const throw () { return ("Read error occurred while receiving on the socket, closing connection"); }
+	const char * what () const throw () { return ("Time out, closing connection"); }
 };
 
 class ArgvErr : public std::exception
@@ -253,14 +248,17 @@ bool exists (Request request);
 std::string get_length_file(std::string file);
 std::string convert_to_binary(const char * path);
 std::string dispatcher(Request &request);
-int conf_check(int argc, char **argv);
+void	conf_check(int argc, char **argv, Config *config);
+
+
 
 /* 4.1 SETUP SERVER */
 // void	setup_server(int *sockfd, struct sockaddr_in *sockaddr);
-void	setup_server(int *sockfd, int *sockfd1, struct sockaddr_in *sockaddr, struct sockaddr_in *sockaddr1);
+// void	setup_server(int *sockfd, int *sockfd1, struct sockaddr_in *sockaddr, struct sockaddr_in *sockaddr1);
+void	setup_server(int *sockets, Config *config, int *sockfd, int *sockfd1, struct sockaddr_in *sockaddr, struct sockaddr_in *sockaddr1);
 
 /* 4.2 HANDLE CLIENTS */
 // void	handle_clients(Log log, int *sockfd, struct sockaddr_in *sockaddr);
-void	handle_clients(Log log, int *sockfd, struct sockaddr_in *sockaddr, int *sockfd1, struct sockaddr_in *sockaddr1);
+void	handle_clients(int *sockets, Config *config, Log log, int *sockfd, struct sockaddr_in *sockaddr, int *sockfd1, struct sockaddr_in *sockaddr1);
 
 #endif

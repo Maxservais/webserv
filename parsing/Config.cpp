@@ -131,10 +131,11 @@ Server& Server::operator=(const Server &rhs)
 
 Server::~Server()
 {
-	std::map<std::string, Location*>::iterator ite = this->_locations.end();
-	for (std::map<std::string, Location*>::iterator it = this->_locations.begin(); it != ite; ++it)
-		delete (*it).second;
-	this->_locations.clear();
+	// ATTENTION AU LEAKS
+	// std::map<std::string, Location*>::iterator ite = this->_locations.end();
+	// for (std::map<std::string, Location*>::iterator it = this->_locations.begin(); it != ite; ++it)
+	// 	delete (*it).second;
+	// this->_locations.clear();
 	return;
 }
 
@@ -242,16 +243,20 @@ Config::Config(Config const & src)
 
 Config::~Config()
 {
-	std::vector<Server*>::iterator ite = this->_servers.end();
-	for (std::vector<Server*>::iterator it = this->_servers.begin(); it != ite; ++it)
-		delete *it;
-	this->_servers.clear();
+	// std::vector<Server*>::iterator ite = this->_servers.end();
+	// for (std::vector<Server*>::iterator it = this->_servers.begin(); it != ite; ++it)
+	// 	delete *it;
+	// this->_servers.clear();
 	return;
 }
 
 Config& Config::operator=(const Config &rhs)
 {
-	(void) rhs;
+	if (this != &rhs)
+	{
+		this->_servers = rhs.get_servers();
+
+	}
 	return (*this);
 }
 

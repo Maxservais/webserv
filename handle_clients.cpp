@@ -28,10 +28,13 @@ void	send_data(int socket, const char *data, int len)
 	while(len > 0)
 	{
 		bytes_sent = send(socket, (char *)data, len, 0);
-		if (bytes_sent == -1)
-			throw SendErr();
-		data += bytes_sent;
-		len -= bytes_sent;
+		if (bytes_sent == 0)
+			break ;
+		if (bytes_sent > 0)
+		{
+			data += bytes_sent;
+			len -= bytes_sent;
+		}
 	}
 }
 
@@ -41,10 +44,13 @@ void	disconnect_client(int client_fd, fd_set *current_sockets)
 	FD_CLR(client_fd, current_sockets);
 }
 
-void	handle_clients(Log log, int *sockfd, struct sockaddr_in *sockaddr, int *sockfd1, struct sockaddr_in *sockaddr1)
+void	handle_clients(int *sockets, Config *config, Log log, int *sockfd, struct sockaddr_in *sockaddr, int *sockfd1, struct sockaddr_in *sockaddr1)
 {
 	int			err;
-	int			max_socket_val = *sockfd1;
+	(void)sockfd;
+	(void)sockfd1;
+	// int			max_socket_val = *sockfd1;
+	int			max_socket_val = sockets[1];
 	socklen_t	addrlen = sizeof(*sockaddr);
 	socklen_t	addrlen1 = sizeof(*sockaddr1);
 	fd_set		current_sockets;
@@ -52,12 +58,16 @@ void	handle_clients(Log log, int *sockfd, struct sockaddr_in *sockaddr, int *soc
 	// add writing sets here
 	struct timeval	timeout;
 
+	(void )config;
+
 	/* Initiliaze current set */
 	FD_ZERO(&current_sockets);
 
 	/* Add sockfd to the current set of file descriptors */
-	FD_SET(*sockfd, &current_sockets);
-	FD_SET(*sockfd1, &current_sockets);
+	FD_SET(sockets[0], &current_sockets);
+	FD_SET(sockets[1], &current_sockets);
+	// FD_SET(*sockfd, &current_sockets);
+	// FD_SET(*sockfd1, &current_sockets);
 	
 	/* Loop, waiting for incoming connects or for incoming data on any of the connected sockets */
 	while(true)
@@ -80,18 +90,18 @@ void	handle_clients(Log log, int *sockfd, struct sockaddr_in *sockaddr, int *soc
 			{
 				/* If there is a new connection, accept it and add the new client socket
 				to the current set of file descriptors */
-				if (i == *sockfd)
+				if (i == sockets[0])
 				{
-					int	connection = accept(*sockfd, (struct sockaddr*)sockaddr, &addrlen);
+					int	connection = accept(sockets[0], (struct sockaddr*)sockaddr, &addrlen);
 					if (connection < 0)
 						throw AcceptErr();
 					FD_SET(connection, &current_sockets);
 					if (connection > max_socket_val)
 						max_socket_val = connection;
 				}
-				else if (i == *sockfd1)
+				else if (i == sockets[1])
 				{
-					int	connection = accept(*sockfd1, (struct sockaddr*)sockaddr1, &addrlen1);
+					int	connection = accept(sockets[1], (struct sockaddr*)sockaddr1, &addrlen1);
 					if (connection < 0)
 						throw AcceptErr();
 					FD_SET(connection, &current_sockets);
@@ -113,16 +123,16 @@ void	handle_clients(Log log, int *sockfd, struct sockaddr_in *sockaddr, int *soc
 					catch (std::exception &e)
 					{
 						disconnect_client(i, &current_sockets);
-						close(*sockfd);
-						close(*sockfd1);
+						close(sockets[0]);
+						close(sockets[1]);
 						std::cerr << e.what() << std::endl;
 					}
 				}
 			}
 		}
 	}
-	close(*sockfd);
-	close(*sockfd1);
+	close(sockets[0]);
+	close(sockets[1]);
 }
 
 /* DOCUMENTATION:

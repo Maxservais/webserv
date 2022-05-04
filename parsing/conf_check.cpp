@@ -31,7 +31,7 @@
 // 	}
 // }
 
-int conf_check(int argc, char **argv)
+void conf_check(int argc, char **argv, Config *config)
 {
 	if (argc != 2)
 		throw ArgvErr();
@@ -40,9 +40,10 @@ int conf_check(int argc, char **argv)
 	if (conf_file.fail())
 		throw ConfOpenErr();
 
-	Config test(argv[1]);
-	std::cout << "test-->" << test.get_servers()[0]->get_port() << std::endl;
-	std::cout << "test-->" << test.get_servers()[1]->get_port() << std::endl;
+	Config tmp(argv[1]); // SUPER INEFICIENT, LET'S FIX IT LATER
+	*config = tmp;
+	std::cout << "test-->" << config->get_servers()[0]->get_port() << std::endl;
+	std::cout << "test-->" << tmp.get_servers()[1]->get_port() << std::endl;
 	// try
 	// {
 	// 	check_Server_block(test);
@@ -52,5 +53,4 @@ int conf_check(int argc, char **argv)
 	// 	std::cerr << e.what() << '\n';
 	// 	return (EXIT_FAILURE);
 	// }
-	return (EXIT_SUCCESS);
 }
