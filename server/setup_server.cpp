@@ -1,4 +1,4 @@
-#include "webserv.hpp"
+#include "../webserv.hpp"
 
 void	setup_server(int *sockfd, struct sockaddr_in *sockaddr)
 {

@@ -19,7 +19,7 @@ std::vector<std::string> split_spaces(std::string s)
 /* Canon */
 Location::Location() { return; }
 
-Location::Location(std::string block) : _ALL(block)
+Location::Location(std::string block) : _ALL(block), _directory_listing(1)
 {
 	std::string token;
 	std::vector<std::string> vec;
@@ -76,9 +76,7 @@ void Location::fill_variables(std::vector<std::string> vec)
 		}
 		else if (vec[i].find("directory_listing") != std::string::npos)
 		{
-			if (vec[i].find("on"))
-				this->_directory_listing = true;
-			else
+			if (vec[i].find("off"))
 				this->_directory_listing = false;
 		}
 		i++;

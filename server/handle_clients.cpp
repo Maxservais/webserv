@@ -1,4 +1,4 @@
-#include "webserv.hpp"
+#include "../webserv.hpp"
 
 std::string build_response(int i, Log log) // reference or pointer for log?
 {
@@ -7,7 +7,7 @@ std::string build_response(int i, Log log) // reference or pointer for log?
 	memset(buffer, 0, BUFFER_SIZE);
 	int ret = read(i, buffer, BUFFER_SIZE); // should we use receiv instead?
 	std::cout << buffer << std::endl;
-	if (ret == 0 || ret == -1)
+	if (ret == -1)
 			throw ConnectionErr();
 	Request request(buffer);
 

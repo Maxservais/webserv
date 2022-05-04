@@ -1,4 +1,4 @@
-#include "webserv.hpp"
+#include "../webserv.hpp"
 
 Response::Response(Request &request, std::string path, std::string default_page, std::string error_404, int port) : req(request), path(path), default_page(default_page), error_404(error_404), port(port)
 {
@@ -51,6 +51,8 @@ std::string Response::content_length(std::string file, int hint)
 {
 	if(hint == IS_DIR)
 		return ("Content-Length: " + std::to_string(ft_try_dir(req).size()) + "\n\n");
+	if (hint == IS_CGI)
+		return ("Content-Length: " + std::to_string(file.size()) + "\n\n");
 	if (req.getFile_extention() == "png" || req.getFile_extention() == "jpg" || req.getFile_extention() == "ico")
 		return ("Content-Length: " + std::to_string(body(file).size()) + "\n\n");
 	std::ifstream in(file.c_str());
@@ -77,10 +79,16 @@ std::string Response::content_type()
 		if (extension == "html")
 			return ("Content-Type: text/html; charset=utf-8\n");
 		else if ((extension == "png" || extension == "jpg" || extension == "ico") && exists())
+		{
 			return ("Content-Type: image/" + extension + "\n");
+		}
 	}
+	else if (req.getFile_extention() == "cgi")
+		return ("Content-Type: text/html\n");
 	else if (req.getMethod() == "POST" || (req.getMethod() == "DELETE" && !exists()))
+	{
 		return ("Content-Type: text/plain\n");
+	}
 	return ("Content-Type: text/html\n");
 }
 
@@ -98,7 +106,7 @@ std::string Response::body(std::string file)
 		std::ifstream input_file(file);
 		if (!input_file.is_open())
 		{
-			std::cout << "Failed to open the requested ressource" << std::endl;
+			std::cerr << "Failed to open the requested ressource" << std::endl;
 			exit(EXIT_FAILURE);
 		}
 		return std::string((std::istreambuf_iterator<char>(input_file)), std::istreambuf_iterator<char>());
@@ -144,11 +152,19 @@ std::string Response::ft_try_dir(Request &request)
 	return (ret);
 }
 
+std::string Response::html_code_cgi(Request &req)
+{
+	Cgi a(req);
+	return (a.executeCgi());
+}
+
 std::string Response::compose_response()
 {
 	if (req.getMethod() == "GET")
 	{
-		if (req.getFile() == "/")
+		if (req.getFile_extention() == "cgi")
+			response = req.getVersion() + full_code(200) + content_type() + content_length(html_code_cgi(req), IS_CGI) + html_code_cgi(req);
+		else if (req.getFile() == "/")
 			this->response = req.getVersion() + full_code(200) + content_type() + content_length(this->path + "/" + this->default_page, IS_FILE) + body(this->path + "/" + this->default_page);
 		else if (ft_try_dir(req) != "")
 			this->response = req.getVersion() + full_code(200) + content_type() + content_length(ft_try_dir(req), IS_DIR) + ft_try_dir(req);
@@ -159,8 +175,15 @@ std::string Response::compose_response()
 	}
 	
 	else if (req.getMethod() == "POST")
-		this->response = req.getVersion() + full_code(204) + content_type();
-	
+	{
+		if (req.getFile_extention() == "cgi")
+		{
+			std::string a(html_code_cgi(req));
+			response = req.getVersion() + full_code(200) + content_type() + content_length(a, IS_CGI) + a;
+		}
+		else
+			this->response = req.getVersion() + full_code(204) + content_type();
+	}
 	else if (req.getMethod() == "DELETE")
 	{
 		if (exists())
@@ -178,6 +201,6 @@ std::string Response::compose_response()
 
 std::string Response::get_response()
 {
-	// std::cout << compose_response() << std::endl;
+	//std::cout << compose_response().size() << std::endl;
 	return (compose_response());
 }

@@ -30,6 +30,7 @@
 #define MAX_CONNECTIONS 10
 #define IS_FILE 0
 #define IS_DIR 1
+#define IS_CGI 2
 
 /* 2. CUSTOM CLASSES */
 
@@ -51,6 +52,8 @@ class	Request
 		std::string getFile_clean();
 		std::string getVersion();
 		std::string getFile_extention();
+		std::string getQuery();
+		std::string getPostImput();
 		std::vector<std::string> split_words(std::string buffer);
 };
 
@@ -92,6 +95,21 @@ class Response
 		std::string compose_response();
 		std::string get_response();
 		std::string ft_try_dir(Request &request);
+		std::string html_code_cgi(Request &req);
+};
+
+// CGI HANDLER
+class	Cgi
+{
+	private:
+		char **env;
+		Request request;
+	public:
+		Cgi(Request a);
+		Cgi &operator=( Cgi &obj );
+		~Cgi();
+		void setEnv();
+		std::string executeCgi();
 };
 
 /* 2.2 PARSING OF THE CONFIG FILE */
@@ -275,6 +293,10 @@ class ServNameErr : public std::exception
 	const char * what () const throw () { return ("Wrong formating of the server_name"); }
 };
 
+class CgiErr : public std::exception
+{
+	const char * what () const throw () { return ("Cannot open cgi script"); }
+};
 
 /* 4. MAIN FUNCTIONS */
 

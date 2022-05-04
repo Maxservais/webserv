@@ -26,7 +26,7 @@ Request::Request(const Request &obj)
 
 Request	&Request::operator=(const Request &obj)
 {
-	(void) obj;
+	buff = obj.buff;
 	return (*this);
 }
 
@@ -69,7 +69,29 @@ std::string Request::getFile()
 	std::vector<std::string> v = split_words(buff);
 	if (v.size() < 2)
 		return (std::string("/"));
-	return (v.at(1));
+	std::string a = v.at(1);
+	if (a.find("?") != std::string::npos)
+	{
+		a.erase((a.begin() + a.find("?")), a.end());
+	}
+	return (a);
+}
+
+std::string Request::getQuery()
+{
+	std::vector<std::string> v = split_words(buff);
+	if (v.size() < 2)
+		return (std::string("/"));
+	std::string a = v.at(1);
+	if (a.find("?") != std::string::npos)
+	{
+		a.erase(a.begin(), (a.begin() + a.find("?") + 1));
+	}
+	else
+	{
+		return (std::string());
+	}
+	return (a);
 }
 
 //return the HTTP version of the request (ex : HTTP/1.1)
@@ -101,6 +123,27 @@ std::string Request::getFile_extention()
 	str.erase(0, 1);
 	return (str);
 }
+
+std::string Request::getPostImput()
+{
+	if (getMethod() != "POST")
+		return (std::string());
+	std::string a(buff);
+	size_t i = a.rfind("=");
+	if (i != std::string::npos)
+	{
+		size_t j = a.rfind("\n", i);
+		if (j != std::string::npos)
+			return (std::string((a.begin() + j + 1), a.end()));
+	}
+	return (std::string());
+}
+
+//std::string Request::getUploadImput()
+//{
+//	if (getMethod() != "POST")
+//		return (std::string());
+//}
 
 /* ************************************************************************** */
 /*  LOG                                                                       */
@@ -162,3 +205,5 @@ size_t	Log::size() const
 {
 	return (v.size());
 }
+
+
