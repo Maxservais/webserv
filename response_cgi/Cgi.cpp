@@ -1,16 +1,4 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   Cgi.cpp                                            :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: adidion <adidion@student.s19.be>           +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2022/05/02 15:10:46 by adidion           #+#    #+#             */
-/*   Updated: 2022/05/04 16:24:35 by adidion          ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
-#include "webserv.hpp"
+#include "../webserv.hpp"
 
 Cgi::Cgi(Request a)
 {
@@ -33,7 +21,7 @@ Cgi::~Cgi()
 	return ;
 }
 
-void Cgi::setEnv2()
+void Cgi::setEnvForUp(){}
 
 void Cgi::setEnv()
 {

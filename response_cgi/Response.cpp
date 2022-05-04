@@ -1,4 +1,4 @@
-#include "webserv.hpp"
+#include "../webserv.hpp"
 
 Response::Response(Request &request, std::string path, std::string default_page, std::string error_404, int port) : req(request), path(path), default_page(default_page), error_404(error_404), port(port)
 {
@@ -34,26 +34,14 @@ std::string Response::full_code(int code)
 		case 200:
 			ret = " 200 OK\n";
 			break;
-		case 202:
-			ret = " 202 Accepted\n";
-			break;
 		case 204:
 			ret = " 204 No Content\n";
-			break;
-		case 400:
-			ret = " 400 Bad Request\n";
-			break;
-		case 401:
-			ret = " 401 Unauthorized\n";
-			break;
-		case 403:
-			ret = " 403 Forbidden\n";
 			break;
 		case 404:
 			ret = " 404 Not Found\n";
 			break;
-		case 414:
-			ret = " 414 URI Too Long\n";
+		case 501:
+			ret = " 501 Not Implemented\n";
 			break;
 	}
 	return (ret);
@@ -201,13 +189,13 @@ std::string Response::compose_response()
 		if (exists())
 		{
 			remove((this->path + req.getFile()).c_str());
-			this->response = req.getVersion() + full_code(200) + content_type() + content_length(this->path + "/file.html", IS_FILE) + body(this->path + "/file.html");
+			this->response = req.getVersion() + full_code(200) + "Content-Type: text/html\nContent-Length: 48\n\n <html><body><h1>File deleted.</h1></body></html>";
 		}
 		else
-			this->response = req.getVersion() + full_code(204) + content_type();
+			this->response = req.getVersion() + full_code(204);
 	}
 	else
-		this->response = req.getVersion() + full_code(204) + content_type();
+		this->response = req.getVersion() + full_code(501);
  	return this->response;
 }
 
