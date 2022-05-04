@@ -148,7 +148,7 @@ class Server
 		std::string get_index(void) const;
 		std::vector<std::string> get_methods(void) const;
 		std::map<int,std::string> &get_errors(void);
-		std::map<std::string, Location*> get_locations(void) const;
+		std::map<std::string, Location*> &get_locations(void);
 
 	private:
 		std::string _ALL;

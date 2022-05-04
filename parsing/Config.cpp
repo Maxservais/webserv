@@ -216,7 +216,7 @@ std::string Server::get_root(void) const { return this->_root; }
 std::string Server::get_index(void) const { return this->_index; }
 std::vector<std::string> Server::get_methods(void) const { return this->_methods; }
 std::map<int,std::string> &Server::get_errors(void){ return this->_errors;}
-std::map<std::string, Location*> Server::get_locations(void) const { return this->_locations; }
+std::map<std::string, Location*> &Server::get_locations(void) { return this->_locations; }
 
 /* ************************************************************************** */
 /*  CONFIG                                                                    */
