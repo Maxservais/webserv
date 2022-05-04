@@ -125,7 +125,15 @@ Server::Server(Server const & src)
 
 Server& Server::operator=(const Server &rhs)
 {
-	(void) rhs;
+	this->_ALL = rhs._ALL;
+	this->_port = rhs._port;
+	this->_server_name = rhs._server_name;
+	this->_max_body_size = rhs._max_body_size;
+	this->_root = rhs._root;
+	this->_index = rhs._index;
+	this->_methods = rhs._methods;
+	this->_errors = rhs._errors;
+	this->_locations = rhs._locations;
 	return (*this);
 }
 
@@ -207,7 +215,7 @@ int Server::get_max_body_size(void) const { return this->_max_body_size; }
 std::string Server::get_root(void) const { return this->_root; }
 std::string Server::get_index(void) const { return this->_index; }
 std::vector<std::string> Server::get_methods(void) const { return this->_methods; }
-std::map<int,std::string> Server::get_errors(void) const { return this->_errors; }
+std::map<int,std::string> &Server::get_errors(void){ return this->_errors;}
 std::map<std::string, Location*> Server::get_locations(void) const { return this->_locations; }
 
 /* ************************************************************************** */
@@ -255,7 +263,7 @@ Config::~Config()
 
 Config& Config::operator=(const Config &rhs)
 {
-	(void) rhs;
+	this->_servers = rhs._servers;
 	return (*this);
 }
 

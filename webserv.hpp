@@ -147,7 +147,7 @@ class Server
 		std::string get_root(void) const;
 		std::string get_index(void) const;
 		std::vector<std::string> get_methods(void) const;
-		std::map<int,std::string> get_errors(void) const;
+		std::map<int,std::string> &get_errors(void);
 		std::map<std::string, Location*> get_locations(void) const;
 
 	private:
@@ -253,6 +253,16 @@ class NegPortErr : public std::exception
 class CodeErr : public std::exception
 {
 	const char * what () const throw () { return ("Invalid error code"); }
+};
+
+class RootErr : public std::exception
+{
+	const char * what () const throw () { return ("Invalid root"); }
+};
+
+class IndexErr : public std::exception
+{
+	const char * what () const throw () { return ("Invalid index file"); }
 };
 
 // class ErrFileErr : public std::exception

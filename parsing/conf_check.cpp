@@ -1,6 +1,6 @@
 #include "../webserv.hpp"
 
-void check_Server_block(Config &obj)
+void check_Server_blocks(Config &obj)
 {
 	if (obj.get_servers().empty()) // check if the config file contains at least a server block
 	{
@@ -38,6 +38,37 @@ void check_Server_block(Config &obj)
 		|| obj.get_servers()[i]->get_port() > 65535)
 			throw NegPortErr();
 	}
+
+	for (size_t i = 0; i < obj.get_servers().size(); i++) // check root
+	{
+		const char * tmp = (obj.get_servers()[i]->get_root()).c_str();
+		DIR *dir = opendir(tmp);
+		if (dir == NULL)
+			throw RootErr();
+		else
+			closedir(dir);
+	}
+
+	for (size_t i = 0; i < obj.get_servers().size(); i++) // check index
+	{
+		std::ifstream stream(obj.get_servers()[i]->get_root() + "/" + obj.get_servers()[i]->get_index());
+		if (stream.fail())
+			throw IndexErr();
+		else
+			stream.close();
+	}
+
+	for (size_t i = 0; i < obj.get_servers().size(); i++) // check errors
+	{
+		if (obj.get_servers()[i]->get_errors().empty())
+			throw MissStatErr();
+		for (std::map<int,std::string>::iterator it = obj.get_servers()[i]->get_errors().begin() ;it != obj.get_servers()[i]->get_errors().end(); ++it)
+		{
+			std::cout << it->first << " => " << it->second << '\n';
+			// check 100 - 599
+			// check open
+		}
+	}
 }
 
 void check_argv(int argc, char **argv)
@@ -48,6 +79,8 @@ void check_argv(int argc, char **argv)
 	std::ifstream conf_file(argv[1]);
 	if (conf_file.fail())
 		throw ConfOpenErr();
+	else
+		conf_file.close();
 }
 
 int conf_check(int argc, char **argv)
@@ -65,7 +98,7 @@ int conf_check(int argc, char **argv)
 	Config test(argv[1]);
 	try
 	{
-		check_Server_block(test);
+		check_Server_blocks(test);
 	}
 	catch(const std::exception& e)
 	{
