@@ -90,6 +90,7 @@ void	handle_clients(int *sockets, Config &config, Log log, std::vector<struct so
 						FD_SET(connection, &current_sockets);
 						if (connection > max_socket_val)
 							max_socket_val = connection;
+						break ;
 					}
 					/* Else, handle the connection and then remove the socket from the set of FDs */
 					else if (j == len - 1)
