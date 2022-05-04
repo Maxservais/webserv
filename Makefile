@@ -1,10 +1,16 @@
-NAME		=	a.out
+NAME		=	webserv
 
 CXX			=	c++
 
 CXXFLAGS	=	-Wall -Wextra -Werror -std=c++98
 
-SRC_FILES	=	main.cpp
+SRC_FILES	=	main.cpp				\
+				Response.cpp			\
+				setup_server.cpp		\
+				handle_clients.cpp		\
+				parsing/Config.cpp		\
+				parsing/Request.cpp		\
+				parsing/conf_check.cpp	\
 
 OBJ_FILES	=	$(SRC_FILES:.cpp=.o)
 
