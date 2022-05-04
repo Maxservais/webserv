@@ -6,7 +6,7 @@
 /*   By: adidion <adidion@student.s19.be>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/02 15:10:46 by adidion           #+#    #+#             */
-/*   Updated: 2022/05/04 11:34:25 by adidion          ###   ########.fr       */
+/*   Updated: 2022/05/04 16:24:35 by adidion          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,8 +33,12 @@ Cgi::~Cgi()
 	return ;
 }
 
+void Cgi::setEnv2()
+
 void Cgi::setEnv()
 {
+	if (request.getFile_extention() == "up")
+		return (setEnvForUp());
 	std::string a;
 	if (request.getMethod() == "GET")
 		a = request.getQuery();

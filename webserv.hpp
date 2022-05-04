@@ -30,18 +30,6 @@
 #define IS_DIR 1
 #define IS_CGI 2
 
-/* 1.1. CGI ENVIRONNEMENT TABLE */
-
-const std::string env[24] =
-{
-	"COMSPEC", "DOCUMENT_ROOT", "GATEWAY_INTERFACE", "HTTP_ACCEPT",
-	"HTTP_ACCEPT_ENCODING", "HTTP_ACCEPT_LANGUAGE", "HTTP_CONNECTION",
-	"HTTP_HOST", "HTTP_USER_AGENT", "PATH", "QUERY_STRING", "REMOTE_ADDR",
-	"REMOTE_PORT", "REQUEST_METHOD", "REQUEST_URI", "SCRIPT_FILENAME",
-	"SCRIPT_NAME", "SERVER_ADDR", "SERVER_ADMIN", "SERVER_NAME", "SERVER_PORT",
-	"SERVER_PROTOCOL", "SERVER_SIGNTURE", "SERVER_SORTWARE"
-};
-
 /* 2. CUSTOM CLASSES */
 
 class	Request
@@ -63,6 +51,7 @@ class	Request
 		std::string getFile_extention();
 		std::string getQuery();
 		std::string getPostImput();
+		std::string getUploadImput();
 		std::vector<std::string> split_words(std::string buffer);
 };
 
@@ -119,6 +108,7 @@ class	Cgi
 		Cgi &operator=( Cgi &obj );
 		~Cgi();
 		void setEnv();
+		void setEnvForUp()
 		std::string executeCgi();
 };
 

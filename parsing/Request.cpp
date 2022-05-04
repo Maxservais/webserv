@@ -136,8 +136,17 @@ std::string Request::getPostImput()
 	return (std::string());
 }
 
-//std::string Request::getUploadImput()
-//{
-//	if (getMethod() != "POST")
-//		return (std::string());
-//}
+std::string Request::getUploadImput()
+{
+	if (getMethod() != "POST")
+		return (std::string());
+	std::string a(buff);
+	size_t i = a.rfind("image/png");
+	if (i != std::string::npos)
+	{
+		size_t j = a.find("\n", i);
+		if (j != std::string::npos)
+			return (std::string((a.begin() + j + 1), a.end()));
+	}
+	return (std::string());
+}
