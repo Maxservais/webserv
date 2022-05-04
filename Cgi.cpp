@@ -6,7 +6,7 @@
 /*   By: adidion <adidion@student.s19.be>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/02 15:10:46 by adidion           #+#    #+#             */
-/*   Updated: 2022/05/03 16:37:51 by adidion          ###   ########.fr       */
+/*   Updated: 2022/05/04 11:34:25 by adidion          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,81 +35,60 @@ Cgi::~Cgi()
 
 void Cgi::setEnv()
 {
+	std::string a;
 	if (request.getMethod() == "GET")
-	{
-		std::string a(request.getQuery());
-		if (a.empty() == 1)
-		{
-			env = new char*[1];
-			env[0] = NULL;
-			return ;
-		}
-		unsigned int i = 0;
-		for (unsigned int j = 0; j < a.size(); j++)
-		{
-			if (a.at(j) == '&')
-				i++;
-		}
-		env = new char*[i + 2];
-		env[i + 1] = NULL;
-		i = 0;
-		unsigned int k = 0;
-		for (unsigned int j = 0; j < a.size(); j++)
-		{
-			if (a.at(j) == '&')
-			{
-				env[k] = new char[i + 1];
-				k++;
-				i = 0;
-			}
-			else
-			{
-				a.at(j);
-				i++;
-			}
-		}
-		env[k] = new char[i + 1];
-		i = 0;
-		k = 0;
-		for (unsigned int j = 0; j < a.size(); j++)
-		{
-			if (a.at(j) == '&')
-			{
-				env[k][i] = '\0';
-				k++;
-				i = 0;
-			}
-			else
-			{
-				env[k][i] = a.at(j);
-				i++;
-			}
-		}
-		env[k][i] = '\0';
-		for (int i = 0; env[i]; i++)
-		{
-			std::cout << env[i] << std::endl;
-		}
-	}
+		a = request.getQuery();
 	if (request.getMethod() == "POST")
+		a = request.getPostImput();
+	if (a.empty() == 1)
 	{
-		std::string a(request.getPostImput());
-		if (a.empty() == 1)
-		{
-			env = new char*[1];
-			env[1] = NULL;
-			return ;
-		}
-		env = new char*[2];
-		env[1] = NULL;
-		env[0] = new char[a.size() + 1];
-		for (unsigned int i = 0; i < a.size(); i++)
-		{
-			env[0][i] = a.at(i);
-		}
-		env[0][a.size()] = '\0';
+		env = new char*[1];
+		env[0] = NULL;
 		return ;
 	}
+	unsigned int i = 0;
+	for (unsigned int j = 0; j < a.size(); j++)
+	{
+		if (a.at(j) == '&')
+			i++;
+	}
+	env = new char*[i + 2];
+	env[i + 1] = NULL;
+	i = 0;
+	unsigned int k = 0;
+	for (unsigned int j = 0; j < a.size(); j++)
+	{
+		if (a.at(j) == '&')
+		{
+			env[k] = new char[i + 1];
+			k++;
+			i = 0;
+		}
+		else
+		{
+			a.at(j);
+			i++;
+		}
+	}
+	env[k] = new char[i + 1];
+	i = 0;
+	k = 0;
+	for (unsigned int j = 0; j < a.size(); j++)
+	{
+		if (a.at(j) == '&')
+		{
+			env[k][i] = '\0';
+			k++;
+			i = 0;
+		}
+		else
+		{
+			env[k][i] = a.at(j);
+			i++;
+		}
+	}
+	env[k][i] = '\0';
+	return ;
 }
 
 std::string Cgi::executeCgi()
@@ -142,7 +121,6 @@ std::string Cgi::executeCgi()
 		int readen = 1;
 		while (readen > 0)
 		{
-			std::cerr << "NIQUE TA MERE OK ? " << std::endl;
 			memset(buff, 0, 50); // A REMPLACER
 			readen = read(fd_out, buff, 50 - 1); // A REMPLACER
 			ret += buff;
@@ -158,6 +136,5 @@ std::string Cgi::executeCgi()
 	fclose(in);
 	if (pid == 0)
 		exit(EXIT_SUCCESS);
-	std::cerr << "Return : " << ret << std::endl;
 	return (ret);
 }

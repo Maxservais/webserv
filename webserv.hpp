@@ -28,6 +28,7 @@
 #define MAX_CONNECTIONS 10
 #define IS_FILE 0
 #define IS_DIR 1
+#define IS_CGI 2
 
 /* 1.1. CGI ENVIRONNEMENT TABLE */
 
@@ -104,6 +105,7 @@ class Response
 		std::string compose_response();
 		std::string get_response();
 		std::string ft_try_dir(Request &request);
+		std::string html_code_cgi(Request &req);
 };
 
 // CGI HANDLER

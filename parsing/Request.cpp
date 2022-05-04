@@ -135,3 +135,9 @@ std::string Request::getPostImput()
 	}
 	return (std::string());
 }
+
+//std::string Request::getUploadImput()
+//{
+//	if (getMethod() != "POST")
+//		return (std::string());
+//}

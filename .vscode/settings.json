@@ -59,6 +59,14 @@
 		"typeinfo": "cpp",
 		"unordered_map": "cpp",
 		"utility": "cpp",
-		"vector": "cpp"
+		"vector": "cpp",
+		"__tree": "cpp",
+		"deque": "cpp",
+		"forward_list": "cpp",
+		"list": "cpp",
+		"map": "cpp",
+		"regex": "cpp",
+		"set": "cpp",
+		"span": "cpp"
 	}
 }
