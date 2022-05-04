@@ -101,7 +101,7 @@ bool Location::get_directory_listing(void) const { return this->_directory_listi
 /* Canon */
 Server::Server() { return; }
 
-Server::Server(std::string block) : _ALL(block)
+Server::Server(std::string block) : _ALL(block), _port(0), _max_body_size(0)
 {
 	std::string token;
 	std::vector<std::string> vec;
@@ -131,11 +131,11 @@ Server& Server::operator=(const Server &rhs)
 
 Server::~Server()
 {
-	std::map<std::string, Location*>::iterator ite = this->_locations.end();
-	for (std::map<std::string, Location*>::iterator it = this->_locations.begin(); it != ite; ++it)
-		delete (*it).second;
-	this->_locations.clear();
-	return;
+	// std::map<std::string, Location*>::iterator ite = this->_locations.end();
+	// for (std::map<std::string, Location*>::iterator it = this->_locations.begin(); it != ite; ++it)
+	// 	delete (*it).second;
+	// this->_locations.clear();
+	// return;
 }
 
 /* Filler */
@@ -160,14 +160,22 @@ size_t Server::fill_location(std::vector<std::string> vec, size_t i)
 void Server::fill_variables(std::vector<std::string> vec)
 {
 	size_t i = 0;
+	std::string tmp;
 	while (i < vec.size())
 	{
 		if (vec[i].find("listen") != std::string::npos)
-			this->_port.assign(vec[i].begin() + vec[i].find(" ") + 1, vec[i].end() - 1);
+		{
+			tmp.assign(vec[i].begin() + vec[i].find(" ") + 1, vec[i].end() - 1);
+			this->_port = atoi(tmp.c_str());
+		}
 		else if (vec[i].find("server_name") != std::string::npos)
 			this->_server_name.assign(vec[i].begin() + vec[i].find(" ") + 1, vec[i].end() - 1);
 		else if (vec[i].find("max_body_size") != std::string::npos)
-			this->_max_body_size.assign(vec[i].begin() + vec[i].find(" ") + 1, vec[i].end() - 1);
+		{
+			tmp.clear();
+			tmp.assign(vec[i].begin() + vec[i].find(" ") + 1, vec[i].end() - 1);
+			this->_max_body_size = atoi(tmp.c_str());
+		}
 		else if (vec[i].find("root") != std::string::npos)
 			this->_root.assign(vec[i].begin() + vec[i].find(" ") + 1, vec[i].end() - 1);
 		else if (vec[i].find("index") != std::string::npos)
@@ -176,13 +184,14 @@ void Server::fill_variables(std::vector<std::string> vec)
 		{
 			std::vector<std::string> splited = split_spaces(vec[i]);
 			splited[2].pop_back();
-			this->_errors.insert(std::pair<int, std::string>(std::stoi(splited[1]), splited[2])); // stoi cpp11
+			this->_errors.insert(std::pair<int, std::string>(atoi(splited[1].c_str()), splited[2]));
 		}
 		else if (vec[i].find("method") != std::string::npos)
 		{
 			this->_methods = split_spaces(vec[i]);
 			this->_methods.erase(this->_methods.begin());
-			this->_methods[this->_methods.size() - 1].pop_back(); // removes the ;
+			if (this->_methods.size() >= 1)
+				this->_methods[this->_methods.size() - 1].pop_back(); // removes the ;
 		}
 		else if (vec[i].find("location") != std::string::npos)
 			i = fill_location(vec, i);
@@ -192,9 +201,9 @@ void Server::fill_variables(std::vector<std::string> vec)
 
 /* Getters */
 std::string Server::get_ALL(void) const {return this->_ALL; }
-std::string Server::get_port(void) const { return this->_port; }
+int Server::get_port(void) const { return this->_port; }
 std::string Server::get_server_name(void) const { return this->_server_name; }
-std::string Server::get_max_body_size(void) const { return this->_max_body_size; }
+int Server::get_max_body_size(void) const { return this->_max_body_size; }
 std::string Server::get_root(void) const { return this->_root; }
 std::string Server::get_index(void) const { return this->_index; }
 std::vector<std::string> Server::get_methods(void) const { return this->_methods; }
@@ -211,12 +220,7 @@ Config::Config() { return; }
 Config::Config(std::string conf_file)
 {
 	std::ifstream input(conf_file);
-	std::string ALL;
-	if (!input.is_open())
-		std::cout << "Failed to open the requested ressource" << std::endl; // try catch needed here
-	else
-		ALL = std::string((std::istreambuf_iterator<char>(input)), std::istreambuf_iterator<char>());
-	
+	std::string ALL = std::string((std::istreambuf_iterator<char>(input)), std::istreambuf_iterator<char>());
 	size_t pos = 0;
 	std::string token;
 	Server * tmp;
@@ -242,11 +246,11 @@ Config::Config(Config const & src)
 
 Config::~Config()
 {
-	std::vector<Server*>::iterator ite = this->_servers.end();
-	for (std::vector<Server*>::iterator it = this->_servers.begin(); it != ite; ++it)
-		delete *it;
-	this->_servers.clear();
-	return;
+	// std::vector<Server*>::iterator ite = this->_servers.end();
+	// for (std::vector<Server*>::iterator it = this->_servers.begin(); it != ite; ++it)
+	// 	delete *it;
+	// this->_servers.clear();
+	// return;
 }
 
 Config& Config::operator=(const Config &rhs)

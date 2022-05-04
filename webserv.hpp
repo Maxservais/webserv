@@ -141,9 +141,9 @@ class Server
 		// void check_Server(void) const;
 
 		std::string get_ALL(void) const;
-		std::string get_port(void) const;
+		int get_port(void) const;
 		std::string get_server_name(void) const;
-		std::string get_max_body_size(void) const;
+		int get_max_body_size(void) const;
 		std::string get_root(void) const;
 		std::string get_index(void) const;
 		std::vector<std::string> get_methods(void) const;
@@ -152,9 +152,9 @@ class Server
 
 	private:
 		std::string _ALL;
-		std::string _port;
+		int _port;
 		std::string _server_name;
-		std::string _max_body_size;
+		int _max_body_size;
 		std::string _root;
 		std::string _index;
 		std::vector<std::string> _methods;
@@ -244,6 +244,26 @@ class MethErr : public std::exception
 {
 	const char * what () const throw () { return ("Invalid methods in the configuration file"); }
 };
+
+class NegPortErr : public std::exception
+{
+	const char * what () const throw () { return ("Invalid port number or max body_size"); }
+};
+
+class CodeErr : public std::exception
+{
+	const char * what () const throw () { return ("Invalid error code"); }
+};
+
+// class ErrFileErr : public std::exception
+// {
+// 	const char * what () const throw () { return ("Cannot open the error file requested"); }
+// };
+
+// class IndexErr : public std::exception
+// {
+// 	const char * what () const throw () { return ("Cannot open the index file requested"); }
+// };
 
 /* 4. MAIN FUNCTIONS */
 
