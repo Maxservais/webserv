@@ -2,11 +2,12 @@
 
 void check_Server_block(Config &obj)
 {
-	if (obj.get_servers().empty())
+	if (obj.get_servers().empty()) // check if the config file contains at least a server block
 	{
 		throw EmptyConfErr();
 	}
-	for (size_t i = 0; i < obj.get_servers().size(); i++)
+
+	for (size_t i = 0; i < obj.get_servers().size(); i++) // check if the server block contains the needed informations
 	{
 		if (obj.get_servers()[i]->get_port().empty() 
 		|| obj.get_servers()[i]->get_server_name().empty()
@@ -18,15 +19,14 @@ void check_Server_block(Config &obj)
 		|| obj.get_servers()[i]->get_locations().empty())
 			throw MissStatErr();
 	}
-	for (size_t i = 0; i < obj.get_servers().size(); i++)
+
+	for (size_t i = 0; i < obj.get_servers().size(); i++) // check if the methods are one of the 8 HTTP methods
 	{
 		for (size_t j = 0; j < obj.get_servers()[i]->get_methods().size(); j++)
 		{
-			std::cout << obj.get_servers()[i]->get_methods()[j] << std::endl;
-			// if (obj.get_servers()[i]->get_methods()[j] != "GET" 
-			// || obj.get_servers()[i]->get_methods()[j] != "POST"
-			// || obj.get_servers()[i]->get_methods()[j] != "DELETE")
-			// 	throw MethErr();
+			std::string tmp = obj.get_servers()[i]->get_methods()[j];
+			if (!tmp.compare("GET") || !tmp.compare("HEAD") || !tmp.compare("POST") || !tmp.compare("PUT") || !tmp.compare("DELETE") || !tmp.compare("CONNECT") || !tmp.compare("OPTION") || !tmp.compare("TRACE"))
+				throw MethErr();
 		}
 	}
 }
