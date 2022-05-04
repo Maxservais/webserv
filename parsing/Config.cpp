@@ -232,6 +232,8 @@ Config::Config(std::string conf_file)
 	size_t pos = 0;
 	std::string token;
 	Server * tmp;
+	if (ALL.find("server {") == std::string::npos)
+		return;
 	while((pos = ALL.find("server {")) != std::string::npos )
 	{
 		token = ALL.substr(0, pos);
