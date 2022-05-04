@@ -101,8 +101,7 @@ bool Location::get_directory_listing(void) const { return this->_directory_listi
 /* Canon */
 Server::Server() { return; }
 
-Server::Server(std::string block) : _ALL(block)
-{
+Server::Server(std::string block) : _ALL(block), _port(0) {
 	std::string token;
 	std::vector<std::string> vec;
 	size_t pos = 0;
@@ -161,10 +160,15 @@ size_t Server::fill_location(std::vector<std::string> vec, size_t i)
 void Server::fill_variables(std::vector<std::string> vec)
 {
 	size_t i = 0;
+	std::string tmp;
+
 	while (i < vec.size())
 	{
 		if (vec[i].find("listen") != std::string::npos)
-			this->_port.assign(vec[i].begin() + vec[i].find(" ") + 1, vec[i].end() - 1);
+		{
+			tmp.assign(vec[i].begin() + vec[i].find(" ") + 1, vec[i].end() - 1);
+			this->_port = atoi(tmp.c_str());
+		}
 		else if (vec[i].find("server_name") != std::string::npos)
 			this->_server_name.assign(vec[i].begin() + vec[i].find(" ") + 1, vec[i].end() - 1);
 		else if (vec[i].find("max_body_size") != std::string::npos)
@@ -193,7 +197,7 @@ void Server::fill_variables(std::vector<std::string> vec)
 
 /* Getters */
 std::string Server::get_ALL(void) const {return this->_ALL; }
-std::string Server::get_port(void) const { return this->_port; }
+int			Server::get_port(void) const { return this->_port; }
 std::string Server::get_server_name(void) const { return this->_server_name; }
 std::string Server::get_max_body_size(void) const { return this->_max_body_size; }
 std::string Server::get_root(void) const { return this->_root; }

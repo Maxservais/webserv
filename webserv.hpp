@@ -140,7 +140,7 @@ class Server
 		// void check_Server(void) const;
 
 		std::string get_ALL(void) const;
-		std::string get_port(void) const;
+		int			get_port(void) const;
 		std::string get_server_name(void) const;
 		std::string get_max_body_size(void) const;
 		std::string get_root(void) const;
@@ -151,7 +151,7 @@ class Server
 
 	private:
 		std::string _ALL;
-		std::string _port;
+		int			_port;
 		std::string _server_name;
 		std::string _max_body_size;
 		std::string _root;
@@ -248,17 +248,19 @@ bool exists (Request request);
 std::string get_length_file(std::string file);
 std::string convert_to_binary(const char * path);
 std::string dispatcher(Request &request);
-void	conf_check(int argc, char **argv, Config *config);
+void	conf_check(int argc, char **argv, Config &config);
 
 
 
 /* 4.1 SETUP SERVER */
 // void	setup_server(int *sockfd, struct sockaddr_in *sockaddr);
 // void	setup_server(int *sockfd, int *sockfd1, struct sockaddr_in *sockaddr, struct sockaddr_in *sockaddr1);
-void	setup_server(int *sockets, Config *config, int *sockfd, int *sockfd1, struct sockaddr_in *sockaddr, struct sockaddr_in *sockaddr1);
+// void setup_server(int *sockets, Config *config, std::vector<struct sockaddr_in> &sockaddr);
+void setup_server(int *sockets, Config &config, std::vector<struct sockaddr_in> &sockaddr);
+
 
 /* 4.2 HANDLE CLIENTS */
 // void	handle_clients(Log log, int *sockfd, struct sockaddr_in *sockaddr);
-void	handle_clients(int *sockets, Config *config, Log log, int *sockfd, struct sockaddr_in *sockaddr, int *sockfd1, struct sockaddr_in *sockaddr1);
+void	handle_clients(int *sockets, Config &config, Log log, std::vector<struct sockaddr_in> &sockaddr);
 
 #endif

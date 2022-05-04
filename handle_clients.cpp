@@ -44,37 +44,26 @@ void	disconnect_client(int client_fd, fd_set *current_sockets)
 	FD_CLR(client_fd, current_sockets);
 }
 
-void	handle_clients(int *sockets, Config *config, Log log, int *sockfd, struct sockaddr_in *sockaddr, int *sockfd1, struct sockaddr_in *sockaddr1)
+void	handle_clients(int *sockets, Config &config, Log log, std::vector<struct sockaddr_in> &sockaddr)
 {
 	int			err;
-	(void)sockfd;
-	(void)sockfd1;
-	// int			max_socket_val = *sockfd1;
-	int			max_socket_val = sockets[1];
-	socklen_t	addrlen = sizeof(*sockaddr);
-	socklen_t	addrlen1 = sizeof(*sockaddr1);
+	int	len = config.get_servers().size();
+	int			max_socket_val = sockets[len - 1];
 	fd_set		current_sockets;
 	fd_set		ready_sockets;
 	// add writing sets here
 	struct timeval	timeout;
 
-	(void )config;
-
 	/* Initiliaze current set */
 	FD_ZERO(&current_sockets);
 
-	/* Add sockfd to the current set of file descriptors */
-	FD_SET(sockets[0], &current_sockets);
-	FD_SET(sockets[1], &current_sockets);
-	// FD_SET(*sockfd, &current_sockets);
-	// FD_SET(*sockfd1, &current_sockets);
-	
+	/* Add each socket to the current set of file descriptors */
+	for (int i = 0; i < len; ++i)
+		FD_SET(sockets[i], &current_sockets);
+
 	/* Loop, waiting for incoming connects or for incoming data on any of the connected sockets */
 	while(true)
 	{
-		// BOUCLE WHILE ICI POUR LE NOMBRE DE SERVEURS / PORTS
-
-		
 		/* Timeout specifies how long we're willing to wait for a fd to become ready */
 		timeout.tv_sec  = 3 * 60;
 		timeout.tv_usec = 0;
@@ -88,44 +77,39 @@ void	handle_clients(int *sockets, Config *config, Log log, int *sockfd, struct s
 		{
 			if(FD_ISSET(i, &ready_sockets))
 			{
-				/* If there is a new connection, accept it and add the new client socket
-				to the current set of file descriptors */
-				if (i == sockets[0])
+				for (int j = 0; j < len; ++j)
 				{
-					int	connection = accept(sockets[0], (struct sockaddr*)sockaddr, &addrlen);
-					if (connection < 0)
-						throw AcceptErr();
-					FD_SET(connection, &current_sockets);
-					if (connection > max_socket_val)
-						max_socket_val = connection;
-				}
-				else if (i == sockets[1])
-				{
-					int	connection = accept(sockets[1], (struct sockaddr*)sockaddr1, &addrlen1);
-					if (connection < 0)
-						throw AcceptErr();
-					FD_SET(connection, &current_sockets);
-					if (connection > max_socket_val)
-						max_socket_val = connection;
-				}
-				/* Else, handle the connection and then remove the socket from the set of FDs */
-				else
-				{
-					try
+					/* If there is a new connection, accept it and add the new client socket
+					to the current set of file descriptors */
+					if (i == sockets[j])
 					{
-						std::string response = build_response(i, log);
-						int len = response.size();
-						const char *ret = response.c_str();
-						send_data(i, ret, len);
-						memset((void *)ret, 0, len);
-						disconnect_client(i, &current_sockets);
+						socklen_t	addrlen = sizeof(sockaddr[j]);
+						int	connection = accept(sockets[j], (struct sockaddr*)&sockaddr[j], &addrlen);
+						if (connection < 0)
+							throw AcceptErr();
+						FD_SET(connection, &current_sockets);
+						if (connection > max_socket_val)
+							max_socket_val = connection;
 					}
-					catch (std::exception &e)
+					/* Else, handle the connection and then remove the socket from the set of FDs */
+					else if (j == len - 1)
 					{
-						disconnect_client(i, &current_sockets);
-						close(sockets[0]);
-						close(sockets[1]);
-						std::cerr << e.what() << std::endl;
+						try
+						{
+							std::string response = build_response(i, log);
+							int len = response.size();
+							const char *ret = response.c_str();
+							send_data(i, ret, len);
+							memset((void *)ret, 0, len);
+							disconnect_client(i, &current_sockets);
+						}
+						catch (std::exception &e)
+						{
+							disconnect_client(i, &current_sockets);
+							close(sockets[0]); // CLOSE ALL SOCKETS
+							close(sockets[1]); // CLOSE ALL SOCKETS
+							std::cerr << e.what() << std::endl;
+						}
 					}
 				}
 			}
