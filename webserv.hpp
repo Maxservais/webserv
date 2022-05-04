@@ -250,11 +250,6 @@ class NegPortErr : public std::exception
 	const char * what () const throw () { return ("Invalid port number or max body_size"); }
 };
 
-class CodeErr : public std::exception
-{
-	const char * what () const throw () { return ("Invalid error code"); }
-};
-
 class RootErr : public std::exception
 {
 	const char * what () const throw () { return ("Invalid root"); }
@@ -262,18 +257,24 @@ class RootErr : public std::exception
 
 class IndexErr : public std::exception
 {
-	const char * what () const throw () { return ("Invalid index file"); }
+	const char * what () const throw () { return ("Cannot open the index file requested"); }
 };
 
-// class ErrFileErr : public std::exception
-// {
-// 	const char * what () const throw () { return ("Cannot open the error file requested"); }
-// };
+class CodeErr : public std::exception
+{
+	const char * what () const throw () { return ("Wrong error code"); }
+};
 
-// class IndexErr : public std::exception
-// {
-// 	const char * what () const throw () { return ("Cannot open the index file requested"); }
-// };
+class Code_fileErr : public std::exception
+{
+	const char * what () const throw () { return ("Cannot open the error code file"); }
+};
+
+class ServNameErr : public std::exception
+{
+	const char * what () const throw () { return ("Wrong formating of the server_name"); }
+};
+
 
 /* 4. MAIN FUNCTIONS */
 

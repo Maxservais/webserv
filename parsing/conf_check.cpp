@@ -7,9 +7,11 @@ void check_Server_blocks(Config &obj)
 		throw EmptyConfErr();
 	}
 
-	for (size_t i = 0; i < obj.get_servers().size(); i++) // check if the server block contains the needed informations
+	std::string arr[] = {"GET", "POST", "DELETE", "HEAD", "PUT", "CONNECT", "OPTIONS", "TRACE", "PATCH"}; 
+	std::vector<std::string> method_list(arr, arr + sizeof(arr) / sizeof(std::string));
+	for (size_t i = 0; i < obj.get_servers().size(); i++) 
 	{
-		if (!obj.get_servers()[i]->get_port()
+		if (!obj.get_servers()[i]->get_port() // check if the server block contains the needed informations
 		|| obj.get_servers()[i]->get_server_name().empty()
 		|| !obj.get_servers()[i]->get_max_body_size()
 		|| obj.get_servers()[i]->get_root().empty()
@@ -18,56 +20,58 @@ void check_Server_blocks(Config &obj)
 		|| obj.get_servers()[i]->get_errors().empty()
 		|| obj.get_servers()[i]->get_locations().empty())
 			throw MissStatErr();
-	}
 
-	std::string arr[] = {"GET", "POST", "DELETE", "HEAD", "PUT", "CONNECT", "OPTIONS", "TRACE", "PATCH"}; // check if the methods are one of the 8 HTTP methods
-	std::vector<std::string> method_list(arr, arr + sizeof(arr) / sizeof(std::string));
-	for (size_t i = 0; i < obj.get_servers().size(); i++) 
-	{
-		for (size_t j = 0; j < obj.get_servers()[i]->get_methods().size(); j++)
+		for (size_t j = 0; j < obj.get_servers()[i]->get_methods().size(); j++) // check if the methods are one of the 8 HTTP methods
 		{
 			std::string tmp = obj.get_servers()[i]->get_methods()[j];
 			if (std::find(std::begin(method_list), std::end(method_list), tmp) == std::end(method_list))
 				throw MethErr();
 		}
-	}
 
-	for (size_t i = 0; i < obj.get_servers().size(); i++) // check the ports and max_body_size
-	{
-		if (obj.get_servers()[i]->get_port() <= 0 || obj.get_servers()[i]->get_max_body_size() <= 0
+		if (obj.get_servers()[i]->get_port() <= 0 || obj.get_servers()[i]->get_max_body_size() <= 0 // check the ports and max_body_size
 		|| obj.get_servers()[i]->get_port() > 65535)
 			throw NegPortErr();
-	}
-
-	for (size_t i = 0; i < obj.get_servers().size(); i++) // check root
-	{
-		const char * tmp = (obj.get_servers()[i]->get_root()).c_str();
+		
+		const char * tmp = (obj.get_servers()[i]->get_root()).c_str(); // check root
 		DIR *dir = opendir(tmp);
 		if (dir == NULL)
 			throw RootErr();
 		else
 			closedir(dir);
-	}
 
-	for (size_t i = 0; i < obj.get_servers().size(); i++) // check index
-	{
-		std::ifstream stream(obj.get_servers()[i]->get_root() + "/" + obj.get_servers()[i]->get_index());
+		std::ifstream stream(obj.get_servers()[i]->get_root() + "/" + obj.get_servers()[i]->get_index()); // check index
 		if (stream.fail())
 			throw IndexErr();
 		else
 			stream.close();
-	}
 
-	for (size_t i = 0; i < obj.get_servers().size(); i++) // check errors
-	{
-		if (obj.get_servers()[i]->get_errors().empty())
+		if (obj.get_servers()[i]->get_errors().empty()) // check errors pages
 			throw MissStatErr();
 		for (std::map<int,std::string>::iterator it = obj.get_servers()[i]->get_errors().begin() ;it != obj.get_servers()[i]->get_errors().end(); ++it)
 		{
-			std::cout << it->first << " => " << it->second << '\n';
-			// check 100 - 599
-			// check open
+			if (it->first < 100 || it->first > 599)
+				throw CodeErr();
+			std::ifstream stream(obj.get_servers()[i]->get_root() + "/" + it->second);
+			if (stream.fail())
+				throw Code_fileErr();
+			else
+				stream.close();
 		}
+
+		if (obj.get_servers()[i]->get_server_name().find('\\') != std::string::npos // check server_name for illegal char
+		|| obj.get_servers()[i]->get_server_name().find('/') != std::string::npos
+		|| obj.get_servers()[i]->get_server_name().find(':') != std::string::npos
+		|| obj.get_servers()[i]->get_server_name().find('?') != std::string::npos
+		|| obj.get_servers()[i]->get_server_name().find('"') != std::string::npos
+		|| obj.get_servers()[i]->get_server_name().find('>') != std::string::npos
+		|| obj.get_servers()[i]->get_server_name().find('|') != std::string::npos
+		|| obj.get_servers()[i]->get_server_name().find('<') != std::string::npos)
+			throw ServNameErr();
+
+		// for (std::map<std::string,Location*>::iterator it = obj.get_servers()[i]->get_locations().begin() ;it != obj.get_servers()[i]->get_locations().end(); ++it)
+		// {
+			
+		// }
 	}
 }
 
@@ -107,3 +111,92 @@ int conf_check(int argc, char **argv)
 	}
 	return (EXIT_SUCCESS);
 }
+
+/////
+// void check_Server_blocks(Config &obj)
+// {
+// 	if (obj.get_servers().empty()) // check if the config file contains at least a server block
+// 	{
+// 		throw EmptyConfErr();
+// 	}
+
+// 	for (size_t i = 0; i < obj.get_servers().size(); i++) 
+// 	{
+// 		if (!obj.get_servers()[i]->get_port() // check if the server block contains the needed informations
+// 		|| obj.get_servers()[i]->get_server_name().empty()
+// 		|| !obj.get_servers()[i]->get_max_body_size()
+// 		|| obj.get_servers()[i]->get_root().empty()
+// 		|| obj.get_servers()[i]->get_index().empty()
+// 		|| obj.get_servers()[i]->get_methods().empty()
+// 		|| obj.get_servers()[i]->get_errors().empty()
+// 		|| obj.get_servers()[i]->get_locations().empty())
+// 			throw MissStatErr();
+// 	}
+
+// 	std::string arr[] = {"GET", "POST", "DELETE", "HEAD", "PUT", "CONNECT", "OPTIONS", "TRACE", "PATCH"}; // check if the methods are one of the 8 HTTP methods
+// 	std::vector<std::string> method_list(arr, arr + sizeof(arr) / sizeof(std::string));
+// 	for (size_t i = 0; i < obj.get_servers().size(); i++) 
+// 	{
+// 		for (size_t j = 0; j < obj.get_servers()[i]->get_methods().size(); j++)
+// 		{
+// 			std::string tmp = obj.get_servers()[i]->get_methods()[j];
+// 			if (std::find(std::begin(method_list), std::end(method_list), tmp) == std::end(method_list))
+// 				throw MethErr();
+// 		}
+// 	}
+
+// 	for (size_t i = 0; i < obj.get_servers().size(); i++) // check the ports and max_body_size
+// 	{
+// 		if (obj.get_servers()[i]->get_port() <= 0 || obj.get_servers()[i]->get_max_body_size() <= 0
+// 		|| obj.get_servers()[i]->get_port() > 65535)
+// 			throw NegPortErr();
+// 	}
+
+// 	for (size_t i = 0; i < obj.get_servers().size(); i++) // check root
+// 	{
+// 		const char * tmp = (obj.get_servers()[i]->get_root()).c_str();
+// 		DIR *dir = opendir(tmp);
+// 		if (dir == NULL)
+// 			throw RootErr();
+// 		else
+// 			closedir(dir);
+// 	}
+
+// 	for (size_t i = 0; i < obj.get_servers().size(); i++) // check index
+// 	{
+// 		std::ifstream stream(obj.get_servers()[i]->get_root() + "/" + obj.get_servers()[i]->get_index());
+// 		if (stream.fail())
+// 			throw IndexErr();
+// 		else
+// 			stream.close();
+// 	}
+
+// 	for (size_t i = 0; i < obj.get_servers().size(); i++) // check errors pages
+// 	{
+// 		if (obj.get_servers()[i]->get_errors().empty())
+// 			throw MissStatErr();
+// 		for (std::map<int,std::string>::iterator it = obj.get_servers()[i]->get_errors().begin() ;it != obj.get_servers()[i]->get_errors().end(); ++it)
+// 		{
+// 			if (it->first < 100 || it->first > 599)
+// 				throw CodeErr();
+// 			std::ifstream stream(obj.get_servers()[i]->get_root() + "/" + it->second);
+// 			if (stream.fail())
+// 				throw Code_fileErr();
+// 			else
+// 				stream.close();
+// 		}
+// 	}
+
+// 	for (size_t i = 0; i < obj.get_servers().size(); i++) // check server_name for illegal char
+// 	{
+// 		if (obj.get_servers()[i]->get_server_name().find('\\') != std::string::npos
+// 		|| obj.get_servers()[i]->get_server_name().find('/') != std::string::npos
+// 		|| obj.get_servers()[i]->get_server_name().find(':') != std::string::npos
+// 		|| obj.get_servers()[i]->get_server_name().find('?') != std::string::npos
+// 		|| obj.get_servers()[i]->get_server_name().find('"') != std::string::npos
+// 		|| obj.get_servers()[i]->get_server_name().find('>') != std::string::npos
+// 		|| obj.get_servers()[i]->get_server_name().find('|') != std::string::npos
+// 		|| obj.get_servers()[i]->get_server_name().find('<') != std::string::npos)
+// 			throw ServNameErr();
+// 	}
+// }
