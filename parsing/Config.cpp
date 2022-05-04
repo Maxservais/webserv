@@ -137,11 +137,12 @@ Server& Server::operator=(const Server &rhs)
 
 Server::~Server()
 {
+	// ATTENTION AU LEAKS
 	// std::map<std::string, Location*>::iterator ite = this->_locations.end();
 	// for (std::map<std::string, Location*>::iterator it = this->_locations.begin(); it != ite; ++it)
 	// 	delete (*it).second;
 	// this->_locations.clear();
-	// return;
+	return;
 }
 
 /* Filler */
@@ -167,6 +168,7 @@ void Server::fill_variables(std::vector<std::string> vec)
 {
 	size_t i = 0;
 	std::string tmp;
+
 	while (i < vec.size())
 	{
 		if (vec[i].find("listen") != std::string::npos)
@@ -258,12 +260,13 @@ Config::~Config()
 	// for (std::vector<Server*>::iterator it = this->_servers.begin(); it != ite; ++it)
 	// 	delete *it;
 	// this->_servers.clear();
-	// return;
+	return;
 }
 
 Config& Config::operator=(const Config &rhs)
 {
-	this->_servers = rhs._servers;
+	if (this != &rhs)
+		this->_servers = rhs.get_servers();
 	return (*this);
 }
 

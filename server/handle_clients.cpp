@@ -5,9 +5,8 @@ std::string build_response(int i, Log log) // reference or pointer for log?
 	/* Parse request */
 	char	buffer[BUFFER_SIZE];
 	memset(buffer, 0, BUFFER_SIZE);
-	int ret = read(i, buffer, BUFFER_SIZE); // should we use receiv instead?
-	std::cout << buffer << std::endl;
-	if (ret == -1)
+	int ret = recv(i, buffer, BUFFER_SIZE, 0);
+	if (ret == 0 || ret == -1) // bug ?
 			throw ConnectionErr();
 	Request request(buffer);
 
@@ -29,10 +28,13 @@ void	send_data(int socket, const char *data, int len)
 	while(len > 0)
 	{
 		bytes_sent = send(socket, (char *)data, len, 0);
-		if (bytes_sent == -1)
-			throw SendErr();
-		data += bytes_sent;
-		len -= bytes_sent;
+		if (bytes_sent == 0)
+			break ;
+		if (bytes_sent > 0)
+		{
+			data += bytes_sent;
+			len -= bytes_sent;
+		}
 	}
 }
 
@@ -42,10 +44,11 @@ void	disconnect_client(int client_fd, fd_set *current_sockets)
 	FD_CLR(client_fd, current_sockets);
 }
 
-void	handle_clients(Log log, int *sockfd, struct sockaddr_in *sockaddr)
+void	handle_clients(int *sockets, Config &config, Log log, std::vector<struct sockaddr_in> &sockaddr)
 {
-	int			max_socket_val = *sockfd;
-	socklen_t	addrlen = sizeof(*sockaddr);
+	int			err;
+	int	len = config.get_servers().size();
+	int			max_socket_val = sockets[len - 1];
 	fd_set		current_sockets;
 	fd_set		ready_sockets;
 	// add writing sets here
@@ -54,55 +57,67 @@ void	handle_clients(Log log, int *sockfd, struct sockaddr_in *sockaddr)
 	/* Initiliaze current set */
 	FD_ZERO(&current_sockets);
 
-	/* Add sockfd to the current set of file descriptors */
-	FD_SET(*sockfd, &current_sockets);
+	/* Add each socket to the current set of file descriptors */
+	for (int i = 0; i < len; ++i)
+		FD_SET(sockets[i], &current_sockets);
 
+	/* Loop, waiting for incoming connects or for incoming data on any of the connected sockets */
 	while(true)
 	{
-		timeout.tv_sec  = 1;
+		/* Timeout specifies how long we're willing to wait for a fd to become ready */
+		timeout.tv_sec  = 3 * 60;
 		timeout.tv_usec = 0;
 		ready_sockets = current_sockets;
-		if (select(max_socket_val + 1, &ready_sockets, NULL, NULL, &timeout) < 0)
+		err = select(max_socket_val + 1, &ready_sockets, NULL, NULL, &timeout);
+		if (err < 0)
 			throw SelectErr();
-
+		else if (err == 0)
+			throw TimeOutErr();
 		for (int i = 0; i <= max_socket_val; i++)
 		{
 			if(FD_ISSET(i, &ready_sockets))
 			{
-				/* If there is a new connection, accept it and add the new client socket
-				to the current set of file descriptors */
-				if (i == *sockfd)
+				for (int j = 0; j < len; ++j)
 				{
-					int	connection = accept(*sockfd, (struct sockaddr*)sockaddr, &addrlen);
-					if (connection < 0)
-						throw AcceptErr();
-					FD_SET(connection, &current_sockets);
-					if (connection > max_socket_val)
-						max_socket_val = connection;
-				}
-				/* Else, handle the connection and then remove the socket from the set of FDs */
-				else
-				{
-					try
+					/* If there is a new connection, accept it and add the new client socket
+					to the current set of file descriptors */
+					if (i == sockets[j])
 					{
-						std::string response = build_response(i, log);
-						int len = response.size();
-						const char *ret = response.c_str();
-						send_data(i, ret, len);
-						memset((void *)ret, 0, len);
-						disconnect_client(i, &current_sockets);
+						socklen_t	addrlen = sizeof(sockaddr[j]);
+						int	connection = accept(sockets[j], (struct sockaddr*)&sockaddr[j], &addrlen);
+						if (connection < 0)
+							throw AcceptErr();
+						FD_SET(connection, &current_sockets);
+						if (connection > max_socket_val)
+							max_socket_val = connection;
+						break ;
 					}
-					catch (std::exception &e)
+					/* Else, handle the connection and then remove the socket from the set of FDs */
+					else if (j == len - 1)
 					{
-						disconnect_client(i, &current_sockets);
-						close(*sockfd);
-						std::cerr << e.what() << std::endl;
+						try
+						{
+							std::string response = build_response(i, log);
+							int len = response.size();
+							const char *ret = response.c_str();
+							send_data(i, ret, len);
+							memset((void *)ret, 0, len);
+							disconnect_client(i, &current_sockets);
+						}
+						catch (std::exception &e)
+						{
+							disconnect_client(i, &current_sockets);
+							close(sockets[0]); // CLOSE ALL SOCKETS
+							close(sockets[1]); // CLOSE ALL SOCKETS
+							std::cerr << e.what() << std::endl;
+						}
 					}
 				}
 			}
 		}
 	}
-	close(*sockfd);
+	close(sockets[0]);
+	close(sockets[1]);
 }
 
 /* DOCUMENTATION:
@@ -110,4 +125,5 @@ void	handle_clients(Log log, int *sockfd, struct sockaddr_in *sockaddr)
 - FD_ISSET – Helps in identifying if a socket belongs to a specified set
 - FD_SET – Assigns a socket to a specified set
 - FD_ZERO – Resets the set
+- timeout specifies how long we're willing to wait for a fd to become ready
 */

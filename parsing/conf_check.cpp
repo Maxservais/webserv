@@ -105,7 +105,19 @@ void check_Server_blocks(Config &obj)
 	}
 }
 
-void check_argv(int argc, char **argv)
+// void check_argv(int argc, char **argv)
+// {
+// 	if (argc != 2)
+// 		throw ArgvErr();
+
+// 	std::ifstream conf_file(argv[1]);
+// 	if (conf_file.fail())
+// 		throw ConfOpenErr();
+// 	else
+// 		conf_file.close();
+// }
+
+void conf_check(int argc, char **argv, Config &config)
 {
 	if (argc != 2)
 		throw ArgvErr();
@@ -115,29 +127,9 @@ void check_argv(int argc, char **argv)
 		throw ConfOpenErr();
 	else
 		conf_file.close();
-}
 
-int conf_check(int argc, char **argv)
-{
-	try
-	{
-		check_argv(argc, argv);
-	}
-	catch(const std::exception& e)
-	{
-		std::cerr << e.what() << '\n';
-		return (EXIT_FAILURE);
-	}
-
-	Config test(argv[1]);
-	try
-	{
-		check_Server_blocks(test);
-	}
-	catch(const std::exception& e)
-	{
-		std::cerr << e.what() << '\n';
-		return (EXIT_FAILURE);
-	}
-	return (EXIT_SUCCESS);
+	Config tmp(argv[1]); // SUPER INEFICIENT, LET'S FIX IT LATER
+	config = tmp;
+	check_Server_blocks(config);
+	return;
 }
