@@ -242,6 +242,11 @@ class ConfOpenErr : public std::exception
 	const char * what () const throw () { return ("Cannot open configuration file"); }
 };
 
+class ExtErr : public std::exception
+{
+	const char * what () const throw () { return ("Wrong extension for the configuration file"); }
+};
+
 class EmptyConfErr : public std::exception
 {
 	const char * what () const throw () { return ("Invalid configuration file"); }
