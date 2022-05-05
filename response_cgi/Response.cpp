@@ -3,7 +3,7 @@
 /* ************************************************************************** */
 /*  CANON                                                                     */
 /* ************************************************************************** */
-Response::Response(Request &request, Config &config, std::string error_404) : req(request), config(config), error_404(error_404)
+Response::Response(Request &request, Config &config) : req(request), config(config)
 {
 	this->server_index = 0;
 	std::string tmp = request.getHost();
@@ -61,81 +61,13 @@ std::string Response::full_code(int code)
 	return (ret);
 }
 
-/* ************************************************************************** */
-/*  RESPONSE COMPOSITION                                                      */
-/* ************************************************************************** */
-std::string Response::content_length(std::string file, int hint)
+std::string Response::check_error_custom(int code)
 {
-	if(hint == IS_DIR)
-		return ("Content-Length: " + std::to_string(ft_try_dir(req).size()) + "\n\n");
-
-	if (hint == IS_CGI)
-		return ("Content-Length: " + std::to_string(file.size()) + "\n\n");
-
-	if (req.getFile_extention() == "png" || req.getFile_extention() == "jpg" || req.getFile_extention() == "ico" || 
-		req.getFile_extention() == "gif" || req.getFile_extention() == "webp")
-		return ("Content-Length: " + std::to_string(body(file).size()) + "\n\n");
-
-	std::ifstream in(file.c_str());
-	unsigned int i = 0;
-	while (in.get() != EOF) i++; 
-	in.close();
-	return ("Content-Length: " + std::to_string(i) + "\n\n");
-}
-
-std::string Response::content_type()
-{
-	if (req.getFile_extention() == "cgi")
-		return ("Content-Type: text/html\n");
-
-	if (req.getMethod() == "GET")
-	{
-		std::string extension;
-		if (req.getFile() == "/")
-		{
-			extension = this->config.get_servers()[server_index]->get_index();
-			extension.erase(0, extension.rfind("."));
-			extension = extension.erase(0, 1);
-		}
-
-		else
-			extension = req.getFile_extention();
-
-		if (extension == "html")
-			return ("Content-Type: text/html; charset=utf-8\n");
-
-		else if ((req.getFile_extention() == "png" || req.getFile_extention() == "jpg" || req.getFile_extention() == "ico" || 
-		req.getFile_extention() == "gif" || req.getFile_extention() == "webp") && exists())
-		{
-			return ("Content-Type: image/" + extension + "\n");
-		}
-	}
-
-
-	else if (req.getMethod() == "POST" || (req.getMethod() == "DELETE" && !exists()))
-	{
-		return ("Content-Type: text/plain\n");
-	}
-
-	return ("Content-Type: text/html\n");
-}
-
-std::string Response::body(std::string file)
-{
-	if (req.getFile_extention() == "png" || req.getFile_extention() == "jpg" || req.getFile_extention() == "ico" ||
-	req.getFile_extention() == "gif" || req.getFile_extention() == "webp") // gif et webp pas testeee
-	{
-		std::ifstream image(file);
-		std::stringstream buffer_s;
-		buffer_s << image.rdbuf();
-		return (buffer_s.str());
-	}
-
+	std::map<int,std::string>::iterator it = this->config.get_servers()[server_index]->get_errors().find(code);
+	if (it != this->config.get_servers()[server_index]->get_errors().end())
+		return (this->config.get_servers()[server_index]->get_root() + "/" + it->second);
 	else
-	{
-		std::ifstream input_file(file);
-		return std::string((std::istreambuf_iterator<char>(input_file)), std::istreambuf_iterator<char>());
-	}
+		return "";
 }
 
 /* ************************************************************************** */
@@ -190,55 +122,137 @@ std::string Response::html_code_cgi(Request &req)
 }
 
 /* ************************************************************************** */
-/*  COMPOSE RESPONSE                                                          */
+/*  RESPONSE COMPOSITION                                                      */
 /* ************************************************************************** */
-std::string Response::compose_response()
+std::string Response::content_type(std::string file)
 {
-	if (req.getMethod() == "GET")
+	size_t pos = file.find_last_of(".");
+	std::string ext = file.substr(pos + 1);
+
+	if (ext == "cgi")
+		return ("Content-Type: text/html\n");
+
+	if (ext == "html")
+		return ("Content-Type: text/html; charset=utf-8\n");
+
+	if (ext == "png" || ext == "jpg" || ext == "ico" || ext == "gif" || ext == "webp")
+		return ("Content-Type: image/" + ext + "\n");
+
+	if (req.getMethod() == "POST")
 	{
-		if (req.getFile_extention() == "cgi")
-			response = req.getVersion() + full_code(200) + content_type() + content_length(html_code_cgi(req), IS_CGI) + html_code_cgi(req);
-		else if (req.getFile() == "/")
-		{
-			this->response = req.getVersion() + full_code(200) + content_type() + content_length(this->config.get_servers()[server_index]->get_root() + "/" + this->config.get_servers()[server_index]->get_index(), IS_FILE) + body(this->config.get_servers()[server_index]->get_root() + "/" + this->config.get_servers()[server_index]->get_index());
-		}
-		else if (ft_try_dir(req) != "")
-			this->response = req.getVersion() + full_code(200) + content_type() + content_length(ft_try_dir(req), IS_DIR) + ft_try_dir(req);
-		else if (exists())
-			this->response = req.getVersion() + full_code(200) + content_type() + content_length(this->config.get_servers()[server_index]->get_root() + req.getFile(), IS_FILE) + body(this->config.get_servers()[server_index]->get_root() + req.getFile());
-		else
-			this->response = req.getVersion() + full_code(200) + content_type() + content_length(this->config.get_servers()[server_index]->get_root() + "/" + this->error_404, IS_FILE) + body(this->config.get_servers()[server_index]->get_root() + "/" + this->error_404);
+		return ("Content-Type: text/plain\n");
 	}
+	else
+		return ("Content-Type: text/html\n");
+}
 
-	else if (req.getMethod() == "POST")
+std::string Response::body(std::string file)
+{
+	size_t pos = file.find_last_of(".");
+	std::string ext = file.substr(pos + 1);
+	// std::cout << file << " check -->" << ext << std::endl;
+	if (ext == "png" || ext == "jpg" || ext == "ico" || ext == "gif" || ext == "webp") // gif et webp pas testeee
 	{
-		if (req.getFile_extention() == "cgi")
-		{
-			std::string a(html_code_cgi(req));
-			response = req.getVersion() + full_code(200) + content_type() + content_length(a, IS_CGI) + a;
-		}
-
-		else
-			this->response = req.getVersion() + full_code(204) + content_type();
-	}
-
-	else if (req.getMethod() == "DELETE")
-	{
-		if (exists())
-		{
-			remove((this->config.get_servers()[server_index]->get_root() + req.getFile()).c_str());
-			this->response = req.getVersion() + full_code(200) + "Content-Type: text/html\nContent-Length: 48\n\n <html><body><h1>File deleted.</h1></body></html>";
-		}
-		else
-			this->response = req.getVersion() + full_code(204);
+		std::ifstream image(file);
+		std::stringstream buffer_s;
+		buffer_s << image.rdbuf();
+		return (buffer_s.str());
 	}
 
 	else
-		this->response = req.getVersion() + full_code(501);
- 	return this->response;
+	{
+		std::ifstream input_file(file);
+		return std::string((std::istreambuf_iterator<char>(input_file)), std::istreambuf_iterator<char>());
+	}
+}
+
+/* ************************************************************************** */
+/*  COMPOSE RESPONSE                                                          */
+/* ************************************************************************** */
+
+void Response::get_methode()
+{
+	std::string s;
+	if (req.getFile_extention() == "cgi")
+		this->response = req.getVersion() + full_code(200) + content_type(html_code_cgi(req)) + + "Content-Length: " + std::to_string(html_code_cgi(req).size()) + "\r\n\r\n" + html_code_cgi(req) + "\r\n";
+	else if (req.getFile() == "/")
+	{
+		s = this->config.get_servers()[server_index]->get_root() + "/" + this->config.get_servers()[server_index]->get_index();
+		this->response = req.getVersion() + full_code(200) + content_type(s) + "Content-Length: " + std::to_string(body(s).size()) + "\r\n\r\n" + body(s) + "\r\n";
+	}
+	else if (ft_try_dir(req) != "")
+		this->response = req.getVersion() + full_code(200) + content_type(ft_try_dir(req)) + "Content-Length: " + std::to_string(ft_try_dir(req).size()) + "\r\n\r\n" + ft_try_dir(req) + "\r\n";
+	else if (exists())
+	{
+		s = this->config.get_servers()[server_index]->get_root() + req.getFile();
+		this->response = req.getVersion() + full_code(200) + content_type(s) + "Content-Length: " + std::to_string(body(s).size()) + "\r\n\r\n" + body(s) + "\r\n";
+	}
+	else
+	{
+		std::string tmp = check_error_custom(404);
+		if (!tmp.empty())
+			this->response = req.getVersion() + full_code(404) + content_type(tmp) + "Content-Length: " + std::to_string(body(tmp).size()) + "\r\n\r\n" + body(tmp) + "\r\n";
+		else
+			this->response = req.getVersion() + full_code(404) + "Content-Type: text/html\nContent-Length: 19\n\n <html><body><h1>Error 404 Not found</h1></body></html>";
+	}
+}
+
+void Response::post_methode()
+{
+	if (req.getFile_extention() == "cgi")
+	{
+		std::string a(html_code_cgi(req));
+		response = req.getVersion() + full_code(200) + content_type(a) + "Content-Length: " + std::to_string(a.size()) + "\r\n\r\n" + a + "\r\n";
+	}
+
+	else
+	{
+		std::string tmp = check_error_custom(204);
+		if (!tmp.empty())
+			this->response = req.getVersion() + full_code(204) + content_type(tmp) + "Content-Length: " + std::to_string(body(tmp).size()) + "\r\n\r\n" + body(tmp) + "\r\n";
+		else
+			this->response = req.getVersion() + full_code(204) + "Content-Type: text/html\nContent-Length: 54\n\n <html><body><h1>Error 204 NOT FOUND</h1></body></html>" + "\r\n";
+	}
+}
+
+void Response::delete_methode()
+{
+	if (exists())
+	{
+		remove((this->config.get_servers()[server_index]->get_root() + req.getFile()).c_str());
+		this->response = req.getVersion() + full_code(200) + "Content-Type: text/html\nContent-Length: 48\n\n <html><body><h1>File deleted.</h1></body></html>" + "\r\n";
+	}
+	else
+	{
+		std::string tmp = check_error_custom(204);
+		if (!tmp.empty())
+			this->response = req.getVersion() + full_code(204) + content_type(tmp) + "Content-Length: " + std::to_string(body(tmp).size()) + "\r\n\r\n" + body(tmp) + "\r\n";
+		else
+			this->response = req.getVersion() + full_code(204) + "Content-Type: text/html\nContent-Length: 54\n\n <html><body><h1>Error 204 NOT FOUND</h1></body></html>" + "\r\n";
+	}
+}
+
+std::string Response::compose_response()
+{
+	if (req.getMethod() == "GET")
+		get_methode();
+	else if (req.getMethod() == "POST")
+		post_methode();
+	else if (req.getMethod() == "DELETE")
+		delete_methode();
+	else
+	{
+		std::string tmp = check_error_custom(501);
+		if (!tmp.empty())
+			this->response = req.getVersion() + full_code(501) + content_type(tmp) + "Content-Length: " + std::to_string(body(tmp).size()) + "\r\n\r\n" + body(tmp) + "\r\n";
+		else
+			this->response = req.getVersion() + full_code(501) + "Content-Type: text/html\nContent-Length: 25\n\n <html><body><h1>Error 501 Not implemented</h1></body></html>" + "\r\n";
+	}
+	return this->response;
 }
 
 std::string Response::get_response()
 {
+	std::cout << compose_response() << std::endl;
 	return (compose_response());
 }

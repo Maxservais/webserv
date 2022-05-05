@@ -161,27 +161,26 @@ class Response
 	private:
 		Request &req;
 		Config &config;
-		
 		int server_index;
-
-		//eux ils degagent
-		std::string error_404;
 		std::string response;
-		// a virer
 
 	public:
-		Response(Request &request, Config &config, std::string error_404);
+		Response(Request &request, Config &config);
 		Response	&operator=(const Response &obj);
 		~Response();
 		bool exists();
+
 		std::string full_code(int code);
-		std::string content_length(std::string file, int hint);
-		std::string content_type();
+		std::string content_type(std::string file);
 		std::string body(std::string file);
 		std::string compose_response();
 		std::string get_response();
 		std::string ft_try_dir(Request &request);
 		std::string html_code_cgi(Request &req);
+		std::string check_error_custom(int code);
+		void get_methode();
+		void post_methode();
+		void delete_methode();
 };
 
 // CGI HANDLER

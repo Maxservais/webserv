@@ -15,7 +15,8 @@ std::string build_response(int i, Log log, Config &config) // reference or point
 	// log.add_one(request);
 
 	/* Build response */
-	Response response(request, config, "error404.html");
+	std::cout << buffer << std::endl;
+ 	Response response(request, config);
 	
 	/* Return response */
 	return (response.get_response());
