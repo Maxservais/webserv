@@ -4,14 +4,29 @@
 		<meta charset="utf-8">
 	</head>
 	<body>
-		<h1> This page was render direcly from the server 
-			<p>Hello there welcome to my website</p>
-		</h1>
+		<h1> This is a marmotte</h1>
 		<img src="ball.png">
-		<form method="post">
-			<label for="fname">First name:</label><br>
-			<input type="text" id="fname" name="fname"><br>
+		<br>
+		<h2>Les marmottes (Marmota) forment un genre de mammifères fouisseurs de l'ordre des rongeurs. Du latin mus montis, « souris de la montagne ».</h2>
+			<br><b>
+			D'après Émile Littré, auteur du Dictionnaire de la Langue Française, Marmontain est l'un des anciens noms français de la marmotte ; espagnol et portugais : marmota ; italien : marmotta, marmotto ; pays de Coire : murmont ; ancien haut allemand : muremanto, muremunti ; du latin murem montanum ou murem montis : rat de montagne1.
+			<br>
+			La marmotte est appelée siffleux en Amérique du Nord, car, quand il y a un danger, elle émet un cri (son d'origine laryngée) puissant pour donner l'alerte d'un danger aux autres marmottes, qui vont alors se réfugier dans leur terrier. L'animal peut aussi être appelé bonhomme couèche, du micmac moonumkweck2. Les anglophones la nomment groundhog (littéralement : « cochon de terre ») ; en allemand, c'est Murmeltier : littéralement l'« animal qui marmonne, marmotte ».  </b>
+		<form method="POST" action="test.cgi">
+			<label for="fname">First&emsp; name:</label>
+			<input type="text" id="fname" name="fname"></input>
+			<br>
+			<label for="sname">Second name:</label>
+			<input type="text" id="sname" name="sname"></input>
+			<input type="submit"></input><br>
 		</form>
-		<a href="http://localhost:9999/page.html" target="_self">CLICK HEREEEEEEEEEEE</a>
+		<a href="/yolo" target="_self">YOLO_DIR</a>
+		<br>
+		<a href="/page_bis.html" target="_self">PAGE_BIS</a>
+		<br>
+		<form action="/index.html" method="post" enctype="multipart/form-data">
+			<p><input type="file" name="file1">
+			<p><button type="submit">Submit</button>
+		</form>
 	</body>
 </html>

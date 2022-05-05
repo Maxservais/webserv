@@ -8,7 +8,7 @@ int main(int argc, char **argv)
 	/* Parse the config file */
 	try
 	{
-		conf_check(argc, argv, config);
+		config = conf_check(argc, argv, config);
 	}
 	catch (std::exception &e)
 	{

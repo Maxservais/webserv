@@ -139,6 +139,17 @@ std::string Request::getPostImput()
 	return (std::string());
 }
 
+std::string Request::getHost()
+{
+	std::vector<std::string> v = split_words(buff);
+	for(size_t i = 0; i < v.size(); i++)
+	{
+		if (v[i] == "Host:" && v.size() >= i+1)
+			return v[i+1];
+	}
+	return "";
+}
+
 //std::string Request::getUploadImput()
 //{
 //	if (getMethod() != "POST")

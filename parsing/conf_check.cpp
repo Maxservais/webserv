@@ -154,7 +154,7 @@ void check_Server_blocks(Config &obj)
 	}
 }
 
-void conf_check(int argc, char **argv, Config &config)
+Config &conf_check(int argc, char **argv, Config &config)
 {
 	if (argc != 2) // check two args
 		throw ArgvErr();
@@ -170,9 +170,8 @@ void conf_check(int argc, char **argv, Config &config)
 	else
 		conf_file.close();
 
-
 	Config tmp(argv[1]); // SUPER INEFFICIENT, LET'S FIX IT LATER
 	config = tmp;
 	check_Server_blocks(config);
-	return;
+	return config;
 }

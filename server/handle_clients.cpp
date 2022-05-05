@@ -1,6 +1,6 @@
 #include "../webserv.hpp"
 
-std::string build_response(int i, Log log) // reference or pointer for log?
+std::string build_response(int i, Log log, Config &config) // reference or pointer for log?
 {
 	/* Parse request */
 	char	buffer[BUFFER_SIZE];
@@ -15,7 +15,7 @@ std::string build_response(int i, Log log) // reference or pointer for log?
 	// log.add_one(request);
 
 	/* Build response */
-	Response response(request, "ressources", "index.html", "error404.html", SERVER_PORT);
+	Response response(request, config, "error404.html");
 	
 	/* Return response */
 	return (response.get_response());
@@ -97,7 +97,7 @@ void	handle_clients(int *sockets, Config &config, Log log, std::vector<struct so
 					{
 						try
 						{
-							std::string response = build_response(i, log);
+							std::string response = build_response(i, log, config);
 							int len = response.size();
 							const char *ret = response.c_str();
 							send_data(i, ret, len);
