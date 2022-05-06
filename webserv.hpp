@@ -22,15 +22,7 @@
 
 /* 1. MACROS AND GLOBAL*/
 
-#define SERVER_PORT 8080
-#define SERVER_PORT1 4040
-#define BACKLOG 800
 #define BUFFER_SIZE 1000000
-#define MAX_CONNECTIONS 10
-#define IS_FILE 0
-#define IS_DIR 1
-#define IS_CGI 2
-#define IS_IMG 3
 
 /* 2. CUSTOM CLASSES */
 
@@ -313,13 +305,10 @@ std::string dispatcher(Request &request);
 Config &conf_check(int argc, char **argv, Config &config);
 
 /* 4.1 SETUP SERVER */
-// void	setup_server(int *sockfd, struct sockaddr_in *sockaddr);
-// void	setup_server(int *sockfd, int *sockfd1, struct sockaddr_in *sockaddr, struct sockaddr_in *sockaddr1);
-// void setup_server(int *sockets, Config *config, std::vector<struct sockaddr_in> &sockaddr);
-void setup_server(int *sockets, Config &config, std::vector<struct sockaddr_in> &sockaddr);
+void	close_sockets(int *sockets, int len);
+void	setup_server(int *sockets, Config &config, std::vector<struct sockaddr_in> &sockaddr);
 
 /* 4.2 HANDLE CLIENTS */
-// void	handle_clients(Log log, int *sockfd, struct sockaddr_in *sockaddr);
 void	handle_clients(int *sockets, Config &config, Log log, std::vector<struct sockaddr_in> &sockaddr);
 
 #endif
