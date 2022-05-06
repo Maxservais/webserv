@@ -15,6 +15,10 @@ Response::Response(Request &request, Config &config) : req(request), config(conf
 		if (this->config.get_servers()[i]->get_port() == port_tmp)
 			this->server_index = i;
 	}
+
+	// get_server pointeur sur serveur prend port et serveur name
+	// vecteur temp -> tous serveurs s'appliquent au port, si un seul
+	// -->renvoie celui la, si plusieurs parcours vecteur et compare name si meme renvoie bon, sinon renvoie premier
 }
 
 Response	&Response::operator=(const Response &obj)
@@ -131,7 +135,7 @@ std::string Response::content_type(std::string file)
 	size_t pos = file.find_last_of(".");
 	std::string ext = file.substr(pos + 1);
 
-	if (ext == "cgi")
+	if (req.getFile_extention() == "cgi")
 		return ("Content-Type: text/html\n");
 
 	if (ext == "html")
@@ -152,7 +156,7 @@ std::string Response::body(std::string file)
 {
 	size_t pos = file.find_last_of(".");
 	std::string ext = file.substr(pos + 1);
-	if (ext == "png" || ext == "jpg" || ext == "ico" || ext == "gif" || ext == "webp") // gif et webp pas testeee
+	if (ext == "png" || ext == "jpg" || ext == "ico" || ext == "gif" || ext == "webp")
 	{
 		std::ifstream image(file);
 		std::stringstream buffer_s;
@@ -175,7 +179,10 @@ void Response::get_methode()
 {
 	std::string s;
 	if (req.getFile_extention() == "cgi")
-		this->response = req.getVersion() + full_code(200) + content_type(html_code_cgi(req)) + + "Content-Length: " + std::to_string(html_code_cgi(req).size()) + "\r\n\r\n" + html_code_cgi(req) + "\r\n";
+	{
+		std::string a(html_code_cgi(req));
+		this->response = req.getVersion() + full_code(200) + content_type(a) + "Content-Length: " + std::to_string(a.size()) + "\r\n\r\n" + a + "\r\n";
+	}
 	else if (req.getFile() == "/")
 	{
 		s = this->config.get_servers()[server_index]->get_root() + "/" + this->config.get_servers()[server_index]->get_index();
@@ -235,7 +242,6 @@ void Response::delete_methode()
 
 std::string Response::compose_response()
 {
-	
 	std::vector<std::string> v = this->config.get_servers()[this->server_index]->get_methods();
 	if (req.getMethod() == "GET" && std::find(v.begin(), v.end(), "GET") != v.end())
 		get_methode();

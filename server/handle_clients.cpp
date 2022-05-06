@@ -6,7 +6,7 @@ std::string build_response(int i, Log log, Config &config) // reference or point
 	char	buffer[BUFFER_SIZE];
 	memset(buffer, 0, BUFFER_SIZE);
 	int ret = recv(i, buffer, BUFFER_SIZE, 0);
-	if (ret == 0 || ret == -1) // bug ?
+	if (ret == -1) // bug ? if (ret == 0 || ret == -1)
 			throw ConnectionErr();
 	Request request(buffer);
 
