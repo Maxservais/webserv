@@ -46,12 +46,11 @@ void	disconnect_client(int client_fd, fd_set *current_sockets)
 
 void	handle_clients(int *sockets, Config &config, Log log, std::vector<struct sockaddr_in> &sockaddr)
 {
-	int			err;
-	int	len = config.get_servers().size();
-	int			max_socket_val = sockets[len - 1];
-	fd_set		current_sockets;
-	fd_set		ready_sockets;
-	// add writing sets here
+	int				err;
+	int				len = config.get_servers().size();
+	int				max_socket_val = sockets[len - 1];
+	fd_set			current_sockets;
+	fd_set			ready_sockets;
 	struct timeval	timeout;
 
 	/* Initiliaze current set */
@@ -107,17 +106,16 @@ void	handle_clients(int *sockets, Config &config, Log log, std::vector<struct so
 						catch (std::exception &e)
 						{
 							disconnect_client(i, &current_sockets);
-							close(sockets[0]); // CLOSE ALL SOCKETS
-							close(sockets[1]); // CLOSE ALL SOCKETS
+							close_sockets(sockets, len);
 							std::cerr << e.what() << std::endl;
+							return ;
 						}
 					}
 				}
 			}
 		}
 	}
-	close(sockets[0]);
-	close(sockets[1]);
+	close_sockets(sockets, len);
 }
 
 /* DOCUMENTATION:
