@@ -12,7 +12,6 @@ void Scheck_info(Config &obj, int i) // check if the server block contains the n
 		|| obj.get_servers()[i]->get_root().empty()
 		|| obj.get_servers()[i]->get_index().empty()
 		|| obj.get_servers()[i]->get_methods().empty()
-		|| obj.get_servers()[i]->get_errors().empty()
 		|| obj.get_servers()[i]->get_locations().empty())
 			throw MissStatErr();
 }
@@ -54,8 +53,8 @@ void Scheck_port_body_size(Config &obj, int i) // check the ports and max_body_s
 
 void Scheck_errors(Config &obj, int i) // check errors pages
 {
-	if (obj.get_servers()[i]->get_errors().empty()) 
-			throw MissStatErr();
+	// if (obj.get_servers()[i]->get_errors().empty()) 
+	// 		throw MissStatErr();
 	for (std::map<int,std::string>::iterator it = obj.get_servers()[i]->get_errors().begin(); it != obj.get_servers()[i]->get_errors().end(); ++it)
 	{
 		if (it->first < 100 || it->first > 599)

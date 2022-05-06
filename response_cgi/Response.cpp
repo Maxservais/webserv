@@ -63,6 +63,8 @@ std::string Response::full_code(int code)
 
 std::string Response::check_error_custom(int code)
 {
+	if (this->config.get_servers()[server_index]->get_errors().empty())
+		return "";
 	std::map<int,std::string>::iterator it = this->config.get_servers()[server_index]->get_errors().find(code);
 	if (it != this->config.get_servers()[server_index]->get_errors().end())
 		return (this->config.get_servers()[server_index]->get_root() + "/" + it->second);
@@ -193,7 +195,7 @@ void Response::get_methode()
 		if (!tmp.empty())
 			this->response = req.getVersion() + full_code(404) + content_type(tmp) + "Content-Length: " + std::to_string(body(tmp).size()) + "\r\n\r\n" + body(tmp) + "\r\n";
 		else
-			this->response = req.getVersion() + full_code(404) + "Content-Type: text/html\nContent-Length: 19\n\n <html><body><h1>Error 404 Not found</h1></body></html>";
+			this->response = req.getVersion() + full_code(404) + "Content-Type: text/html\nContent-Length: 99\n\n<html><body><center><h1>Error 404</h1></center><center><h2>Not found<h2></center><hr></body></html>";
 	}
 }
 
@@ -211,7 +213,7 @@ void Response::post_methode()
 		if (!tmp.empty())
 			this->response = req.getVersion() + full_code(204) + content_type(tmp) + "Content-Length: " + std::to_string(body(tmp).size()) + "\r\n\r\n" + body(tmp) + "\r\n";
 		else
-			this->response = req.getVersion() + full_code(204) + "Content-Type: text/html\nContent-Length: 54\n\n <html><body><h1>Error 204 NOT FOUND</h1></body></html>" + "\r\n";
+			this->response = req.getVersion() + full_code(204) + "Content-Type: text/html\nContent-Length: 100\n\n<html><body><center><h1>Error 204</h1></center><center><h2>No content<h2></center><hr></body></html>" + "\r\n";
 	}
 }
 
@@ -228,31 +230,35 @@ void Response::delete_methode()
 		if (!tmp.empty())
 			this->response = req.getVersion() + full_code(204) + content_type(tmp) + "Content-Length: " + std::to_string(body(tmp).size()) + "\r\n\r\n" + body(tmp) + "\r\n";
 		else
-			this->response = req.getVersion() + full_code(204) + "Content-Type: text/html\nContent-Length: 54\n\n <html><body><h1>Error 204 NOT FOUND</h1></body></html>" + "\r\n";
+			this->response = req.getVersion() + full_code(204) + "Content-Type: text/html\nContent-Length: 100\n\n<html><body><center><h1>Error 204</h1></center><center><h2>No content<h2></center><hr></body></html>" + "\r\n";
 	}
 }
 
 std::string Response::compose_response()
 {
-	if (req.getMethod() == "GET")
+	
+	std::vector<std::string> v = this->config.get_servers()[this->server_index]->get_methods();
+	if (req.getMethod() == "GET" && std::find(v.begin(), v.end(), "GET") != v.end())
 		get_methode();
-	else if (req.getMethod() == "POST")
+
+	else if (req.getMethod() == "POST" && std::find(v.begin(), v.end(), "POST") != v.end())
 		post_methode();
-	else if (req.getMethod() == "DELETE")
+
+	else if (req.getMethod() == "DELETE" && std::find(v.begin(), v.end(), "DELETE") != v.end())
 		delete_methode();
+
 	else
 	{
 		std::string tmp = check_error_custom(501);
 		if (!tmp.empty())
 			this->response = req.getVersion() + full_code(501) + content_type(tmp) + "Content-Length: " + std::to_string(body(tmp).size()) + "\r\n\r\n" + body(tmp) + "\r\n";
 		else
-			this->response = req.getVersion() + full_code(501) + "Content-Type: text/html\nContent-Length: 25\n\n <html><body><h1>Error 501 Not implemented</h1></body></html>" + "\r\n";
+			this->response = req.getVersion() + full_code(501) + "Content-Type: text/html\nContent-Length: 105\n\n<html><body><center><h1>Error 501</h1></center><center><h2>Not implemented<h2></center><hr></body></html>" + "\r\n";
 	}
 	return this->response;
 }
 
 std::string Response::get_response()
 {
-	std::cout << compose_response() << std::endl;
 	return (compose_response());
 }
