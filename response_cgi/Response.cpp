@@ -232,11 +232,13 @@ void Response::delete_methode()
 	}
 	else
 	{
-		std::string tmp = check_error_custom(204);
+		std::string tmp = check_error_custom(404);
 		if (!tmp.empty())
-			this->response = req.getVersion() + full_code(204) + content_type(tmp) + "Content-Length: " + std::to_string(body(tmp).size()) + "\r\n\r\n" + body(tmp) + "\r\n";
+			this->response = req.getVersion() + full_code(404) + content_type(tmp) + "Content-Length: " + std::to_string(body(tmp).size()) + "\r\n\r\n" + body(tmp) + "\r\n";
 		else
-			this->response = req.getVersion() + full_code(204) + "Content-Type: text/html\nContent-Length: 100\n\n<html><body><center><h1>Error 204</h1></center><center><h2>No content<h2></center><hr></body></html>" + "\r\n";
+		{
+			this->response = req.getVersion() + full_code(404) + "Content-Type: text/html\nContent-Length: 99\n\n<html><body><center><h1>Error 404</h1></center><center><h2>Not found<h2></center><hr></body></html>" + "\r\n";
+		}
 	}
 }
 

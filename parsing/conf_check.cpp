@@ -37,7 +37,7 @@ void Scheck_root_index(Config &obj, int i) // check root and index
 	else
 		closedir(dir);
 
-	std::ifstream stream(obj.get_servers()[i]->get_root() + "/" + obj.get_servers()[i]->get_index()); 
+	std::ifstream stream(obj.get_servers()[i]->get_root() + "/" + obj.get_servers()[i]->get_index());
 	if (stream.fail())
 		throw IndexErr();
 	else
