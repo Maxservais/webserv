@@ -22,8 +22,7 @@
 
 /* 1. MACROS AND GLOBAL*/
 
-#define SERVER_PORT 9999
-#define SERVER_PORT1 8888
+#define SERVER_PORT 8080
 #define BACKLOG 800
 #define BUFFER_SIZE 1000000
 #define MAX_CONNECTIONS 10
@@ -315,7 +314,6 @@ void	setup_server(int *sockets, Config &config, std::vector<struct sockaddr_in> 
 
 
 /* 4.2 HANDLE CLIENTS */
-// void	handle_clients(Log log, int *sockfd, struct sockaddr_in *sockaddr);
 void	handle_clients(int *sockets, Config &config, Log log, std::vector<struct sockaddr_in> &sockaddr);
 
 #endif
