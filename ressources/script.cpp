@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   script.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: adidion <adidion@student.s19.be>           +#+  +:+       +#+        */
+/*   By: mdeclerf <mdeclerf@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/03 14:23:49 by adidion           #+#    #+#             */
-/*   Updated: 2022/05/04 12:02:12 by adidion          ###   ########.fr       */
+/*   Updated: 2022/05/06 15:32:41 by mdeclerf         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,7 +32,7 @@ std::string &addsname(std::vector<std::string> &v, std::string &a, unsigned int 
 	if (cgi == "admin")
 		a += ("<h1>I totally respect you !</h1>");
 	else if (cgi == "")
-		a += "<h1>Don't you have a second name name ?</h1>";
+		a += "<h1>Don't you have a second name ?</h1>";
 	else
 		a += ("<h1>Your second name is " + cgi + " !</h1>");
 	return (a);

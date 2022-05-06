@@ -1,13 +1,13 @@
 #include "../webserv.hpp"
 
-std::string build_response(int i, Log log) // reference or pointer for log?
+std::string build_response(int i, Log log, Config &config) // reference or pointer for log?
 {
 	/* Parse request */
 	char	buffer[BUFFER_SIZE];
 	memset(buffer, 0, BUFFER_SIZE);
 	int ret = recv(i, buffer, BUFFER_SIZE, 0);
-	// for (int i = 0; i < BUFFER_SIZE; i++)
-	// 	std::cout << buffer[i];
+	//for (int i = 0; i < BUFFER_SIZE; i++)
+	//	std::cout << buffer[i];
 	if (ret == -1) // bug ?
 		throw ConnectionErr();
 	Request request(buffer);
@@ -17,7 +17,7 @@ std::string build_response(int i, Log log) // reference or pointer for log?
 	// log.add_one(request);
 
 	/* Build response */
-	Response response(request, "ressources", "index.html", "error404.html", SERVER_PORT);
+ 	Response response(request, config);
 	
 	/* Return response */
 	return (response.get_response());
@@ -48,12 +48,11 @@ void	disconnect_client(int client_fd, fd_set *current_sockets)
 
 void	handle_clients(int *sockets, Config &config, Log log, std::vector<struct sockaddr_in> &sockaddr)
 {
-	int			err;
-	int	len = config.get_servers().size();
-	int			max_socket_val = sockets[len - 1];
-	fd_set		current_sockets;
-	fd_set		ready_sockets;
-	// add writing sets here
+	int				err;
+	int				len = config.get_servers().size();
+	int				max_socket_val = sockets[len - 1];
+	fd_set			current_sockets;
+	fd_set			ready_sockets;
 	struct timeval	timeout;
 
 	/* Initiliaze current set */
@@ -99,7 +98,7 @@ void	handle_clients(int *sockets, Config &config, Log log, std::vector<struct so
 					{
 						try
 						{
-							std::string response = build_response(i, log);
+							std::string response = build_response(i, log, config);
 							int len = response.size();
 							const char *ret = response.c_str();
 							send_data(i, ret, len);
@@ -109,17 +108,16 @@ void	handle_clients(int *sockets, Config &config, Log log, std::vector<struct so
 						catch (std::exception &e)
 						{
 							disconnect_client(i, &current_sockets);
-							close(sockets[0]); // CLOSE ALL SOCKETS
-							close(sockets[1]); // CLOSE ALL SOCKETS
+							close_sockets(sockets, len);
 							std::cerr << e.what() << std::endl;
+							return ;
 						}
 					}
 				}
 			}
 		}
 	}
-	close(sockets[0]);
-	close(sockets[1]);
+	close_sockets(sockets, len);
 }
 
 /* DOCUMENTATION:

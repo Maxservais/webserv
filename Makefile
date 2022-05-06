@@ -5,12 +5,12 @@ CXX			=	c++
 CXXFLAGS	=	-Wall -Wextra -Werror -std=c++98 -fsanitize=address -g
 
 SRC_FILES	=	main.cpp					\
-				response_cgi/Response.cpp	\
-				server/setup_server.cpp		\
-				server/handle_clients.cpp	\
 				parsing/Config.cpp			\
 				parsing/Request.cpp			\
 				parsing/conf_check.cpp		\
+				server/setup_server.cpp		\
+				server/handle_clients.cpp	\
+				response_cgi/Response.cpp	\
 				response_cgi/Cgi.cpp		\
 
 OBJ_FILES	=	$(SRC_FILES:.cpp=.o)

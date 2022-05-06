@@ -21,32 +21,8 @@ Cgi::~Cgi()
 	return ;
 }
 
-void Cgi::setEnvForUp()
-{
-	std::string a(request.getUploadImput());
-	//for (int i = 0; i < BUFFER_SIZE; i++)
-	//	std::cout << a[i];
-	if (a.empty() == 1)
-	{
-		env = new char*[1];
-		env[0] = NULL;
-		return ;
-	}
-	env = new char*[2];
-	env[1] = NULL;
-	env[0] = new char[a.size() + 1];
-	env[0][a.size()] = '\0';
-	for (unsigned int j = 0; j < a.size(); j++)
-	{
-		env[0][j] = a.at(j);
-	}
-	return ;
-}
-
 void Cgi::setEnv()
 {
-	if (request.getFile_extention() == "up")
-		return (setEnvForUp());
 	std::string a;
 	if (request.getMethod() == "GET")
 		a = request.getQuery();

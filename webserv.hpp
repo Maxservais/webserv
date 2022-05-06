@@ -22,98 +22,11 @@
 
 /* 1. MACROS AND GLOBAL*/
 
-#define SERVER_PORT 9999
-#define SERVER_PORT1 8888
-#define BACKLOG 800
 #define BUFFER_SIZE 1000000
-#define MAX_CONNECTIONS 10
-#define IS_FILE 0
-#define IS_DIR 1
-#define IS_CGI 2
 
 /* 2. CUSTOM CLASSES */
 
-/* 2.1 PARSING OF THE REQUESTS */
-class	Request
-{
-	private:
-		std::string buff;
-	public:
-		Request();
-		Request(std::string &buffer);
-		Request(char *buffer);
-		Request(const Request &obj);
-		Request &operator=(const Request &objz);
-		~Request();
-		std::string getBuff() const;
-		std::string getMethod();
-		std::string getFile();
-		std::string getFile_clean();
-		std::string getVersion();
-		std::string getFile_extention();
-		std::string getQuery();
-		std::string getPostImput();
-		std::string getUploadImput();
-		std::vector<std::string> split_words(std::string buffer);
-};
-
-class	Log
-{
-	private:
-		std::vector<Request> v;
-	public:
-		Log();
-		Log( const Log &obj );
-		Log &operator=( const Log &obj );
-		~Log();
-		Request getFirst() const;
-		Request getLast() const;
-		std::vector<Request> getLog() const;
-		void	add_one(Request newone);
-		void	clear();
-		size_t	size() const;
-};
-
-class Response
-{
-	private:
-		Request &req;
-		std::string path;
-		std::string default_page;
-		std::string error_404;
-		std::string response;
-		int port;
-	public:
-		Response(Request &request, std::string path, std::string default_page, std::string error_404, int port);
-		Response	&operator=(const Response &obj);
-		~Response();
-		bool exists();
-		std::string full_code(int code);
-		std::string content_length(std::string file, int hint);
-		std::string content_type();
-		std::string body(std::string file);
-		std::string compose_response();
-		std::string get_response();
-		std::string ft_try_dir(Request &request);
-		std::string html_code_cgi(Request &req);
-};
-
-// CGI HANDLER
-class	Cgi
-{
-	private:
-		char **env;
-		Request request;
-	public:
-		Cgi(Request a);
-		Cgi &operator=( Cgi &obj );
-		~Cgi();
-		void setEnv();
-		void setEnvForUp();
-		std::string executeCgi();
-};
-
-/* 2.2 PARSING OF THE CONFIG FILE */
+/* 2.1 PARSING OF THE CONFIG FILE */
 
 class Location
 {
@@ -194,6 +107,89 @@ class Config
 		std::vector<Server*> _servers;
 };
 
+/* 2.2 PARSING OF THE REQUESTS */
+class	Request
+{
+	private:
+		std::string buff;
+	public:
+		Request();
+		Request(std::string &buffer);
+		Request(char *buffer);
+		Request(const Request &obj);
+		Request &operator=(const Request &objz);
+		~Request();
+		std::string getHost();
+		std::string getBuff() const;
+		std::string getMethod();
+		std::string getFile();
+		std::string getFile_clean();
+		std::string getVersion();
+		std::string getFile_extention();
+		std::string getQuery();
+		std::string getPostImput();
+		std::string getUploadImput();
+		std::vector<std::string> split_words(std::string buffer);
+};
+
+class	Log
+{
+	private:
+		std::vector<Request> v;
+	public:
+		Log();
+		Log( const Log &obj );
+		Log &operator=( const Log &obj );
+		~Log();
+		Request getFirst() const;
+		Request getLast() const;
+		std::vector<Request> getLog() const;
+		void	add_one(Request newone);
+		void	clear();
+		size_t	size() const;
+};
+
+class Response
+{
+	private:
+		Request &req;
+		Config &config;
+		int server_index;
+		std::string response;
+
+	public:
+		Response(Request &request, Config &config);
+		Response	&operator=(const Response &obj);
+		~Response();
+		bool exists();
+
+		std::string full_code(int code);
+		std::string content_type(std::string file);
+		std::string body(std::string file);
+		std::string compose_response();
+		std::string get_response();
+		std::string ft_try_dir(Request &request);
+		std::string html_code_cgi(Request &req);
+		std::string check_error_custom(int code);
+		void get_methode();
+		void post_methode();
+		void delete_methode();
+};
+
+// CGI HANDLER
+class	Cgi
+{
+	private:
+		char **env;
+		Request request;
+	public:
+		Cgi(Request a);
+		Cgi &operator=( Cgi &obj );
+		~Cgi();
+		void setEnv();
+		std::string executeCgi();
+};
+
 /* 3. EXCEPTIONS */
 
 class SocketErr : public std::exception
@@ -242,6 +238,11 @@ class ArgvErr : public std::exception
 class ConfOpenErr : public std::exception
 {
 	const char * what () const throw () { return ("Cannot open configuration file"); }
+};
+
+class ExtErr : public std::exception
+{
+	const char * what () const throw () { return ("Wrong extension for the configuration file"); }
 };
 
 class EmptyConfErr : public std::exception
@@ -302,19 +303,13 @@ bool exists (Request request);
 std::string get_length_file(std::string file);
 std::string convert_to_binary(const char * path);
 std::string dispatcher(Request &request);
-void	conf_check(int argc, char **argv, Config &config);
-
-
+Config &conf_check(int argc, char **argv, Config &config);
 
 /* 4.1 SETUP SERVER */
-// void	setup_server(int *sockfd, struct sockaddr_in *sockaddr);
-// void	setup_server(int *sockfd, int *sockfd1, struct sockaddr_in *sockaddr, struct sockaddr_in *sockaddr1);
-// void setup_server(int *sockets, Config *config, std::vector<struct sockaddr_in> &sockaddr);
-void setup_server(int *sockets, Config &config, std::vector<struct sockaddr_in> &sockaddr);
-
+void	close_sockets(int *sockets, int len);
+void	setup_server(int *sockets, Config &config, std::vector<struct sockaddr_in> &sockaddr);
 
 /* 4.2 HANDLE CLIENTS */
-// void	handle_clients(Log log, int *sockfd, struct sockaddr_in *sockaddr);
 void	handle_clients(int *sockets, Config &config, Log log, std::vector<struct sockaddr_in> &sockaddr);
 
 #endif

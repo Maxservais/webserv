@@ -16,14 +16,14 @@ Request::Request(std::string &buffer): buff(buffer)
 
 Request::Request(char *buffer): buff(buffer)
 {
-	//for (int i = 0; i < BUFFER_SIZE; i++)
-	//{
-	//	buff.push_back(buffer[i]);
-	//}
-	//for (int i = 0; i < BUFFER_SIZE; i++)
-	//{
-	//	std::cout << buff[i];
-	//}
+	if (getMethod() == "POST" && buff.find("------WebKitFormBoundary") != std::string::npos)
+	{
+		buff.clear();
+		for (int i = 0; i < BUFFER_SIZE; i++)
+		{
+			buff.push_back(buffer[i]);
+		}
+	}
 	return ;
 }
 
@@ -147,25 +147,56 @@ std::string Request::getPostImput()
 	return (std::string());
 }
 
+std::string ft_upload(std::string up, std::string buff)
+{
+	std::string a(buff);
+	size_t i = a.rfind("filename=\"");
+	if (i != std::string::npos)
+	{
+		i += 10;
+		size_t j = a.find("\"", i);
+		if (j != std::string::npos)
+		{
+			a = std::string((a.begin() + i), a.begin() + j);
+		}
+	}
+	int fd = open(("ressources/download/" + a).c_str(), O_RDWR | O_CREAT, 00777);
+	if (fd == -1)
+		exit (1); // throw une erreur --> plus tard
+	write(fd, up.c_str(), up.size());
+	close(fd);
+	return (a);
+}
+
 std::string Request::getUploadImput()
 {
 	if (getMethod() != "POST")
 		return (std::string());
 	std::string a(buff);
-	size_t i = a.rfind("image/png");
+	size_t i = a.rfind("Content-Type:");
 	if (i != std::string::npos)
 		i = a.find("\n", i);
 	if (i != std::string::npos)
 	{
-			std::cout << "HERE" << std::endl;
 		size_t j = a.find("------WebKitFormBoundary", i);
 		if (j != std::string::npos)
 		{
-			return (std::string((a.begin() + i + 1), a.begin() + j - 1));
+			return (ft_upload(std::string((a.begin() + i + 3), a.begin() + j - 2), buff));
 		}
 	}
 	return (std::string());
 }
+std::string Request::getHost()
+{
+	std::vector<std::string> v = split_words(buff);
+	for(size_t i = 0; i < v.size(); i++)
+	{
+		if (v[i] == "Host:" && v.size() >= i+1)
+			return v[i+1];
+	}
+	return "";
+}
+
 
 /* ************************************************************************** */
 /*  LOG                                                                       */
@@ -212,7 +243,6 @@ Request Log::getLast() const
 //add a request to the history
 void	Log::add_one(Request newone)
 {
-	//std::cout << v.size() << std::endl;
 	v.push_back(newone);
 }
 

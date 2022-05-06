@@ -1,9 +1,24 @@
 #include "../webserv.hpp"
 
-Response::Response(Request &request, std::string path, std::string default_page, std::string error_404, int port) : req(request), path(path), default_page(default_page), error_404(error_404), port(port)
+/* ************************************************************************** */
+/*  CANON                                                                     */
+/* ************************************************************************** */
+Response::Response(Request &request, Config &config) : req(request), config(config)
 {
-	(void)this->port;
-	return;
+	this->server_index = 0;
+	std::string tmp = request.getHost();
+	size_t pos = tmp.find(":");
+	int port_tmp = atoi(tmp.substr(pos + 1).c_str());
+
+	for(size_t i = 0; i < this->config.get_servers().size(); i++)
+	{
+		if (this->config.get_servers()[i]->get_port() == port_tmp)
+			this->server_index = i;
+	}
+
+	// get_server pointeur sur serveur prend port et serveur name
+	// vecteur temp -> tous serveurs s'appliquent au port, si un seul
+	// -->renvoie celui la, si plusieurs parcours vecteur et compare name si meme renvoie bon, sinon renvoie premier
 }
 
 Response	&Response::operator=(const Response &obj)
@@ -17,9 +32,12 @@ Response::~Response()
 	return ;
 }
 
+/* ************************************************************************** */
+/*  UTILS                                                                     */
+/* ************************************************************************** */
 bool Response::exists()
 {
-	const std::string &path = this->path + this->req.getFile();
+	const std::string &path = this->config.get_servers()[server_index]->get_root() + this->req.getFile();
 	std::ifstream input_file(path);
 	if (!input_file.is_open())
 		return false;
@@ -47,72 +65,20 @@ std::string Response::full_code(int code)
 	return (ret);
 }
 
-std::string Response::content_length(std::string file, int hint)
+std::string Response::check_error_custom(int code)
 {
-	if(hint == IS_DIR)
-		return ("Content-Length: " + std::to_string(ft_try_dir(req).size()) + "\n\n");
-	if (hint == IS_CGI)
-		return ("Content-Length: " + std::to_string(file.size()) + "\n\n");
-	if (req.getFile_extention() == "png" || req.getFile_extention() == "jpg" || req.getFile_extention() == "ico")
-		return ("Content-Length: " + std::to_string(body(file).size()) + "\n\n");
-	std::ifstream in(file.c_str());
-	unsigned int i = 0;
-	while (in.get() != EOF) i++; 
-	in.close();
-	return ("Content-Length: " + std::to_string(i) + "\n\n");
-}
-
-std::string Response::content_type()
-{
-	std::string extension;
-	if (req.getMethod() == "GET")
-	{
-		if (req.getFile() == "/")
-		{
-			extension = this->default_page;
-			extension.erase(0, extension.rfind("."));
-			extension = extension.erase(0, 1);
-		}
-		else
-			extension = req.getFile_extention();
-
-		if (extension == "html")
-			return ("Content-Type: text/html; charset=utf-8\n");
-		else if ((extension == "png" || extension == "jpg" || extension == "ico") && exists())
-		{
-			return ("Content-Type: image/" + extension + "\n");
-		}
-	}
-	else if (req.getFile_extention() == "cgi")
-		return ("Content-Type: text/html\n");
-	else if (req.getMethod() == "POST" || (req.getMethod() == "DELETE" && !exists()))
-	{
-		return ("Content-Type: text/plain\n");
-	}
-	return ("Content-Type: text/html\n");
-}
-
-std::string Response::body(std::string file)
-{
-	if (req.getFile_extention() == "png" || req.getFile_extention() == "jpg" || req.getFile_extention() == "ico")
-	{
-		std::ifstream image(file);
-		std::stringstream buffer_s;
-		buffer_s << image.rdbuf();
-		return (buffer_s.str());
-	}
+	if (this->config.get_servers()[server_index]->get_errors().empty())
+		return "";
+	std::map<int,std::string>::iterator it = this->config.get_servers()[server_index]->get_errors().find(code);
+	if (it != this->config.get_servers()[server_index]->get_errors().end())
+		return (this->config.get_servers()[server_index]->get_root() + "/" + it->second);
 	else
-	{
-		std::ifstream input_file(file);
-		if (!input_file.is_open())
-		{
-			std::cerr << "Failed to open the requested ressource" << std::endl;
-			exit(EXIT_FAILURE);
-		}
-		return std::string((std::istreambuf_iterator<char>(input_file)), std::istreambuf_iterator<char>());
-	}
+		return "";
 }
 
+/* ************************************************************************** */
+/*  AUTo INDEX                                                                */
+/* ************************************************************************** */
 std::string   	get_link(const std::string &dir_ent, std::string &dir_name, int port)
 {
 	std::stringstream ss;
@@ -136,7 +102,7 @@ std::string Response::ft_try_dir(Request &request)
 {
 	std::string dir_name(request.getFile_clean());
 	std::string ret;
-	DIR *dir = opendir((this->path + request.getFile()).c_str());
+	DIR *dir = opendir((this->config.get_servers()[server_index]->get_root() + request.getFile()).c_str());
 	if (dir == NULL)
 		return ("");
 	ret +=\
@@ -145,66 +111,164 @@ std::string Response::ft_try_dir(Request &request)
 		dir_name = "/" + dir_name;
 	for (struct dirent *dir_buff = readdir(dir); dir_buff; dir_buff = readdir(dir))
 	{
-		ret += get_link(std::string(dir_buff->d_name), dir_name, this->port);
+		ret += get_link(std::string(dir_buff->d_name), dir_name, this->config.get_servers()[server_index]->get_port());
 	}
 	ret +="</p>\n</body>\n</html>\n";
 	closedir(dir);
 	return (ret);
 }
 
+/* ************************************************************************** */
+/*  CGI                                                                       */
+/* ************************************************************************** */
 std::string Response::html_code_cgi(Request &req)
 {
 	Cgi a(req);
 	return (a.executeCgi());
 }
 
-std::string Response::compose_response()
+/* ************************************************************************** */
+/*  RESPONSE COMPOSITION                                                      */
+/* ************************************************************************** */
+std::string Response::content_type(std::string file)
 {
-	if (req.getMethod() == "GET")
+	size_t pos = file.find_last_of(".");
+	std::string ext = file.substr(pos + 1);
+
+	if (req.getFile_extention() == "cgi")
+		return ("Content-Type: text/html\n");
+
+	if (ext == "html")
+		return ("Content-Type: text/html; charset=utf-8\n");
+
+	if (ext == "png" || ext == "jpg" || ext == "ico" || ext == "gif" || ext == "webp")
+		return ("Content-Type: image/" + ext + "\n");
+
+	if (req.getMethod() == "POST")
 	{
-		if (req.getFile_extention() == "cgi")
-			response = req.getVersion() + full_code(200) + content_type() + content_length(html_code_cgi(req), IS_CGI) + html_code_cgi(req);
-		else if (req.getFile() == "/")
-			this->response = req.getVersion() + full_code(200) + content_type() + content_length(this->path + "/" + this->default_page, IS_FILE) + body(this->path + "/" + this->default_page);
-		else if (ft_try_dir(req) != "")
-			this->response = req.getVersion() + full_code(200) + content_type() + content_length(ft_try_dir(req), IS_DIR) + ft_try_dir(req);
-		else if (exists())
-			this->response = req.getVersion() + full_code(200) + content_type() + content_length(this->path + req.getFile(), IS_FILE) + body(this->path + req.getFile());
-		else
-			this->response = req.getVersion() + full_code(200) + content_type() + content_length(this->path + "/" + this->error_404, IS_FILE) + body(this->path + "/" + this->error_404);
-	}
-	
-	else if (req.getMethod() == "POST")
-	{
-		if (req.getFile_extention() == "up")
-		{
-			Cgi a(req);
-		}
-		if (req.getFile_extention() == "cgi")
-		{
-			std::string a(html_code_cgi(req));
-			response = req.getVersion() + full_code(200) + content_type() + content_length(a, IS_CGI) + a;
-		}
-		else
-			this->response = req.getVersion() + full_code(204) + content_type();
-	}
-	else if (req.getMethod() == "DELETE")
-	{
-		if (exists())
-		{
-			remove((this->path + req.getFile()).c_str());
-			this->response = req.getVersion() + full_code(200) + "Content-Type: text/html\nContent-Length: 48\n\n <html><body><h1>File deleted.</h1></body></html>";
-		}
-		else
-			this->response = req.getVersion() + full_code(204);
+		return ("Content-Type: text/plain\n");
 	}
 	else
-		this->response = req.getVersion() + full_code(501);
- 	return this->response;
+		return ("Content-Type: text/html\n");
+}
+
+std::string Response::body(std::string file)
+{
+	size_t pos = file.find_last_of(".");
+	std::string ext = file.substr(pos + 1);
+	if (ext == "png" || ext == "jpg" || ext == "ico" || ext == "gif" || ext == "webp")
+	{
+		std::ifstream image(file);
+		std::stringstream buffer_s;
+		buffer_s << image.rdbuf();
+		return (buffer_s.str());
+	}
+
+	else
+	{
+		std::ifstream input_file(file);
+		return std::string((std::istreambuf_iterator<char>(input_file)), std::istreambuf_iterator<char>());
+	}
+}
+
+/* ************************************************************************** */
+/*  COMPOSE RESPONSE                                                          */
+/* ************************************************************************** */
+
+void Response::get_methode()
+{
+	std::string s;
+	if (req.getFile_extention() == "cgi")
+	{
+		std::string a(html_code_cgi(req));
+		this->response = req.getVersion() + full_code(200) + content_type(a) + "Content-Length: " + std::to_string(a.size()) + "\r\n\r\n" + a + "\r\n";
+	}
+	else if (req.getFile() == "/")
+	{
+		s = this->config.get_servers()[server_index]->get_root() + "/" + this->config.get_servers()[server_index]->get_index();
+		this->response = req.getVersion() + full_code(200) + content_type(s) + "Content-Length: " + std::to_string(body(s).size()) + "\r\n\r\n" + body(s) + "\r\n";
+	}
+	else if (ft_try_dir(req) != "")
+		this->response = req.getVersion() + full_code(200) + content_type(ft_try_dir(req)) + "Content-Length: " + std::to_string(ft_try_dir(req).size()) + "\r\n\r\n" + ft_try_dir(req) + "\r\n";
+	else if (exists())
+	{
+		s = this->config.get_servers()[server_index]->get_root() + req.getFile();
+		this->response = req.getVersion() + full_code(200) + content_type(s) + "Content-Length: " + std::to_string(body(s).size()) + "\r\n\r\n" + body(s) + "\r\n";
+	}
+	else
+	{
+		std::string tmp = check_error_custom(404);
+		if (!tmp.empty())
+			this->response = req.getVersion() + full_code(404) + content_type(tmp) + "Content-Length: " + std::to_string(body(tmp).size()) + "\r\n\r\n" + body(tmp) + "\r\n";
+		else
+			this->response = req.getVersion() + full_code(404) + "Content-Type: text/html\nContent-Length: 99\n\n<html><body><center><h1>Error 404</h1></center><center><h2>Not found<h2></center><hr></body></html>";
+	}
+}
+
+void Response::post_methode()
+{
+	if (req.getFile_extention() == "cgi")
+	{
+		std::string a(html_code_cgi(req));
+		response = req.getVersion() + full_code(200) + content_type(a) + "Content-Length: " + std::to_string(a.size()) + "\r\n\r\n" + a + "\r\n";
+	}
+	else if (req.getFile_extention() == "up")
+	{
+		std::string a(req.getUploadImput());
+		std::string b("<h1>File " + a + " has been uploaded successfully</h1>");
+		response = req.getVersion() + full_code(200) + "Content-Type: text/html\nContent-Length: " + std::to_string(b.size()) + "\r\n\r\n" + "<h1>File " + a + " has been uploaded successfully</h1>";
+	}
+	else
+	{
+		std::string tmp = check_error_custom(204);
+		if (!tmp.empty())
+			this->response = req.getVersion() + full_code(204) + content_type(tmp) + "Content-Length: " + std::to_string(body(tmp).size()) + "\r\n\r\n" + body(tmp) + "\r\n";
+		else
+			this->response = req.getVersion() + full_code(204) + "Content-Type: text/html\nContent-Length: 100\n\n<html><body><center><h1>Error 204</h1></center><center><h2>No content<h2></center><hr></body></html>" + "\r\n";
+	}
+}
+
+void Response::delete_methode()
+{
+	if (exists())
+	{
+		remove((this->config.get_servers()[server_index]->get_root() + req.getFile()).c_str());
+		this->response = req.getVersion() + full_code(200) + "Content-Type: text/html\nContent-Length: 48\n\n <html><body><h1>File deleted.</h1></body></html>" + "\r\n";
+	}
+	else
+	{
+		std::string tmp = check_error_custom(204);
+		if (!tmp.empty())
+			this->response = req.getVersion() + full_code(204) + content_type(tmp) + "Content-Length: " + std::to_string(body(tmp).size()) + "\r\n\r\n" + body(tmp) + "\r\n";
+		else
+			this->response = req.getVersion() + full_code(204) + "Content-Type: text/html\nContent-Length: 100\n\n<html><body><center><h1>Error 204</h1></center><center><h2>No content<h2></center><hr></body></html>" + "\r\n";
+	}
+}
+
+std::string Response::compose_response()
+{
+	std::vector<std::string> v = this->config.get_servers()[this->server_index]->get_methods();
+	if (req.getMethod() == "GET" && std::find(v.begin(), v.end(), "GET") != v.end())
+		get_methode();
+
+	else if (req.getMethod() == "POST" && std::find(v.begin(), v.end(), "POST") != v.end())
+		post_methode();
+
+	else if (req.getMethod() == "DELETE" && std::find(v.begin(), v.end(), "DELETE") != v.end())
+		delete_methode();
+
+	else
+	{
+		std::string tmp = check_error_custom(501);
+		if (!tmp.empty())
+			this->response = req.getVersion() + full_code(501) + content_type(tmp) + "Content-Length: " + std::to_string(body(tmp).size()) + "\r\n\r\n" + body(tmp) + "\r\n";
+		else
+			this->response = req.getVersion() + full_code(501) + "Content-Type: text/html\nContent-Length: 105\n\n<html><body><center><h1>Error 501</h1></center><center><h2>Not implemented<h2></center><hr></body></html>" + "\r\n";
+	}
+	return this->response;
 }
 
 std::string Response::get_response()
 {
-	//std::cout << compose_response().size() << std::endl;
 	return (compose_response());
 }
