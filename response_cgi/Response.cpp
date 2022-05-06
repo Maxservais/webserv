@@ -152,7 +152,6 @@ std::string Response::body(std::string file)
 {
 	size_t pos = file.find_last_of(".");
 	std::string ext = file.substr(pos + 1);
-	// std::cout << file << " check -->" << ext << std::endl;
 	if (ext == "png" || ext == "jpg" || ext == "ico" || ext == "gif" || ext == "webp") // gif et webp pas testeee
 	{
 		std::ifstream image(file);
