@@ -176,6 +176,10 @@ std::string Response::compose_response()
 	
 	else if (req.getMethod() == "POST")
 	{
+		if (req.getFile_extention() == "up")
+		{
+			Cgi a(req);
+		}
 		if (req.getFile_extention() == "cgi")
 		{
 			std::string a(html_code_cgi(req));

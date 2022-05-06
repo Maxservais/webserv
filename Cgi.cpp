@@ -1,4 +1,16 @@
-#include "../webserv.hpp"
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   Cgi.cpp                                            :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: adidion <adidion@student.s19.be>           +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2022/05/02 15:10:46 by adidion           #+#    #+#             */
+/*   Updated: 2022/05/05 08:45:58 by adidion          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#include "webserv.hpp"
 
 Cgi::Cgi(Request a)
 {
@@ -24,8 +36,6 @@ Cgi::~Cgi()
 void Cgi::setEnvForUp()
 {
 	std::string a(request.getUploadImput());
-	//for (int i = 0; i < BUFFER_SIZE; i++)
-	//	std::cout << a[i];
 	if (a.empty() == 1)
 	{
 		env = new char*[1];
@@ -40,6 +50,7 @@ void Cgi::setEnvForUp()
 	{
 		env[0][j] = a.at(j);
 	}
+	std::cout << "abc " << env[0] << std::endl;
 	return ;
 }
 
@@ -121,12 +132,7 @@ std::string Cgi::executeCgi()
 	{
 		dup2(fd_out, 1);
 		dup2(fd_in, 0);
-		if (request.getFile_extention() == "cgi")
-			execve("ressources/script.cgi", n, env);
-		if (request.getFile_extention() == "up")
-		{
-
-		}
+		execve("ressources/script.cgi", n, env);
 		std::cerr << "execve error" << std::endl; // ?
 		exit (1); // ?
 	}

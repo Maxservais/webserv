@@ -16,6 +16,14 @@ Request::Request(std::string &buffer): buff(buffer)
 
 Request::Request(char *buffer): buff(buffer)
 {
+	//for (int i = 0; i < BUFFER_SIZE; i++)
+	//{
+	//	buff.push_back(buffer[i]);
+	//}
+	//for (int i = 0; i < BUFFER_SIZE; i++)
+	//{
+	//	std::cout << buff[i];
+	//}
 	return ;
 }
 
@@ -146,10 +154,15 @@ std::string Request::getUploadImput()
 	std::string a(buff);
 	size_t i = a.rfind("image/png");
 	if (i != std::string::npos)
+		i = a.find("\n", i);
+	if (i != std::string::npos)
 	{
-		size_t j = a.find("\n", i);
+			std::cout << "HERE" << std::endl;
+		size_t j = a.find("------WebKitFormBoundary", i);
 		if (j != std::string::npos)
-			return (std::string((a.begin() + j + 1), a.end()));
+		{
+			return (std::string((a.begin() + i + 1), a.begin() + j - 1));
+		}
 	}
 	return (std::string());
 }
