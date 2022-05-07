@@ -207,16 +207,20 @@ void Response::get_methode()
 
 void Response::post_methode()
 {
+	if (req.getFile_extention() == "up")
+	{
+		std::string a(req.getUploadImput());
+		std::string b("<h1>File " + a + " has been uploaded successfully</h1>");
+		if (a.empty() == 0)
+		{
+			response = req.getVersion() + full_code(200) + "Content-Type: text/html\nContent-Length: " + std::to_string(b.size()) + "\r\n\r\n" + "<h1>File " + a + " has been uploaded successfully</h1>";
+			return ;
+		}
+	}
 	if (req.getFile_extention() == "cgi")
 	{
 		std::string a(html_code_cgi(req));
 		response = req.getVersion() + full_code(200) + content_type(a) + "Content-Length: " + std::to_string(a.size()) + "\r\n\r\n" + a + "\r\n";
-	}
-	else if (req.getFile_extention() == "up")
-	{
-		std::string a(req.getUploadImput());
-		std::string b("<h1>File " + a + " has been uploaded successfully</h1>");
-		response = req.getVersion() + full_code(200) + "Content-Type: text/html\nContent-Length: " + std::to_string(b.size()) + "\r\n\r\n" + "<h1>File " + a + " has been uploaded successfully</h1>";
 	}
 	else
 	{

@@ -5,7 +5,7 @@ std::string build_response(int i, Log log, Config &config) // reference or point
 	/* Parse request */
 	char	buffer[BUFFER_SIZE];
 	memset(buffer, 0, BUFFER_SIZE);
-	int ret = recv(i, buffer, BUFFER_SIZE, 0);
+	int ret = read(i, buffer, BUFFER_SIZE);
 	//for (int i = 0; i < BUFFER_SIZE; i++)
 	//	std::cout << buffer[i];
 	if (ret == -1) // bug ?

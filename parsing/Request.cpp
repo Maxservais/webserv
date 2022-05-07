@@ -24,6 +24,7 @@ Request::Request(char *buffer): buff(buffer)
 			buff.push_back(buffer[i]);
 		}
 	}
+	std::cout << buff << std::endl;
 	return ;
 }
 
