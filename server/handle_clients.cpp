@@ -5,9 +5,11 @@ std::string build_response(int i, Log log, Config &config) // reference or point
 	/* Parse request */
 	char	buffer[BUFFER_SIZE];
 	memset(buffer, 0, BUFFER_SIZE);
-	int ret = recv(i, buffer, BUFFER_SIZE, 0);
-	if (ret == -1) // bug ? if (ret == 0 || ret == -1)
-			throw ConnectionErr();
+	int ret = read(i, buffer, BUFFER_SIZE);
+	//for (int i = 0; i < BUFFER_SIZE; i++)
+	//	std::cout << buffer[i];
+	if (ret == -1) // bug ?
+		throw ConnectionErr();
 	Request request(buffer);
 
 	/* Log what needs to be logged */
@@ -15,7 +17,6 @@ std::string build_response(int i, Log log, Config &config) // reference or point
 	// log.add_one(request);
 
 	/* Build response */
-	std::cout << buffer << std::endl;
  	Response response(request, config);
 	
 	/* Return response */

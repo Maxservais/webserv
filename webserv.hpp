@@ -22,7 +22,7 @@
 
 /* 1. MACROS AND GLOBAL*/
 
-#define BUFFER_SIZE 1000000
+#define BUFFER_SIZE 8000000
 
 /* 2. CUSTOM CLASSES */
 
@@ -128,6 +128,7 @@ class	Request
 		std::string getFile_extention();
 		std::string getQuery();
 		std::string getPostImput();
+		std::string getUploadImput();
 		std::vector<std::string> split_words(std::string buffer);
 };
 

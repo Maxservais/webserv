@@ -1,4 +1,16 @@
-#include "../webserv.hpp"
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   Cgi.cpp                                            :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: adidion <adidion@student.s19.be>           +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2022/05/02 15:10:46 by adidion           #+#    #+#             */
+/*   Updated: 2022/05/05 08:45:58 by adidion          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#include "webserv.hpp"
 
 Cgi::Cgi(Request a)
 {
@@ -21,8 +33,31 @@ Cgi::~Cgi()
 	return ;
 }
 
+void Cgi::setEnvForUp()
+{
+	std::string a(request.getUploadImput());
+	if (a.empty() == 1)
+	{
+		env = new char*[1];
+		env[0] = NULL;
+		return ;
+	}
+	env = new char*[2];
+	env[1] = NULL;
+	env[0] = new char[a.size() + 1];
+	env[0][a.size()] = '\0';
+	for (unsigned int j = 0; j < a.size(); j++)
+	{
+		env[0][j] = a.at(j);
+	}
+	std::cout << "abc " << env[0] << std::endl;
+	return ;
+}
+
 void Cgi::setEnv()
 {
+	if (request.getFile_extention() == "up")
+		return (setEnvForUp());
 	std::string a;
 	if (request.getMethod() == "GET")
 		a = request.getQuery();
@@ -97,12 +132,7 @@ std::string Cgi::executeCgi()
 	{
 		dup2(fd_out, 1);
 		dup2(fd_in, 0);
-		if (request.getFile_extention() == "cgi")
-			execve("ressources/script.cgi", n, env);
-		if (request.getFile_extention() == "up")
-		{
-
-		}
+		execve("ressources/script.cgi", n, env);
 		std::cerr << "execve error" << std::endl; // ?
 		exit (1); // ?
 	}
