@@ -61,6 +61,9 @@ std::string Response::full_code(int code)
 		case 501:
 			ret = " 501 Not Implemented\n";
 			break;
+		case 413:
+			ret = " 413 Request Entity Too Large\n";
+			break;
 	}
 	return (ret);
 }
@@ -209,12 +212,24 @@ void Response::post_methode()
 {
 	if (req.getFile_extention() == "up")
 	{
-		std::string a(req.getUploadImput());
-		std::string b("<h1>File " + a + " has been uploaded successfully</h1>");
-		if (a.empty() == 0)
+		if (this->config.get_servers()[server_index]->get_max_body_size() < req.getUpBody())
 		{
-			response = req.getVersion() + full_code(200) + "Content-Type: text/html\nContent-Length: " + std::to_string(b.size()) + "\r\n\r\n" + "<h1>File " + a + " has been uploaded successfully</h1>";
+			std::string tmp = check_error_custom(413);
+			if (!tmp.empty())
+				this->response = req.getVersion() + full_code(413) + content_type(tmp) + "Content-Length: " + std::to_string(body(tmp).size()) + "\r\n\r\n" + body(tmp) + "\r\n";
+			else
+				this->response = req.getVersion() + full_code(413) + "Content-Type: text/html\nContent-Length: 114\n\n<html><body><center><h1>Error 413</h1></center><center><h2>Request Entity Too Large<h2></center><hr></body></html>" + "\r\n";
 			return ;
+		}
+		else
+		{
+			std::string a(req.getUploadImput());
+			std::string b("<h1>File " + a + " has been uploaded successfully</h1>");
+			if (a.empty() == 0)
+			{
+				response = req.getVersion() + full_code(200) + "Content-Type: text/html\nContent-Length: " + std::to_string(b.size()) + "\r\n\r\n" + "<h1>File " + a + " has been uploaded successfully</h1>";
+				return ;
+			}
 		}
 	}
 	if (req.getFile_extention() == "cgi")

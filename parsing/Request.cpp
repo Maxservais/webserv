@@ -24,7 +24,7 @@ Request::Request(char *buffer): buff(buffer)
 			buff.push_back(buffer[i]);
 		}
 	}
-	std::cout << buff << std::endl;
+	//std::cout << buff << std::endl;
 	return ;
 }
 
@@ -161,7 +161,7 @@ std::string ft_upload(std::string up, std::string buff)
 			a = std::string((a.begin() + i), a.begin() + j);
 		}
 	}
-	int fd = open(("ressources/download/" + a).c_str(), O_RDWR | O_CREAT, 00777);
+	int fd = open(("ressources/download/" + a).c_str(), O_RDWR | O_CREAT | O_TRUNC, 00777);
 	if (fd == -1)
 		exit (1); // throw une erreur --> plus tard
 	write(fd, up.c_str(), up.size());
@@ -187,6 +187,27 @@ std::string Request::getUploadImput()
 	}
 	return (std::string());
 }
+
+int Request::getUpBody()
+{
+	if (getMethod() != "POST")
+		return (0);
+	std::string a(buff);
+	size_t i = a.rfind("Content-Type:");
+	if (i != std::string::npos)
+		i = a.find("\n", i);
+	if (i != std::string::npos)
+	{
+		size_t j = a.find("------WebKitFormBoundary", i);
+		if (j != std::string::npos)
+		{
+			std::string b((a.begin() + i + 3), a.begin() + j - 2);
+			return (b.size());
+		}
+	}
+	return (0);
+}
+
 std::string Request::getHost()
 {
 	std::vector<std::string> v = split_words(buff);

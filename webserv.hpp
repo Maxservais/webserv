@@ -129,6 +129,7 @@ class	Request
 		std::string getQuery();
 		std::string getPostImput();
 		std::string getUploadImput();
+		int getUpBody();
 		std::vector<std::string> split_words(std::string buffer);
 };
 
