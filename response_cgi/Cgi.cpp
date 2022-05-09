@@ -1,8 +1,8 @@
 #include "../webserv.hpp"
 
-Cgi::Cgi(Request a)
+Cgi::Cgi(Request a) : request(a)
 {
-	request = a;
+	// request = a;
 	setEnv();
 	return ;
 }

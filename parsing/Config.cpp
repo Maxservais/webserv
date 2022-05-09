@@ -62,12 +62,8 @@ void Location::fill_variables(std::vector<std::string> vec)
 			this->_root.assign(vec[i].begin() + vec[i].find(" ") + 1, vec[i].end());
 		else if (vec[i].find("index") != std::string::npos)
 			this->_index.assign(vec[i].begin() + vec[i].find(" ") + 1, vec[i].end());
-		else if (vec[i].find("cgi_extension") != std::string::npos)
-			this->_cgi_extension.assign(vec[i].begin() + vec[i].find(" ") + 1, vec[i].end());
-		else if (vec[i].find("cgi_path") != std::string::npos)
-			this->_cgi_path.assign(vec[i].begin() + vec[i].find(" ") + 1, vec[i].end());
-		else if (vec[i].find("index") != std::string::npos)
-			this->_cgi_path.assign(vec[i].begin() + vec[i].find(" ") + 1, vec[i].end());
+		else if (vec[i].find("uploads") != std::string::npos)
+			this->_uploads.assign(vec[i].begin() + vec[i].find(" ") + 1, vec[i].end());
 		else if (vec[i].find("method") != std::string::npos)
 		{
 			this->_methods = split_spaces(vec[i]);
@@ -85,9 +81,8 @@ void Location::fill_variables(std::vector<std::string> vec)
 /* Getters */
 std::string Location::get_ALL(void) const {return this->_ALL; }
 std::string Location::get_root(void) const { return this->_root; }
+std::string Location::get_uploads(void) const { return this->_uploads; }
 std::string Location::get_index(void) const { return this->_index; }
-std::string Location::get_cgi_extension(void) const { return this->_cgi_extension; }
-std::string Location::get_cgi_path(void) const { return this->_cgi_path; }
 std::vector<std::string> Location::get_methods(void) const { return this->_methods; }
 bool Location::get_directory_listing(void) const { return this->_directory_listing; }
 
@@ -159,6 +154,7 @@ size_t Server::fill_location(std::vector<std::string> vec, size_t i)
 	loc_tmp = new Location(token);
 	tmp.clear();
 	tmp.assign(token.begin() + token.find("/"), token.begin() + token.find("{"));
+	tmp.pop_back();
 	this->_locations.insert(std::pair<std::string, Location*>(tmp,loc_tmp));
 	return i;
 }
@@ -246,7 +242,7 @@ Config::Config(std::string conf_file)
 
 Config::Config(Config const & src)
 {
-	*this = src;
+	this->_servers = src._servers;
 	return;
 }
 

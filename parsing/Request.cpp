@@ -4,17 +4,10 @@
 /*  REQUEST                                                                   */
 /* ************************************************************************** */
 
-Request::Request()
-{
-	return ;
-}
-
-Request::Request(std::string &buffer): buff(buffer)
-{
-	return ;
-}
-
-Request::Request(char *buffer): buff(buffer)
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+/*  CANON                                                                     */
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+Request::Request(char *buffer, Config &conf): buff(buffer), config(conf)
 {
 	if (getMethod() == "POST" && buff.find("------WebKitFormBoundary") != std::string::npos)
 	{
@@ -25,12 +18,25 @@ Request::Request(char *buffer): buff(buffer)
 		}
 	}
 	std::cout << buff << std::endl;
+	this->_file = getFile();
+	fill_variables();
 	return ;
 }
 
-Request::Request(const Request &obj)
+Request::Request(const Request &obj): config(obj.config)
 {
-	*this = obj;
+	
+	this->buff = obj.buff;
+	this->_server_index = obj._server_index; 
+	this->_max_body_size = obj._max_body_size;
+	this->_port = obj._port;
+	this->_errors = obj._errors;
+	this->_server_name = obj._server_name;
+	this->_root = obj._root;
+	this->_index = obj._index;
+	this->_methods = obj._methods;
+	this->_directory_listing = obj._directory_listing;
+	this->_uploads = obj._uploads;
 }
 
 Request	&Request::operator=(const Request &obj)
@@ -43,6 +49,98 @@ Request::~Request()
 {
 	return ;
 }
+
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+/*  UTILS FILLING                                                             */
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+std::string Request::getHost()
+{
+	std::vector<std::string> v = split_words(buff);
+	for(size_t i = 0; i < v.size(); i++)
+	{
+		if (v[i] == "Host:" && v.size() >= i+1)
+			return v[i+1];
+	}
+	return "";
+}
+
+void Request::fill_variables()
+{
+	// SET SERVER_INDEX
+	this->_server_index = 0;
+	std::string tmp = getHost();
+	size_t pos = tmp.find(":");
+	int port_tmp = atoi(tmp.substr(pos + 1).c_str());
+
+	for(size_t i = 0; i < this->config.get_servers().size(); i++)
+	{
+		if (this->config.get_servers()[i]->get_port() == port_tmp)
+			this->_server_index = i;
+	}
+
+	// FIST WE SET EVERYTHING WITH THE GLOBAL SCOPE ELEMENTS
+	this->_port = this->config.get_servers()[this->_server_index]->get_port();
+	this->_server_name = this->config.get_servers()[this->_server_index]->get_server_name();
+	this->_max_body_size = this->config.get_servers()[this->_server_index]->get_max_body_size();
+	this->_errors = this->config.get_servers()[this->_server_index]->get_errors();
+	this->_root = this->config.get_servers()[this->_server_index]->get_root();
+	this->_index = this->config.get_servers()[this->_server_index]->get_index();
+	this->_methods = this->config.get_servers()[this->_server_index]->get_methods();
+	this->_directory_listing = true;
+	this->_uploads = this->_root;
+
+	// NOW CHECK IF THERE IS / IN THE URI
+	std::string uri = getFile().erase(0, 1);
+
+	// CASE WE DON'T HAVE A / AND THE FILE NAME IS NOT A LOCATION KEY
+	// OR THERE IS NO LOCATION BLOCKS IN THE URI WE KEEP THE GLOBAL SCOPE VARIABLES
+	if (this->config.get_servers()[this->_server_index]->get_locations().empty())
+		return;
+
+	// CASE WE DON'T HAVE A / AND THE URI IS NOT A LOCATION BLOCK NAME
+	if (uri.find('/') == std::string::npos && this->config.get_servers()[this->_server_index]->get_locations().find(getFile()) == this->config.get_servers()[this->_server_index]->get_locations().end())
+		return;
+
+	// CASE WE HAVE A / IN THE URI MEANS WE WILL TAKE THE SETTINGS OF THE LOCATION BLOCK (IF THERE IS ONE FOR THIS KEY)
+	std::map<std::string,Location *>::iterator it;
+	if (uri.find('/') != std::string::npos)
+	{
+		std::string loc = "/";
+		for (size_t i = 0; uri[i] != '/'; i++)
+			loc += uri[i];
+		it = this->config.get_servers()[this->_server_index]->get_locations().find(loc);
+	}
+	else
+	{
+		it = this->config.get_servers()[this->_server_index]->get_locations().find(getFile());
+		this->_file = "/";
+	}
+
+	// we found the key in the location map
+	if (it !=  this->config.get_servers()[this->_server_index]->get_locations().end())
+	{
+		if (uri.find('/') != std::string::npos)
+			this->_file = "/" + uri.substr(it->first.size());
+
+		if ( !it->second->get_root().empty())
+			this->_root = it->second->get_root();
+		if ( !it->second->get_index().empty())
+			this->_index = it->second->get_index();
+		if ( !it->second->get_methods().empty())
+			this->_methods = it->second->get_methods();
+		if ( it->second->get_directory_listing() == false)
+			this->_directory_listing = false;
+		if ( !it->second->get_uploads().empty())
+			this->_uploads = it->second->get_uploads();
+		else
+			this->_uploads = this->_root;
+	}
+	return;
+}
+
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+/*  UTILS                                                                     */
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
 // split a string with spaces without care of allocations and returns it into a vector
 std::vector<std::string> Request::split_words(std::string s)
@@ -58,6 +156,7 @@ std::string Request::getBuff() const
 {
 	return (buff);
 }
+
 //return a std::string of the method in capital letters
 //if the method doesn't exist, it returns a clear std:::string
 std::string Request::getMethod()
@@ -187,17 +286,21 @@ std::string Request::getUploadImput()
 	}
 	return (std::string());
 }
-std::string Request::getHost()
-{
-	std::vector<std::string> v = split_words(buff);
-	for(size_t i = 0; i < v.size(); i++)
-	{
-		if (v[i] == "Host:" && v.size() >= i+1)
-			return v[i+1];
-	}
-	return "";
-}
 
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+/*  GETTERS                                                                   */
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+int Request::get_server_index(void) const { return this->_server_index; }
+std::string Request::get_root(void) const { return this->_root; }
+std::string Request::get_index(void) const { return this->_index; }
+std::vector<std::string> &Request::get_methods(void) { return this->_methods; }
+bool Request::get_directory_listing(void) const { return this->_directory_listing; }
+int Request::get_port(void) const { return this->_port; }
+std::string Request::get_server_name(void) const { return this->_server_name; }
+std::map<int,std::string> &Request::get_errors(void) { return this->_errors; }
+std::string Request::get_uploads(void) const { return this->_uploads; }
+int  Request::get_max_body_size(void) const { return this->_max_body_size; }
+std::string Request::get_file(void) const { return this->_file; }
 
 /* ************************************************************************** */
 /*  LOG                                                                       */

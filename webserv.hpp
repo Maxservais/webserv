@@ -43,8 +43,7 @@ class Location
 		std::string get_ALL(void) const;
 		std::string get_root(void) const;
 		std::string get_index(void) const;
-		std::string get_cgi_extension(void) const;
-		std::string get_cgi_path(void) const;
+		std::string get_uploads(void) const;
 		std::vector<std::string> get_methods(void) const;
 		bool get_directory_listing(void) const;
 
@@ -52,10 +51,9 @@ class Location
 		std::string _ALL;
 		std::string _root;
 		std::string _index;
-		std::string _cgi_extension;
-		std::string _cgi_path;
 		std::vector<std::string> _methods;
 		bool _directory_listing;
+		std::string _uploads;
 };
 
 class Server
@@ -69,8 +67,6 @@ class Server
 
 		void fill_variables(std::vector<std::string> vec);
 		size_t fill_location(std::vector<std::string> vec, size_t i);
-
-		// void check_Server(void) const;
 
 		std::string get_ALL(void) const;
 		int get_port(void) const;
@@ -112,14 +108,30 @@ class	Request
 {
 	private:
 		std::string buff;
+		Config &config;
+		std::string _file;
+
+		/// THESE ARE THE VARIABLES TO BE USED IN RESPONSE.CPP, ACCORDING TO THE LOCATION
+		int _server_index; 
+		int _max_body_size;
+		int _port;
+		std::map<int,std::string> _errors;
+		std::string _server_name;
+		std::string _root;
+		std::string _index;
+		std::vector<std::string> _methods;
+		bool _directory_listing;
+		std::string _uploads;
+		/// THESE ARE THE VARIABLES TO BE USED IN RESPONSE.CPP, ACCORDING TO THE LOCATION
+
 	public:
-		Request();
-		Request(std::string &buffer);
-		Request(char *buffer);
+		// CANON
+		Request(char *buffer, Config &conf);
 		Request(const Request &obj);
-		Request &operator=(const Request &objz);
+		Request &operator=(const Request &obj);
 		~Request();
-		std::string getHost();
+
+		// UTILS
 		std::string getBuff() const;
 		std::string getMethod();
 		std::string getFile();
@@ -130,6 +142,23 @@ class	Request
 		std::string getPostImput();
 		std::string getUploadImput();
 		std::vector<std::string> split_words(std::string buffer);
+
+		// UTILS FILL PRIVATE VARIABLES TI BE USED IN RESPONSE
+		std::string getHost();
+		void fill_variables();
+
+		//GETTERS
+		std::string get_file(void) const;
+		int  get_server_index(void) const;
+		std::string  get_root(void) const;
+		std::string  get_index(void) const;
+		std::vector<std::string>  &get_methods(void);
+		bool  get_directory_listing(void) const;
+		int  get_port(void) const;
+		std::string  get_server_name(void) const;
+		std::map<int,std::string>  &get_errors(void);
+		std::string  get_uploads(void) const;
+		int  get_max_body_size(void) const;
 };
 
 class	Log
@@ -153,12 +182,10 @@ class Response
 {
 	private:
 		Request &req;
-		Config &config;
-		int server_index;
 		std::string response;
 
 	public:
-		Response(Request &request, Config &config);
+		Response(Request &request);
 		Response	&operator=(const Response &obj);
 		~Response();
 		bool exists();

@@ -3,22 +3,20 @@
 /* ************************************************************************** */
 /*  CANON                                                                     */
 /* ************************************************************************** */
-Response::Response(Request &request, Config &config) : req(request), config(config)
+Response::Response(Request &request) : req(request)
 {
-	this->server_index = 0;
-	std::string tmp = request.getHost();
-	size_t pos = tmp.find(":");
-	int port_tmp = atoi(tmp.substr(pos + 1).c_str());
-
-	for(size_t i = 0; i < this->config.get_servers().size(); i++)
-	{
-		if (this->config.get_servers()[i]->get_port() == port_tmp)
-			this->server_index = i;
-	}
-
 	// get_server pointeur sur serveur prend port et serveur name
 	// vecteur temp -> tous serveurs s'appliquent au port, si un seul
 	// -->renvoie celui la, si plusieurs parcours vecteur et compare name si meme renvoie bon, sinon renvoie premier
+
+	// std::cout << "check --> max body  " << req.get_max_body_size() << std::endl;
+	// std::cout << "check --> port      " << req.get_port() << std::endl;
+	// std::cout << "check --> s name    " << req.get_server_name() << std::endl;
+	// std::cout << "check --> root      " << req.get_root() << std::endl;
+	// std::cout << "check --> index     " << req.get_index() << std::endl;
+	// std::cout << "check --> meth size " << req.get_methods().size() << std::endl;
+	// std::cout << "check --> auto inde " << req.get_directory_listing() << std::endl;
+	// std::cout << "check --> uploads   " << req.get_uploads() << std::endl;
 }
 
 Response	&Response::operator=(const Response &obj)
@@ -37,7 +35,7 @@ Response::~Response()
 /* ************************************************************************** */
 bool Response::exists()
 {
-	const std::string &path = this->config.get_servers()[server_index]->get_root() + this->req.getFile();
+	const std::string &path = req.get_root() + this->req.get_file();
 	std::ifstream input_file(path);
 	if (!input_file.is_open())
 		return false;
@@ -67,11 +65,11 @@ std::string Response::full_code(int code)
 
 std::string Response::check_error_custom(int code)
 {
-	if (this->config.get_servers()[server_index]->get_errors().empty())
+	if (req.get_errors().empty())
 		return "";
-	std::map<int,std::string>::iterator it = this->config.get_servers()[server_index]->get_errors().find(code);
-	if (it != this->config.get_servers()[server_index]->get_errors().end())
-		return (this->config.get_servers()[server_index]->get_root() + "/" + it->second);
+	std::map<int,std::string>::iterator it = req.get_errors().find(code);
+	if (it != req.get_errors().end())
+		return (req.get_root() + "/" + it->second);
 	else
 		return "";
 }
@@ -102,7 +100,7 @@ std::string Response::ft_try_dir(Request &request)
 {
 	std::string dir_name(request.getFile_clean());
 	std::string ret;
-	DIR *dir = opendir((this->config.get_servers()[server_index]->get_root() + request.getFile()).c_str());
+	DIR *dir = opendir((this->req.get_root() + request.get_file()).c_str());
 	if (dir == NULL)
 		return ("");
 	ret +=\
@@ -111,7 +109,7 @@ std::string Response::ft_try_dir(Request &request)
 		dir_name = "/" + dir_name;
 	for (struct dirent *dir_buff = readdir(dir); dir_buff; dir_buff = readdir(dir))
 	{
-		ret += get_link(std::string(dir_buff->d_name), dir_name, this->config.get_servers()[server_index]->get_port());
+		ret += get_link(std::string(dir_buff->d_name), dir_name, this->req.get_port());
 	}
 	ret +="</p>\n</body>\n</html>\n";
 	closedir(dir);
@@ -178,21 +176,24 @@ std::string Response::body(std::string file)
 void Response::get_methode()
 {
 	std::string s;
+	std::cout << " CHECK --> this->req.get_root() + slash + this->req.get_index() " << this->req.get_root() + "/" + this->req.get_index() << std::endl;
+	std::cout << " CHECK --> this->req.get_root() + req.get_file() " << this->req.get_root() + req.get_file() << std::endl << std::endl;
+
 	if (req.getFile_extention() == "cgi")
 	{
 		std::string a(html_code_cgi(req));
 		this->response = req.getVersion() + full_code(200) + content_type(a) + "Content-Length: " + std::to_string(a.size()) + "\r\n\r\n" + a + "\r\n";
 	}
-	else if (req.getFile() == "/")
+	else if (req.get_file() == "/")
 	{
-		s = this->config.get_servers()[server_index]->get_root() + "/" + this->config.get_servers()[server_index]->get_index();
+		s = this->req.get_root() + "/" + this->req.get_index();
 		this->response = req.getVersion() + full_code(200) + content_type(s) + "Content-Length: " + std::to_string(body(s).size()) + "\r\n\r\n" + body(s) + "\r\n";
 	}
 	else if (ft_try_dir(req) != "")
 		this->response = req.getVersion() + full_code(200) + content_type(ft_try_dir(req)) + "Content-Length: " + std::to_string(ft_try_dir(req).size()) + "\r\n\r\n" + ft_try_dir(req) + "\r\n";
 	else if (exists())
 	{
-		s = this->config.get_servers()[server_index]->get_root() + req.getFile();
+		s = this->req.get_root() + req.get_file();
 		this->response = req.getVersion() + full_code(200) + content_type(s) + "Content-Length: " + std::to_string(body(s).size()) + "\r\n\r\n" + body(s) + "\r\n";
 	}
 	else
@@ -209,6 +210,8 @@ void Response::post_methode()
 {
 	if (req.getFile_extention() == "up")
 	{
+		// if (this->req.get_max_body_size() > """""""")
+		// 	response = """"""""
 		std::string a(req.getUploadImput());
 		std::string b("<h1>File " + a + " has been uploaded successfully</h1>");
 		if (a.empty() == 0)
@@ -236,7 +239,7 @@ void Response::delete_methode()
 {
 	if (exists())
 	{
-		remove((this->config.get_servers()[server_index]->get_root() + req.getFile()).c_str());
+		remove((this->req.get_root() + req.get_file()).c_str());
 		this->response = req.getVersion() + full_code(200) + "Content-Type: text/html\nContent-Length: 48\n\n <html><body><h1>File deleted.</h1></body></html>" + "\r\n";
 	}
 	else
@@ -253,7 +256,7 @@ void Response::delete_methode()
 
 std::string Response::compose_response()
 {
-	std::vector<std::string> v = this->config.get_servers()[this->server_index]->get_methods();
+	std::vector<std::string> v = req.get_methods();
 	if (req.getMethod() == "GET" && std::find(v.begin(), v.end(), "GET") != v.end())
 		get_methode();
 

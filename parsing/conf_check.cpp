@@ -100,18 +100,6 @@ void Lcheck_root_index(std::map<std::string,Location*>::iterator it) // check in
 		stream.close();
 }
 
-void Lcheck_cgi(std::map<std::string,Location*>::iterator it) // check cgi_path
-{
-	if (!it->second->get_cgi_path().empty())
-	{
-		std::ifstream stream(it->second->get_root() + "/" + it->second->get_cgi_path()); 
-		if (stream.fail())
-			throw CgiErr();
-		else
-			stream.close();
-	}
-}
-
 void Lcheck_methods(std::map<std::string,Location*>::iterator it) // check if the methods are one of the 8 HTTP methods
 {
 	std::string arr[] = {"GET", "POST", "DELETE", "HEAD", "PUT", "CONNECT", "OPTIONS", "TRACE", "PATCH"};
@@ -147,7 +135,6 @@ void check_Server_blocks(Config &obj)
 		for (std::map<std::string,Location*>::iterator it = obj.get_servers()[i]->get_locations().begin() ;it != obj.get_servers()[i]->get_locations().end(); ++it)
 		{
 			Lcheck_root_index(it);
-			Lcheck_cgi(it);
 			Lcheck_methods(it);
 		}
 	}

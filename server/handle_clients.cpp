@@ -10,14 +10,14 @@ std::string build_response(int i, Log log, Config &config) // reference or point
 	//	std::cout << buffer[i];
 	if (ret == -1) // bug ?
 		throw ConnectionErr();
-	Request request(buffer);
+	Request request(buffer, config);
 
 	/* Log what needs to be logged */
 	(void)log;
 	// log.add_one(request);
 
 	/* Build response */
- 	Response response(request, config);
+ 	Response response(request);
 	
 	/* Return response */
 	return (response.get_response());
