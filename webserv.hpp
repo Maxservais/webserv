@@ -222,12 +222,17 @@ class AcceptErr : public std::exception
 
 class ConnectionErr : public std::exception
 {
-	const char * what () const throw () { return ("Read error occurred while receiving on the socket, closing connection"); }
+	const char * what () const throw () { return ("Read error occurred while receiving on the socket, closing connection!"); }
+};
+
+class ConnectionClosedErr : public std::exception
+{
+	const char * what () const throw () { return ("Connection closed by client!"); }
 };
 
 class TimeOutErr : public std::exception
 {
-	const char * what () const throw () { return ("Time out, closing connection"); }
+	const char * what () const throw () { return ("Time out, closing connection!"); }
 };
 
 class ArgvErr : public std::exception
@@ -237,62 +242,62 @@ class ArgvErr : public std::exception
 
 class ConfOpenErr : public std::exception
 {
-	const char * what () const throw () { return ("Cannot open configuration file"); }
+	const char * what () const throw () { return ("Cannot open configuration file!"); }
 };
 
 class ExtErr : public std::exception
 {
-	const char * what () const throw () { return ("Wrong extension for the configuration file"); }
+	const char * what () const throw () { return ("Wrong extension for the configuration file!"); }
 };
 
 class EmptyConfErr : public std::exception
 {
-	const char * what () const throw () { return ("Invalid configuration file"); }
+	const char * what () const throw () { return ("Invalid configuration file!"); }
 };
 
 class MissStatErr : public std::exception
 {
-	const char * what () const throw () { return ("Missing element in the configuration file"); }
+	const char * what () const throw () { return ("Missing element in the configuration file!"); }
 };
 
 class MethErr : public std::exception
 {
-	const char * what () const throw () { return ("Invalid methods in the configuration file"); }
+	const char * what () const throw () { return ("Invalid methods in the configuration file!"); }
 };
 
 class NegPortErr : public std::exception
 {
-	const char * what () const throw () { return ("Invalid port number or max body_size"); }
+	const char * what () const throw () { return ("Invalid port number or max body_size!"); }
 };
 
 class RootErr : public std::exception
 {
-	const char * what () const throw () { return ("Invalid root"); }
+	const char * what () const throw () { return ("Invalid root!"); }
 };
 
 class IndexErr : public std::exception
 {
-	const char * what () const throw () { return ("Cannot open the index file requested"); }
+	const char * what () const throw () { return ("Cannot open the index file requested!"); }
 };
 
 class CodeErr : public std::exception
 {
-	const char * what () const throw () { return ("Wrong error code"); }
+	const char * what () const throw () { return ("Wrong error code!"); }
 };
 
 class Code_fileErr : public std::exception
 {
-	const char * what () const throw () { return ("Cannot open the error code file"); }
+	const char * what () const throw () { return ("Cannot open the error code file!"); }
 };
 
 class ServNameErr : public std::exception
 {
-	const char * what () const throw () { return ("Wrong formating of the server_name"); }
+	const char * what () const throw () { return ("Wrong formating of the server_name!"); }
 };
 
 class CgiErr : public std::exception
 {
-	const char * what () const throw () { return ("Cannot open cgi script"); }
+	const char * what () const throw () { return ("Cannot open cgi script!"); }
 };
 
 /* 4. MAIN FUNCTIONS */
