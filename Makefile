@@ -5,6 +5,7 @@ CXX			=	c++
 CXXFLAGS	=	-Wall -Wextra -Werror -std=c++98 -fsanitize=address -g
 
 SRC_FILES	=	main.cpp					\
+				parsing/Log.cpp				\
 				parsing/Config.cpp			\
 				parsing/Request.cpp			\
 				parsing/conf_check.cpp		\

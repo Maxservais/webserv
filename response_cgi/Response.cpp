@@ -44,6 +44,9 @@ std::string Response::full_code(int code)
 		case 204:
 			ret = " 204 No Content\n";
 			break;
+		case 403:
+			ret = " 404 Forbidden\n";
+			break;
 		case 404:
 			ret = " 404 Not Found\n";
 			break;
@@ -66,7 +69,7 @@ std::string Response::check_error_custom(int code)
 }
 
 /* ************************************************************************** */
-/*  AUTo INDEX                                                                */
+/*  AUTO INDEX                                                                */
 /* ************************************************************************** */
 std::string   	get_link(const std::string &dir_ent, std::string &dir_name, int port)
 {
@@ -177,7 +180,18 @@ void Response::get_methode()
 		this->response = req.getVersion() + full_code(200) + content_type(s) + "Content-Length: " + std::to_string(body(s).size()) + "\r\n\r\n" + body(s) + "\r\n";
 	}
 	else if (ft_try_dir(req) != "")
-		this->response = req.getVersion() + full_code(200) + content_type(ft_try_dir(req)) + "Content-Length: " + std::to_string(ft_try_dir(req).size()) + "\r\n\r\n" + ft_try_dir(req) + "\r\n";
+	{
+		if (req.get_directory_listing() == false)
+		{
+			std::string tmp = check_error_custom(403);
+			if (!tmp.empty())
+				this->response = req.getVersion() + full_code(403) + content_type(tmp) + "Content-Length: " + std::to_string(body(tmp).size()) + "\r\n\r\n" + body(tmp) + "\r\n";
+			else
+				this->response = req.getVersion() + full_code(403) + "Content-Type: text/html\nContent-Length: 100\n\n<html><body><center><h1>Error 403</h1></center><center><h2>Forbidden<h2></center><hr></body></html>";
+		}
+		else
+			this->response = req.getVersion() + full_code(200) + content_type(ft_try_dir(req)) + "Content-Length: " + std::to_string(ft_try_dir(req).size()) + "\r\n\r\n" + ft_try_dir(req) + "\r\n";
+	}
 	else if (exists())
 	{
 		s = this->req.get_root() + req.get_file();
@@ -207,6 +221,7 @@ void Response::post_methode()
 			return ;
 		}
 	}
+
 	if (req.getFile_extention() == "cgi")
 	{
 		std::string a(html_code_cgi(req));

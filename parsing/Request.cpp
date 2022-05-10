@@ -64,9 +64,8 @@ std::string Request::getHost()
 	return "";
 }
 
-void Request::fill_variables()
+void Request::fill_server_index()
 {
-	// SET SERVER_INDEX
 	this->_server_index = 0;
 	std::string tmp = getHost();
 	size_t pos = tmp.find(":");
@@ -77,8 +76,10 @@ void Request::fill_variables()
 		if (this->config.get_servers()[i]->get_port() == port_tmp)
 			this->_server_index = i;
 	}
+}
 
-	// FIST WE SET EVERYTHING WITH THE GLOBAL SCOPE ELEMENTS
+void Request::fill_default_variables()
+{
 	this->_port = this->config.get_servers()[this->_server_index]->get_port();
 	this->_server_name = this->config.get_servers()[this->_server_index]->get_server_name();
 	this->_max_body_size = this->config.get_servers()[this->_server_index]->get_max_body_size();
@@ -88,20 +89,48 @@ void Request::fill_variables()
 	this->_methods = this->config.get_servers()[this->_server_index]->get_methods();
 	this->_directory_listing = true;
 	this->_uploads = this->_root;
+}
 
-	// NOW CHECK IF THERE IS / IN THE URI
+void Request::replace_default_variables(std::map<std::string,Location *>::iterator it, std::string uri)
+{
+	if (uri.find('/') != std::string::npos)
+		this->_file = "/" + uri.substr(it->first.size());
+	if ( !it->second->get_root().empty())
+		this->_root = it->second->get_root();
+	if ( !it->second->get_index().empty())
+		this->_index = it->second->get_index();
+	if ( !it->second->get_methods().empty())
+		this->_methods = it->second->get_methods();
+	if ( it->second->get_directory_listing() == false)
+		this->_directory_listing = false;
+	if ( !it->second->get_uploads().empty())
+		this->_uploads = it->second->get_uploads();
+	else
+		this->_uploads = this->_root;
+}
+
+void Request::fill_variables()
+{
+	// setting the index of the server (all the server blocks are stored in a vector)
+	fill_server_index();
+
+	// we fill the variables with the elements of the global scope from the server block
+	fill_default_variables();
+
+	// we check if there is a / in the uri (removing the first char, which is always a /)
 	std::string uri = get_file().erase(0, 1);
 
-	// CASE WE DON'T HAVE A / AND THE FILE NAME IS NOT A LOCATION KEY
-	// OR THERE IS NO LOCATION BLOCKS IN THE URI WE KEEP THE GLOBAL SCOPE VARIABLES
+	// in case there is no location block in the server block
 	if (this->config.get_servers()[this->_server_index]->get_locations().empty())
 		return;
 
-	// CASE WE DON'T HAVE A / AND THE URI IS NOT A LOCATION BLOCK NAME
+	// in case we don't have a slash and the uri is not a location key
 	if (uri.find('/') == std::string::npos && this->config.get_servers()[this->_server_index]->get_locations().find(get_file()) == this->config.get_servers()[this->_server_index]->get_locations().end())
 		return;
 
-	// CASE WE HAVE A / IN THE URI MEANS WE WILL TAKE THE SETTINGS OF THE LOCATION BLOCK (IF THERE IS ONE FOR THIS KEY)
+	// we now need to replace the default variables with the ones from the requested location block if the string is a key in the location block
+	
+	// if we have a slash in the uri, we need to check the string before the slash to check if it is found in the location blocks map
 	std::map<std::string,Location *>::iterator it;
 	if (uri.find('/') != std::string::npos)
 	{
@@ -116,25 +145,9 @@ void Request::fill_variables()
 		this->_file = "/";
 	}
 
-	// we found the key in the location map
+	// if we found the key in the location map, we set the variables to the found location block ones
 	if (it !=  this->config.get_servers()[this->_server_index]->get_locations().end())
-	{
-		if (uri.find('/') != std::string::npos)
-			this->_file = "/" + uri.substr(it->first.size());
-
-		if ( !it->second->get_root().empty())
-			this->_root = it->second->get_root();
-		if ( !it->second->get_index().empty())
-			this->_index = it->second->get_index();
-		if ( !it->second->get_methods().empty())
-			this->_methods = it->second->get_methods();
-		if ( it->second->get_directory_listing() == false)
-			this->_directory_listing = false;
-		if ( !it->second->get_uploads().empty())
-			this->_uploads = it->second->get_uploads();
-		else
-			this->_uploads = this->_root;
-	}
+		replace_default_variables(it, uri);
 	return;
 }
 
@@ -170,7 +183,6 @@ std::string Request::getMethod()
 
 // return the path of the file, if it exists
 // else, it return only a "/"
-
 std::string Request::setFile()
 {
 	std::vector<std::string> v = split_words(buff);
