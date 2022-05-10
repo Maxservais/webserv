@@ -1,4 +1,4 @@
-#include "../webserv.hpp"
+#include "../../webserv.hpp"
 
 /* ************************************************************************** */
 /*  UTILS                                                                     */
@@ -18,7 +18,7 @@ std::vector<std::string> split_spaces(std::string s)
 /* Canon */
 Location::Location() { return; }
 
-Location::Location(std::string block) : _ALL(block), _directory_listing(1)
+Location::Location(std::string block) : _ALL(block), _directory_listing(true)
 {
 	std::string token;
 	std::vector<std::string> vec;
@@ -34,7 +34,6 @@ Location::Location(std::string block) : _ALL(block), _directory_listing(1)
 		vec.push_back(this->_ALL);
 
 	fill_variables(vec);
-	return;
 }
 
 Location::Location(Location const & src)
@@ -68,11 +67,13 @@ void Location::fill_variables(std::vector<std::string> vec)
 			this->_methods = split_spaces(vec[i]);
 			this->_methods.erase(this->_methods.begin());
 		}
-		else if (vec[i].find("directory_listing") != std::string::npos)
+		else if (vec[i].find("directory_listing ") != std::string::npos)
 		{
-			if (vec[i].find("off"))
+			if (vec[i].find("off") != std::string::npos)
 				this->_directory_listing = false;
-		}
+			if (vec[i].find("on") != std::string::npos)
+				this->_directory_listing = true;
+		}	
 		i++;
 	}
 }
@@ -105,7 +106,6 @@ Server::Server(std::string block) : _ALL(block), _port(0), _max_body_size(0)
 		this->_ALL.erase(0,pos + 2); // the + 2 is for removing the tabs
 	}
 	fill_variables(vec);
-	return;
 }
 
 Server::Server(Server const & src)

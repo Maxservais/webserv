@@ -142,6 +142,7 @@ class	Request
 		std::string get_file(void) const;
 		int  get_server_index(void) const;
 		std::string  get_root(void) const;
+		std::string  get_errors_root(void) const;
 		std::string  get_index(void) const;
 		std::vector<std::string>  &get_methods(void);
 		bool  get_directory_listing(void) const;
@@ -162,6 +163,7 @@ class	Request
 		std::map<int,std::string> _errors;
 		std::string _server_name;
 		std::string _root;
+		std::string _errors_root;
 		std::string _index;
 		std::vector<std::string> _methods;
 		bool _directory_listing;

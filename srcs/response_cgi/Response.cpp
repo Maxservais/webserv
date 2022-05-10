@@ -1,4 +1,4 @@
-#include "../webserv.hpp"
+#include "../../webserv.hpp"
 
 /* ************************************************************************** */
 /*  CANON                                                                     */
@@ -63,7 +63,7 @@ std::string Response::check_error_custom(int code)
 		return "";
 	std::map<int,std::string>::iterator it = req.get_errors().find(code);
 	if (it != req.get_errors().end())
-		return (req.get_root() + "/" + it->second);
+		return (req.get_errors_root() + "/" + it->second);
 	else
 		return "";
 }

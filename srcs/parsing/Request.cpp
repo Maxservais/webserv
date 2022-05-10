@@ -1,4 +1,4 @@
-#include "../webserv.hpp"
+#include "../../webserv.hpp"
 
 /* ************************************************************************** */
 /*  REQUEST                                                                   */
@@ -20,7 +20,6 @@ Request::Request(char *buffer, Config &conf): buff(buffer), config(conf)
 	std::cout << buff << std::endl;
 	this->_file = setFile();
 	fill_variables();
-	return ;
 }
 
 Request::Request(const Request &obj): config(obj.config)
@@ -31,6 +30,7 @@ Request::Request(const Request &obj): config(obj.config)
 	this->_max_body_size = obj._max_body_size;
 	this->_port = obj._port;
 	this->_errors = obj._errors;
+	this->_errors_root = obj._errors_root;
 	this->_server_name = obj._server_name;
 	this->_root = obj._root;
 	this->_index = obj._index;
@@ -85,6 +85,7 @@ void Request::fill_default_variables()
 	this->_max_body_size = this->config.get_servers()[this->_server_index]->get_max_body_size();
 	this->_errors = this->config.get_servers()[this->_server_index]->get_errors();
 	this->_root = this->config.get_servers()[this->_server_index]->get_root();
+	this->_errors_root = this->_root;
 	this->_index = this->config.get_servers()[this->_server_index]->get_index();
 	this->_methods = this->config.get_servers()[this->_server_index]->get_methods();
 	this->_directory_listing = true;
@@ -312,3 +313,4 @@ std::map<int,std::string> &Request::get_errors(void) { return this->_errors; }
 std::string Request::get_uploads(void) const { return this->_uploads; }
 int  Request::get_max_body_size(void) const { return this->_max_body_size; }
 std::string Request::get_file(void) const { return this->_file; }
+std::string Request::get_errors_root(void) const { return this->_errors_root; }

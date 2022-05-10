@@ -2,17 +2,17 @@ NAME		=	webserv
 
 CXX			=	c++
 
-CXXFLAGS	=	-Wall -Wextra -Werror -std=c++98 -fsanitize=address -g
+CXXFLAGS	=	-Wall -Wextra -Werror -std=c++98
 
-SRC_FILES	=	main.cpp					\
-				parsing/Log.cpp				\
-				parsing/Config.cpp			\
-				parsing/Request.cpp			\
-				parsing/conf_check.cpp		\
-				server/setup_server.cpp		\
-				server/handle_clients.cpp	\
-				response_cgi/Response.cpp	\
-				response_cgi/Cgi.cpp		\
+SRC_FILES	=	main.cpp						\
+				srcs/parsing/Log.cpp			\
+				srcs/parsing/Config.cpp			\
+				srcs/parsing/Request.cpp		\
+				srcs/parsing/conf_check.cpp		\
+				srcs/server/setup_server.cpp	\
+				srcs/server/handle_clients.cpp	\
+				srcs/response_cgi/Response.cpp	\
+				srcs/response_cgi/Cgi.cpp		\
 
 OBJ_FILES	=	$(SRC_FILES:.cpp=.o)
 

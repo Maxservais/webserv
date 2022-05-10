@@ -1,4 +1,4 @@
-#include "../webserv.hpp"
+#include "../../webserv.hpp"
 
 Cgi::Cgi(Request a) : request(a)
 {
