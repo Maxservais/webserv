@@ -133,6 +133,9 @@ std::string Response::content_type(std::string file)
 	if (ext == "html")
 		return ("Content-Type: text/html; charset=utf-8\n");
 
+	if (ext == "css")
+		return ("Content-Type: text/css\n");
+
 	if (ext == "png" || ext == "jpg" || ext == "ico" || ext == "gif" || ext == "webp")
 		return ("Content-Type: image/" + ext + "\n");
 
@@ -227,6 +230,7 @@ void Response::post_methode()
 		std::string a(html_code_cgi(req));
 		response = req.getVersion() + full_code(200) + content_type(a) + "Content-Length: " + std::to_string(a.size()) + "\r\n\r\n" + a + "\r\n";
 	}
+
 	else
 	{
 		std::string tmp = check_error_custom(204);

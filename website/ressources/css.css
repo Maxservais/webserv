@@ -1,0 +1,18 @@
+body {
+	background-color: lightblue;
+	font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+  
+  h1 {
+	color: blue;
+	background-color: yellow;
+	border: 1px solid black;
+  }
+  
+  p {
+	color: rgb(44, 191, 73);
+  }
+
+  a {
+	color: hotpink;
+  }
