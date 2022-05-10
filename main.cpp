@@ -14,6 +14,7 @@ int main(int argc, char **argv)
 	{
 		std::cerr << e.what() << std::endl;
 		std::cerr << "Program termination. Issue(s) with config file!" << std::endl;
+		config.free_all_server();
 		return (EXIT_FAILURE);
 	}
 
@@ -37,6 +38,7 @@ int main(int argc, char **argv)
 	catch (std::exception &e)
 	{
 		std::cerr << e.what() << std::endl;
+		config.free_all_server();
 		return (EXIT_FAILURE);
 	}
 
@@ -48,7 +50,10 @@ int main(int argc, char **argv)
 	catch (std::exception &e)
 	{
 		std::cerr << e.what() << std::endl;
+		config.free_all_server();
 		return (EXIT_FAILURE);
 	}
+
+	config.free_all_server();
 	return (EXIT_SUCCESS);
 }

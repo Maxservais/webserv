@@ -2,17 +2,25 @@ body {
 	background-color: lightblue;
 	font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   }
-  
+
+  img {
+	display: block;
+	width: 60%;
+	margin-left: auto;
+	margin-right: auto;
+  }
+
   h1 {
 	color: blue;
-	background-color: yellow;
-	border: 1px solid black;
+	text-align: center;
   }
   
   p {
+	text-align: center;
 	color: rgb(44, 191, 73);
   }
 
   a {
+	text-align: center;
 	color: hotpink;
   }

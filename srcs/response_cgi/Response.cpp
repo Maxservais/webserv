@@ -30,6 +30,7 @@ bool Response::exists()
 	std::ifstream input_file(path);
 	if (!input_file.is_open())
 		return false;
+	input_file.close();
 	return true;
 }
 
@@ -53,6 +54,7 @@ std::string Response::full_code(int code)
 		case 501:
 			ret = " 501 Not Implemented\n";
 			break;
+		
 	}
 	return (ret);
 }
@@ -131,7 +133,7 @@ std::string Response::content_type(std::string file)
 		return ("Content-Type: text/html\n");
 
 	if (ext == "html")
-		return ("Content-Type: text/html; charset=utf-8\n");
+		return ("Content-Type: text/html\n");
 
 	if (ext == "css")
 		return ("Content-Type: text/css\n");
@@ -147,23 +149,22 @@ std::string Response::content_type(std::string file)
 		return ("Content-Type: text/html\n");
 }
 
+std::string Response::compose_error_message(int code)
+{
+	std::string error_code = std::to_string(code);
+	std::string html = "<html><body><center><h1>Error" + error_code + "</h1></center><center><h2>" + full_code(code) + "<h2></center><hr></body></html>";
+	return ("Content-Type: text/html\nContent-Length: " + std::to_string(html.size()) + "\n\n" + html);
+}
+
 std::string Response::body(std::string file)
 {
-	size_t pos = file.find_last_of(".");
-	std::string ext = file.substr(pos + 1);
-	if (ext == "png" || ext == "jpg" || ext == "ico" || ext == "gif" || ext == "webp")
-	{
-		std::ifstream image(file);
-		std::stringstream buffer_s;
-		buffer_s << image.rdbuf();
-		return (buffer_s.str());
-	}
+	std::ifstream input_file(file);
+	std::stringstream	buffer;
+	std::string ret;
+	buffer << input_file.rdbuf();
+	ret = buffer.str();
 
-	else
-	{
-		std::ifstream input_file(file);
-		return std::string((std::istreambuf_iterator<char>(input_file)), std::istreambuf_iterator<char>());
-	}
+	return (ret);
 }
 
 /* ************************************************************************** */
@@ -190,7 +191,8 @@ void Response::get_methode()
 			if (!tmp.empty())
 				this->response = req.getVersion() + full_code(403) + content_type(tmp) + "Content-Length: " + std::to_string(body(tmp).size()) + "\r\n\r\n" + body(tmp) + "\r\n";
 			else
-				this->response = req.getVersion() + full_code(403) + "Content-Type: text/html\nContent-Length: 100\n\n<html><body><center><h1>Error 403</h1></center><center><h2>Forbidden<h2></center><hr></body></html>";
+				this->response = req.getVersion() + full_code(403) + compose_error_message(403);
+				// this->response = req.getVersion() + full_code(403) + "Content-Type: text/html\nContent-Length: 100\n\n<html><body><center><h1>Error 403</h1></center><center><h2>Forbidden<h2></center><hr></body></html>";
 		}
 		else
 			this->response = req.getVersion() + full_code(200) + content_type(ft_try_dir(req)) + "Content-Length: " + std::to_string(ft_try_dir(req).size()) + "\r\n\r\n" + ft_try_dir(req) + "\r\n";
@@ -206,7 +208,8 @@ void Response::get_methode()
 		if (!tmp.empty())
 			this->response = req.getVersion() + full_code(404) + content_type(tmp) + "Content-Length: " + std::to_string(body(tmp).size()) + "\r\n\r\n" + body(tmp) + "\r\n";
 		else
-			this->response = req.getVersion() + full_code(404) + "Content-Type: text/html\nContent-Length: 99\n\n<html><body><center><h1>Error 404</h1></center><center><h2>Not found<h2></center><hr></body></html>";
+			this->response = req.getVersion() + full_code(404) + compose_error_message(404);
+			// this->response = req.getVersion() + full_code(404) + "Content-Type: text/html\nContent-Length: 99\n\n<html><body><center><h1>Error 404</h1></center><center><h2>Not found<h2></center><hr></body></html>";
 	}
 }
 
@@ -237,7 +240,8 @@ void Response::post_methode()
 		if (!tmp.empty())
 			this->response = req.getVersion() + full_code(204) + content_type(tmp) + "Content-Length: " + std::to_string(body(tmp).size()) + "\r\n\r\n" + body(tmp) + "\r\n";
 		else
-			this->response = req.getVersion() + full_code(204) + "Content-Type: text/html\nContent-Length: 100\n\n<html><body><center><h1>Error 204</h1></center><center><h2>No content<h2></center><hr></body></html>" + "\r\n";
+			this->response = req.getVersion() + full_code(204) + compose_error_message(204);
+			// this->response = req.getVersion() + full_code(204) + "Content-Type: text/html\nContent-Length: 100\n\n<html><body><center><h1>Error 204</h1></center><center><h2>No content<h2></center><hr></body></html>\r\n";
 	}
 }
 
@@ -254,9 +258,8 @@ void Response::delete_methode()
 		if (!tmp.empty())
 			this->response = req.getVersion() + full_code(404) + content_type(tmp) + "Content-Length: " + std::to_string(body(tmp).size()) + "\r\n\r\n" + body(tmp) + "\r\n";
 		else
-		{
-			this->response = req.getVersion() + full_code(404) + "Content-Type: text/html\nContent-Length: 99\n\n<html><body><center><h1>Error 404</h1></center><center><h2>Not found<h2></center><hr></body></html>" + "\r\n";
-		}
+			// this->response = req.getVersion() + full_code(404) + "Content-Type: text/html\nContent-Length: 99\n\n<html><body><center><h1>Error 404</h1></center><center><h2>Not found<h2></center><hr></body></html>" + "\r\n";
+			this->response = req.getVersion() + full_code(404) + compose_error_message(404);
 	}
 }
 
@@ -278,12 +281,14 @@ std::string Response::compose_response()
 		if (!tmp.empty())
 			this->response = req.getVersion() + full_code(501) + content_type(tmp) + "Content-Length: " + std::to_string(body(tmp).size()) + "\r\n\r\n" + body(tmp) + "\r\n";
 		else
-			this->response = req.getVersion() + full_code(501) + "Content-Type: text/html\nContent-Length: 105\n\n<html><body><center><h1>Error 501</h1></center><center><h2>Not implemented<h2></center><hr></body></html>" + "\r\n";
+			this->response = req.getVersion() + full_code(501) + compose_error_message(501);
+			// this->response = req.getVersion() + full_code(501) + "Content-Type: text/html\nContent-Length: 105\n\n<html><body><center><h1>Error 501</h1></center><center><h2>Not implemented<h2></center><hr></body></html>" + "\r\n";
 	}
 	return this->response;
 }
 
 std::string Response::get_response()
 {
+	std::cout << compose_response() << std::endl;
 	return (compose_response());
 }

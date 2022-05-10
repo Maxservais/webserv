@@ -130,11 +130,10 @@ Server& Server::operator=(const Server &rhs)
 
 Server::~Server()
 {
-	// ATTENTION AU LEAKS
-	// std::map<std::string, Location*>::iterator ite = this->_locations.end();
-	// for (std::map<std::string, Location*>::iterator it = this->_locations.begin(); it != ite; ++it)
-	// 	delete (*it).second;
-	// this->_locations.clear();
+	std::map<std::string, Location*>::iterator ite = this->_locations.end();
+	for (std::map<std::string, Location*>::iterator it = this->_locations.begin(); it != ite; ++it)
+		delete (*it).second;
+	this->_locations.clear();
 	return;
 }
 
@@ -237,6 +236,7 @@ Config::Config(std::string conf_file)
 	}
 	tmp = new Server(ALL);
 	this->_servers.push_back(tmp);
+	input.close(); // YOO
 }
 
 Config::Config(Config const & src)
@@ -245,14 +245,7 @@ Config::Config(Config const & src)
 	return;
 }
 
-Config::~Config()
-{
-	// std::vector<Server*>::iterator ite = this->_servers.end();
-	// for (std::vector<Server*>::iterator it = this->_servers.begin(); it != ite; ++it)
-	// 	delete *it;
-	// this->_servers.clear();
-	return;
-}
+Config::~Config() { return; }
 
 Config& Config::operator=(const Config &rhs)
 {
@@ -263,3 +256,13 @@ Config& Config::operator=(const Config &rhs)
 
 /* Getters */
 std::vector<Server*> Config::get_servers(void) const { return this->_servers; }
+
+/* Free */
+void Config::free_all_server(void)
+{
+	std::vector<Server*>::iterator ite = this->_servers.end();
+	for (std::vector<Server*>::iterator it = this->_servers.begin(); it != ite; ++it)
+		delete (*it);
+	this->_servers.clear();
+	return;
+}

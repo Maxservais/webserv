@@ -104,6 +104,7 @@ class Config
 		~Config();
 		Config& operator=(const Config &rhs);
 		std::vector<Server*> get_servers(void) const;
+		void free_all_server(void);
 
 	private:
 		std::vector<Server*> _servers;
@@ -212,6 +213,7 @@ class Response
 		std::string ft_try_dir(Request &request);
 		std::string html_code_cgi(Request &req);
 		std::string check_error_custom(int code);
+		std::string compose_error_message(int code);
 
 		/* Getters */
 		void get_methode();
