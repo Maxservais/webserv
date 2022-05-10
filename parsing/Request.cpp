@@ -16,7 +16,8 @@ Request::Request(std::string &buffer): buff(buffer)
 
 Request::Request(char *buffer): buff(buffer)
 {
-	if (getMethod() == "POST" && buff.find("------WebKitFormBoundary") != std::string::npos)
+	// if (getMethod() == "POST" && buff.find("------WebKitFormBoundary") != std::string::npos)
+	if (getMethod() == "POST" && buff.find("----WebKitFormBoundary") != std::string::npos)
 	{
 		buff.clear();
 		for (int i = 0; i < BUFFER_SIZE; i++)
@@ -179,7 +180,8 @@ std::string Request::getUploadImput()
 		i = a.find("\n", i);
 	if (i != std::string::npos)
 	{
-		size_t j = a.find("------WebKitFormBoundary", i);
+		// size_t j = a.find("------WebKitFormBoundary", i);
+		size_t j = a.find("----WebKitFormBoundary", i);
 		if (j != std::string::npos)
 		{
 			return (ft_upload(std::string((a.begin() + i + 3), a.begin() + j - 2), buff));

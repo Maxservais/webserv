@@ -2,19 +2,45 @@
 
 int read_connection(int i, std::string &buff)
 {
-	/* Parse request */
 	char	buffer[BUFFER_SIZE + 1];
+	static int x;
 
+	/* Read from client' socket and add it to the buff string */
 	memset(buffer, 0, BUFFER_SIZE);
 	int ret = recv(i, buffer, BUFFER_SIZE, 0);
-	buffer[ret] = '\0';
+	x += ret;
+	// buffer[ret] = '\0';
 	if (ret < 0)
 		throw ConnectionErr();
 	if (ret == 0)
 		throw ConnectionClosedErr();
-	buff = std::string(buffer, ret);
-	return (0);
+	buff += std::string(buffer, ret);
 
+	std::cout << "Je tourne en boucle" << std::endl;
+
+	/* Check whether "\r\n\r\n" was found */
+	size_t res = buff.find("\r\n\r\n");
+	if (res != std::string::npos)
+	{
+		std::cout << "Got here!" << std::endl;
+		if (buff.find("Content-Length: ") == std::string::npos)
+			return 0;
+		
+		/* Find the content length */
+		size_t len = std::atoi(buff.substr(buff.find("Content-Length: ") + 16, 10).c_str());
+		
+		/* If buff' size is bigger or equal to what the client told us he would send, then we are good */
+		std::cout << len + 4 + res << " |||| " << x << std::endl;
+		if (buff.size() >= len + res + strlen("\r\n\r\n"))
+		{
+			std::cout << "coucou" << std::endl;
+			return (0);
+		}
+		/* Else, we exit and keep on receiving data from the socket */
+		else
+			return (1);
+	}
+	return (1);
 }
 
 // std::string build_response(int i, Log log, Config &config) // reference or pointer for log?
@@ -82,6 +108,7 @@ void	handle_clients(int *sockets, Config &config, Log log, std::vector<struct so
 	fd_set			current_sockets;
 	fd_set			ready_sockets;
 	struct timeval	timeout;
+	std::string		buff;
 
 	/* Initiliaze current set */
 	FD_ZERO(&current_sockets);
@@ -127,13 +154,13 @@ void	handle_clients(int *sockets, Config &config, Log log, std::vector<struct so
 						try
 						{
 							/* Read from client' socket */
-							std::string buff;
 							err = read_connection(i, buff);
 
 							/* If the full request could be read, we parse it, build a response and send it */
-							if (!err)
+							if (err == 0)
 							{
 								Request request(buff);
+								buff.clear();
 								Response resp(request, config);
 
 								std::string response = resp.get_response();
@@ -143,6 +170,8 @@ void	handle_clients(int *sockets, Config &config, Log log, std::vector<struct so
 								memset((void *)ret, 0, len);
 								disconnect_client(i, &current_sockets);
 							}
+							else if (err == 1)
+								break ;
 						}
 						catch (std::exception &e)
 						{
