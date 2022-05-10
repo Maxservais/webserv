@@ -8,15 +8,6 @@ Response::Response(Request &request) : req(request)
 	// get_server pointeur sur serveur prend port et serveur name
 	// vecteur temp -> tous serveurs s'appliquent au port, si un seul
 	// -->renvoie celui la, si plusieurs parcours vecteur et compare name si meme renvoie bon, sinon renvoie premier
-
-	// std::cout << "check --> max body  " << req.get_max_body_size() << std::endl;
-	// std::cout << "check --> port      " << req.get_port() << std::endl;
-	// std::cout << "check --> s name    " << req.get_server_name() << std::endl;
-	// std::cout << "check --> root      " << req.get_root() << std::endl;
-	// std::cout << "check --> index     " << req.get_index() << std::endl;
-	// std::cout << "check --> meth size " << req.get_methods().size() << std::endl;
-	// std::cout << "check --> auto inde " << req.get_directory_listing() << std::endl;
-	// std::cout << "check --> uploads   " << req.get_uploads() << std::endl;
 }
 
 Response	&Response::operator=(const Response &obj)
@@ -172,13 +163,9 @@ std::string Response::body(std::string file)
 /* ************************************************************************** */
 /*  COMPOSE RESPONSE                                                          */
 /* ************************************************************************** */
-
 void Response::get_methode()
 {
 	std::string s;
-	std::cout << " CHECK --> this->req.get_root() + slash + this->req.get_index() " << this->req.get_root() + "/" + this->req.get_index() << std::endl;
-	std::cout << " CHECK --> this->req.get_root() + req.get_file() " << this->req.get_root() + req.get_file() << std::endl << std::endl;
-
 	if (req.getFile_extention() == "cgi")
 	{
 		std::string a(html_code_cgi(req));

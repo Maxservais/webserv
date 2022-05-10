@@ -20,7 +20,7 @@
 #include <signal.h>
 #include <map>
 
-/* 1. MACROS AND GLOBAL*/
+/* 1. MACROS*/
 
 #define BUFFER_SIZE 8000000
 
@@ -111,7 +111,6 @@ class	Request
 		Config &config;
 		std::string _file;
 
-		/// THESE ARE THE VARIABLES TO BE USED IN RESPONSE.CPP, ACCORDING TO THE LOCATION
 		int _server_index; 
 		int _max_body_size;
 		int _port;
@@ -122,7 +121,6 @@ class	Request
 		std::vector<std::string> _methods;
 		bool _directory_listing;
 		std::string _uploads;
-		/// THESE ARE THE VARIABLES TO BE USED IN RESPONSE.CPP, ACCORDING TO THE LOCATION
 
 	public:
 		// CANON
@@ -134,7 +132,7 @@ class	Request
 		// UTILS
 		std::string getBuff() const;
 		std::string getMethod();
-		std::string getFile();
+		std::string setFile();
 		std::string getFile_clean();
 		std::string getVersion();
 		std::string getFile_extention();
@@ -178,6 +176,7 @@ class	Log
 		size_t	size() const;
 };
 
+/* 2.3 FORMULATION OF THE RESPONSE */
 class Response
 {
 	private:
@@ -203,7 +202,7 @@ class Response
 		void delete_methode();
 };
 
-// CGI HANDLER
+/* 2.4 CGI HANDLER*/
 class	Cgi
 {
 	private:

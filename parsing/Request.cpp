@@ -18,7 +18,7 @@ Request::Request(char *buffer, Config &conf): buff(buffer), config(conf)
 		}
 	}
 	std::cout << buff << std::endl;
-	this->_file = getFile();
+	this->_file = setFile();
 	fill_variables();
 	return ;
 }
@@ -90,7 +90,7 @@ void Request::fill_variables()
 	this->_uploads = this->_root;
 
 	// NOW CHECK IF THERE IS / IN THE URI
-	std::string uri = getFile().erase(0, 1);
+	std::string uri = get_file().erase(0, 1);
 
 	// CASE WE DON'T HAVE A / AND THE FILE NAME IS NOT A LOCATION KEY
 	// OR THERE IS NO LOCATION BLOCKS IN THE URI WE KEEP THE GLOBAL SCOPE VARIABLES
@@ -98,7 +98,7 @@ void Request::fill_variables()
 		return;
 
 	// CASE WE DON'T HAVE A / AND THE URI IS NOT A LOCATION BLOCK NAME
-	if (uri.find('/') == std::string::npos && this->config.get_servers()[this->_server_index]->get_locations().find(getFile()) == this->config.get_servers()[this->_server_index]->get_locations().end())
+	if (uri.find('/') == std::string::npos && this->config.get_servers()[this->_server_index]->get_locations().find(get_file()) == this->config.get_servers()[this->_server_index]->get_locations().end())
 		return;
 
 	// CASE WE HAVE A / IN THE URI MEANS WE WILL TAKE THE SETTINGS OF THE LOCATION BLOCK (IF THERE IS ONE FOR THIS KEY)
@@ -112,7 +112,7 @@ void Request::fill_variables()
 	}
 	else
 	{
-		it = this->config.get_servers()[this->_server_index]->get_locations().find(getFile());
+		it = this->config.get_servers()[this->_server_index]->get_locations().find(get_file());
 		this->_file = "/";
 	}
 
@@ -141,7 +141,6 @@ void Request::fill_variables()
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 /*  UTILS                                                                     */
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-
 // split a string with spaces without care of allocations and returns it into a vector
 std::vector<std::string> Request::split_words(std::string s)
 {
@@ -172,7 +171,7 @@ std::string Request::getMethod()
 // return the path of the file, if it exists
 // else, it return only a "/"
 
-std::string Request::getFile()
+std::string Request::setFile()
 {
 	std::vector<std::string> v = split_words(buff);
 	if (v.size() < 2)
@@ -216,7 +215,7 @@ std::string Request::getVersion()
 // return an empty string in case of error
 std::string Request::getFile_clean()
 {
-	std::string str = getFile();
+	std::string str = get_file();
 	if (str.find("/") == 0)
 		str.erase(0, 1);
 	return (str);
@@ -226,7 +225,7 @@ std::string Request::getFile_clean()
 // returns an empty string in case of error
 std::string Request::getFile_extention()
 {
-	std::string str = getFile();
+	std::string str = get_file();
 	str.erase(0, str.rfind("."));
 	str.erase(0, 1);
 	return (str);
@@ -260,7 +259,7 @@ std::string ft_upload(std::string up, std::string buff)
 			a = std::string((a.begin() + i), a.begin() + j);
 		}
 	}
-	int fd = open(("ressources/download/" + a).c_str(), O_RDWR | O_CREAT, 00777);
+	int fd = open(("ressources/download/" + a).c_str(), O_RDWR | O_CREAT, 00777); // NOOOOOON
 	if (fd == -1)
 		exit (1); // throw une erreur --> plus tard
 	write(fd, up.c_str(), up.size());
@@ -301,65 +300,3 @@ std::map<int,std::string> &Request::get_errors(void) { return this->_errors; }
 std::string Request::get_uploads(void) const { return this->_uploads; }
 int  Request::get_max_body_size(void) const { return this->_max_body_size; }
 std::string Request::get_file(void) const { return this->_file; }
-
-/* ************************************************************************** */
-/*  LOG                                                                       */
-/* ************************************************************************** */
-Log::Log(): v()
-{
-	return;
-}
-
-Log::Log( const Log &obj ): v(obj.v)
-{
-	return ;
-}
-
-Log	&Log::operator=( const Log &obj )
-{
-	v = obj.v;
-	return (*this);
-}
-
-Log::~Log()
-{
-	return ;
-}
-
-// return a vector of the history of requests sort from the oldest to the newest
-std::vector<Request> Log::getLog() const
-{
-	return (v);
-}
-
-//return the oldest request
-Request Log::getFirst() const
-{
-	return (*v.begin());
-}
-
-//return the last request done
-Request Log::getLast() const
-{
-	return (*(v.end() - 1));
-}
-
-//add a request to the history
-void	Log::add_one(Request newone)
-{
-	v.push_back(newone);
-}
-
-// clear the history
-void	Log::clear()
-{
-	v.clear();
-}
-
-// returns the number of requests in the log
-size_t	Log::size() const
-{
-	return (v.size());
-}
-
-
