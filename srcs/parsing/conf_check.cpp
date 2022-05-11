@@ -132,9 +132,6 @@ void Ccheck(Config &obj)
 		throw DoubleErr();
 }
 
-/* ************************************************************************** */
-/*  GLOBAL CHECKS                                                             */
-/* ************************************************************************** */
 bool check_brackets(std::string file)
 {
 	std::ifstream input(file);
@@ -157,6 +154,9 @@ bool check_brackets(std::string file)
 		return 0;
 	return 1;
 }
+/* ************************************************************************** */
+/*  GLOBAL CHECKS                                                             */
+/* ************************************************************************** */
 
 void check_Server_blocks(Config &obj) 
 {
