@@ -97,8 +97,8 @@ std::string Cgi::executeCgi()
 	{
 		dup2(fd_out, 1);
 		dup2(fd_in, 0);
-		execve("./website/ressources/script.cgi", n, env);
-		std::cerr << "execve error" << std::endl; // ?
+		execve((request.get_root() + "/script.cgi").c_str(), n, env);
+		// throw OpenErr();
 		exit (1); // ?
 	}
 

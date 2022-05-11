@@ -9,14 +9,6 @@
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 Request::Request(std::string buffer, Config &conf): buff(buffer), config(conf)
 {
-	//if (getMethod() == "POST" && buff.find("------WebKitFormBoundary") != std::string::npos)
-	//{
-	//	buff.clear();
-	//	for (int i = 0; i < BUFFER_SIZE; i++)
-	//	{
-	//		buff.push_back(buffer[i]);
-	//	}
-	//}
 	// std::cout << buff << std::endl;
 	this->_file = setFile();
 	fill_variables();
@@ -263,6 +255,19 @@ std::string Request::getPostImput()
 	return (std::string());
 }
 
+int Request::getPostInputLen()
+{
+	std::string a(buff);
+	size_t i = a.rfind("\n");
+	if (i != std::string::npos)
+	{
+		size_t j = a.rfind("\n", i);
+		if (j != std::string::npos)
+			return (static_cast<int>(std::string((a.begin() + j + 1), a.end()).size()));
+	}
+	return (0);
+}
+
 std::string Request::ft_upload(std::string up, std::string buff)
 {
 	std::string a(buff);
@@ -285,7 +290,7 @@ std::string Request::ft_upload(std::string up, std::string buff)
 		fd = open((this->get_root() + "/" + this->get_uploads() + "/" + a).c_str(), O_RDWR | O_CREAT | O_TRUNC, 00777);
 	}
 	if (fd == -1)
-		throw OpenErr(); // throw une erreur --> plus tard
+		throw OpenErr();
 	write(fd, up.c_str(), up.size());
 	close(fd);
 	return (a);
