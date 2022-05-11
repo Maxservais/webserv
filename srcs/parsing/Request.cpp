@@ -7,17 +7,17 @@
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 /*  CANON                                                                     */
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-Request::Request(char *buffer, Config &conf): buff(buffer), config(conf)
+Request::Request(std::string buffer, Config &conf): buff(buffer), config(conf)
 {
-	if (getMethod() == "POST" && buff.find("------WebKitFormBoundary") != std::string::npos)
-	{
-		buff.clear();
-		for (int i = 0; i < BUFFER_SIZE; i++)
-		{
-			buff.push_back(buffer[i]);
-		}
-	}
-	std::cout << buff << std::endl;
+	//if (getMethod() == "POST" && buff.find("------WebKitFormBoundary") != std::string::npos)
+	//{
+	//	buff.clear();
+	//	for (int i = 0; i < BUFFER_SIZE; i++)
+	//	{
+	//		buff.push_back(buffer[i]);
+	//	}
+	//}
+	// std::cout << buff << std::endl;
 	this->_file = setFile();
 	fill_variables();
 }
