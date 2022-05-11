@@ -11,6 +11,7 @@ std::vector<std::string> split_spaces(std::string s)
 	return (std::vector<std::string>(begin, end));
 }
 
+
 /* ************************************************************************** */
 /*  LOCATION                                                                  */
 /* ************************************************************************** */
@@ -20,6 +21,7 @@ Location::Location() { return; }
 
 Location::Location(std::string block) : _ALL(block), _directory_listing(true)
 {
+	std::string backup = this->_ALL;
 	std::string token;
 	std::vector<std::string> vec;
 	size_t pos = 0;
@@ -34,6 +36,7 @@ Location::Location(std::string block) : _ALL(block), _directory_listing(true)
 		vec.push_back(this->_ALL);
 
 	fill_variables(vec);
+	this->_ALL = backup;
 }
 
 Location::Location(Location const & src)
@@ -56,22 +59,22 @@ void Location::fill_variables(std::vector<std::string> vec)
 	size_t i = 0;
 	while (i < vec.size())
 	{
-		if (vec[i].find("root") != std::string::npos)
+		if (vec[i].find("root ") != std::string::npos)
 			this->_root.assign(vec[i].begin() + vec[i].find(" ") + 1, vec[i].end());
-		else if (vec[i].find("index") != std::string::npos)
+		else if (vec[i].find("index ") != std::string::npos)
 			this->_index.assign(vec[i].begin() + vec[i].find(" ") + 1, vec[i].end());
-		else if (vec[i].find("uploads") != std::string::npos)
+		else if (vec[i].find("uploads ") != std::string::npos)
 			this->_uploads.assign(vec[i].begin() + vec[i].find(" ") + 1, vec[i].end());
-		else if (vec[i].find("method") != std::string::npos)
+		else if (vec[i].find("method ") != std::string::npos)
 		{
 			this->_methods = split_spaces(vec[i]);
 			this->_methods.erase(this->_methods.begin());
 		}
 		else if (vec[i].find("directory_listing ") != std::string::npos)
 		{
-			if (vec[i].find("off") != std::string::npos)
+			if (vec[i].find(" off ") != std::string::npos)
 				this->_directory_listing = false;
-			if (vec[i].find("on") != std::string::npos)
+			if (vec[i].find(" on ") != std::string::npos)
 				this->_directory_listing = true;
 		}	
 		i++;
