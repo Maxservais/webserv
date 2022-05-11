@@ -229,6 +229,20 @@ void Response::post_methode()
 		}
 		else
 		{
+			try
+			{
+				std::string a(req.getUploadImput());
+			}
+			catch(const std::exception& e)
+			{
+				std::cerr << e.what() << std::endl;
+				std::string tmp = check_error_custom(403);
+				if (!tmp.empty())
+					this->response = req.getVersion() + full_code(403) + content_type(tmp) + "Content-Length: " + std::to_string(body(tmp).size()) + "\r\n\r\n" + body(tmp) + "\r\n";
+				else
+					this->response = req.getVersion() + full_code(403) + compose_error_message(403);
+				return ;
+			}
 			std::string a(req.getUploadImput());
 			std::string b("<h1>File " + a + " has been uploaded successfully</h1>");
 			if (a.empty() == 0)
