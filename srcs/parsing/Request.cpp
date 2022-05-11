@@ -280,10 +280,12 @@ std::string Request::ft_upload(std::string up, std::string buff)
 	if (this->get_uploads().empty())
 		fd = open((this->get_root() + "/" + a).c_str(), O_RDWR | O_CREAT | O_TRUNC, 00777);
 	else
-		/// HERE NEED TO CREATE TEST UP IN this->get root if doens't exist yet
+	{
+		mkdir((this->get_root() + "/" + this->get_uploads()).c_str(), 0755);
 		fd = open((this->get_root() + "/" + this->get_uploads() + "/" + a).c_str(), O_RDWR | O_CREAT | O_TRUNC, 00777);
+	}
 	if (fd == -1)
-		exit (1); // throw une erreur --> plus tard
+		throw OpenErr(); // throw une erreur --> plus tard
 	write(fd, up.c_str(), up.size());
 	close(fd);
 	return (a);

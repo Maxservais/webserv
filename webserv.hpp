@@ -19,6 +19,7 @@
 #include <stdexcept>
 #include <dirent.h>
 #include <signal.h>
+#include <sys/stat.h>
 
 /* 1. MACROS*/
 
@@ -278,6 +279,11 @@ class MethErr : public std::exception
 class NegPortErr : public std::exception
 {
 	const char * what () const throw () { return ("Invalid port number or max body_size"); }
+};
+
+class OpenErr : public std::exception
+{
+	const char * what () const throw () { return ("Can't upload the requested file"); }
 };
 
 class RootErr : public std::exception
