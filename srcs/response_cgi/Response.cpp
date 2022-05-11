@@ -216,7 +216,8 @@ void Response::get_methode()
 
 void Response::post_methode()
 {
-	if (req.getFile_extention() == "up")
+
+	if (req.getFile_extention() == "up") // upload de fichers
 	{
 		if (req.get_max_body_size() < req.getUpBody())
 		{
@@ -238,7 +239,20 @@ void Response::post_methode()
 			}
 		}
 	}
-	if (req.getFile_extention() == "cgi")
+
+	//std::cout << "max body size--> " << req.get_max_body_size() << std::endl;
+	//std::cout << "upload input size--> " << static_cast<int>(req.getUploadImput().size()) << std::endl;
+	//if (req.get_max_body_size() < static_cast<int>(req.getPostImput().size())) // post with form, max size check
+	//{
+	//	std::string tmp = check_error_custom(413);
+	//	if (!tmp.empty())
+	//		this->response = req.getVersion() + full_code(413) + content_type(tmp) + "Content-Length: " + std::to_string(body(tmp).size()) + "\r\n\r\n" + body(tmp) + "\r\n";
+	//	else
+	//		this->response = req.getVersion() + full_code(413) + "Content-Type: text/html\nContent-Length: 114\n\n<html><body><center><h1>Error 413</h1></center><center><h2>Request Entity Too Large<h2></center><hr></body></html>" + "\r\n";
+	//	return ;
+	//}
+
+	if (req.getFile_extention() == "cgi") // post with form
 	{
 		std::string a(html_code_cgi(req));
 		response = req.getVersion() + full_code(200) + content_type(a) + "Content-Length: " + std::to_string(a.size()) + "\r\n\r\n" + a + "\r\n";
@@ -251,7 +265,7 @@ void Response::post_methode()
 			this->response = req.getVersion() + full_code(204) + content_type(tmp) + "Content-Length: " + std::to_string(body(tmp).size()) + "\r\n\r\n" + body(tmp) + "\r\n";
 		else
 			this->response = req.getVersion() + full_code(204) + compose_error_message(204);
-		}
+	}
 }
 
 void Response::delete_methode()
