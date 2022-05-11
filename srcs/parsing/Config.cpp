@@ -236,7 +236,7 @@ Config::Config(std::string conf_file)
 	}
 	tmp = new Server(ALL);
 	this->_servers.push_back(tmp);
-	input.close(); // YOO
+	input.close();
 }
 
 Config::Config(Config const & src)
