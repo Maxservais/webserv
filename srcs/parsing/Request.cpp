@@ -9,7 +9,6 @@
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 Request::Request(std::string buffer, Config &conf): buff(buffer), config(conf)
 {
-	// std::cout << buff << std::endl;
 	this->_file = setFile();
 	fill_variables();
 }
@@ -58,6 +57,13 @@ std::string Request::getHost()
 
 void Request::fill_server_index()
 {
+	// get_server pointeur sur serveur prend port et serveur name
+	// vecteur temp -> tous serveurs s'appliquent au port, 
+	//	-->si un seul --> renvoie celui la
+	//	-->si plusieurs parcours vecteur et compare name 
+	// 			--> trouve server name --> renvoie celui qu'on trouve
+	//			--> sinon renvoie premier
+
 	this->_server_index = 0;
 	std::string tmp = getHost();
 	size_t pos = tmp.find(":");
@@ -109,6 +115,7 @@ void Request::replace_default_variables(std::map<std::string,Location *>::iterat
 void Request::fill_variables()
 {
 	// setting the index of the server (all the server blocks are stored in a vector)
+	// std::cout << buff << std::endl;
 	fill_server_index();
 
 	// we fill the variables with the elements of the global scope from the server block

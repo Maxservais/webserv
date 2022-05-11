@@ -237,6 +237,7 @@ Config::Config(std::string conf_file)
 	tmp = new Server(ALL);
 	this->_servers.push_back(tmp);
 	input.close();
+	set_nb_port();
 }
 
 Config::Config(Config const & src)
@@ -256,8 +257,17 @@ Config& Config::operator=(const Config &rhs)
 
 /* Getters */
 std::vector<Server*> Config::get_servers(void) const { return this->_servers; }
+int Config::get_nb_port(void) const { return this->_nb_port; }
 
-/* Free */
+/* Utils */
+void Config::set_nb_port(void)
+{
+	std::map<int,int> tmp;
+	for(int i = 0; i < static_cast<int>(this->get_servers().size()); i++)
+		tmp.insert(std::pair<int, int>(this->get_servers()[i]->get_port(), 0));
+	this->_nb_port = tmp.size();
+}
+
 void Config::free_all_server(void)
 {
 	std::vector<Server*>::iterator ite = this->_servers.end();

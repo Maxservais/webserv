@@ -5,9 +5,7 @@
 /* ************************************************************************** */
 Response::Response(Request &request) : req(request)
 {
-	// get_server pointeur sur serveur prend port et serveur name
-	// vecteur temp -> tous serveurs s'appliquent au port, si un seul
-	// -->renvoie celui la, si plusieurs parcours vecteur et compare name si meme renvoie bon, sinon renvoie premier
+
 }
 
 Response	&Response::operator=(const Response &obj)
