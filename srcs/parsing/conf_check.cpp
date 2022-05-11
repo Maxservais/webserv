@@ -113,14 +113,27 @@ void Lcheck_methods(std::map<std::string,Location*>::iterator it) // check if th
 }
 
 /* ************************************************************************** */
+/*  CONFIG CHECK                                                             */
+/* ************************************************************************** */
+void Ccheck(Config &obj)
+{
+	std::vector< std::pair<int,std::string> > vec;
+	for (size_t i = 0; i < obj.get_servers().size(); i++)
+		vec.push_back(std::pair<int,std::string>(obj.get_servers()[i]->get_port(), obj.get_servers()[i]->get_server_name()));
+	std::vector<std::pair<int,std::string> >::iterator it = std::unique(vec.begin(), vec.end());
+	if (it != vec.end())
+		throw DoubleErr();
+}
+
+/* ************************************************************************** */
 /*  GLOBAL CHECKS                                                             */
 /* ************************************************************************** */
 void check_Server_blocks(Config &obj) 
 {
-	if (obj.get_servers().empty()) 
+	if (obj.get_servers().empty())
 		throw EmptyConfErr();
 
-	for (size_t i = 0; i < obj.get_servers().size(); i++) 
+	for (size_t i = 0; i < obj.get_servers().size(); i++)
 	{
 		Scheck_info(obj, i);
 		Scheck_methods(obj, i);
@@ -135,6 +148,8 @@ void check_Server_blocks(Config &obj)
 			Lcheck_methods(it);
 		}
 	}
+
+	Ccheck(obj);
 }
 
 Config &conf_check(int argc, char **argv, Config &config)

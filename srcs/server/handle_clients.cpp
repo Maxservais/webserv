@@ -63,7 +63,7 @@ void	handle_clients(int *sockets, Config &config, Log log, std::vector<struct so
 {
 	(void)log;
 	int				err;
-	int				len = config.get_servers().size();
+	int				len = config.get_servers().size(); // YO config.get_nb_port();
 	int				max_socket_val = sockets[len - 1];
 	fd_set			current_sockets;
 	fd_set			ready_sockets;

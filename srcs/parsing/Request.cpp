@@ -76,12 +76,15 @@ void Request::fill_server_index()
 	// 		this->_server_index = i;
 	// }
 
-	this->_server_index = -1;
+	this->_server_index = 0;
 	std::string temp = getHost();
 	// first we get the server_name
 	int i = 0;
 	std::string requested_server_name = "";
-	while(temp[i] != ':')
+	if (temp.find(":") == std::string::npos)
+		throw HostNameErr();
+
+	while(temp[i] && temp[i] != ':')
 	{
 		requested_server_name += temp[i];
 		i++;
@@ -89,7 +92,6 @@ void Request::fill_server_index()
 
 	// then we get the port number
 	int requested_port = atoi(temp.substr(temp.find(":") + 1).c_str());
-	std::cout << "port --> " << requested_port << " server_name -->" << requested_server_name << std::endl;
 
 	std::map<int, Server *> server_map; // in this map we store all the vectors which have the requested port number. The key is the index in the config vector
 	for(size_t i = 0; i < this->config.get_servers().size(); i++)
@@ -105,12 +107,12 @@ void Request::fill_server_index()
 		std::cout << "check --> " << server_map.begin()->first << std::endl;
 	}
 
-	else // A TESTER !!!!!!!!!!!
+	else // A TESTER !!!!!!!!!!! (pourra pas tester tant que fail to bind)
 	{
 		std::map<int, Server *>::iterator it;
 		for(it = server_map.begin(); it != server_map.end(); ++it)
 		{
-			if ((*it).second->get_server_name() == requested_server_name && this->_server_index == -1)
+			if ((*it).second->get_server_name() == requested_server_name)
 			{
 				this->_server_index = (*it).first;
 				return;

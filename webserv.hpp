@@ -316,6 +316,16 @@ class ServNameErr : public std::exception
 	const char * what () const throw () { return ("Wrong formating of the server_name!"); }
 };
 
+class DoubleErr : public std::exception
+{
+	const char * what () const throw () { return ("Two or more server blocks have the same server name and port"); }
+};
+
+class HostNameErr : public std::exception
+{
+	const char * what () const throw () { return ("Wrong formating of Host name (<server_name>:<port>) "); }
+};
+
 /* 3.2 SERVER */
 class SocketErr : public std::exception
 {

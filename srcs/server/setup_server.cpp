@@ -11,7 +11,7 @@ void	close_sockets(int *sockets, int len)
 void	setup_server(int *sockets, Config &config, std::vector<struct sockaddr_in> &sockaddr)
 {
 	int	optval;
-	int	len = config.get_servers().size();
+	int	len = config.get_servers().size(); // YO config.get_nb_port();
 
 	for (int i = 0; i < len; ++i)
 	{
