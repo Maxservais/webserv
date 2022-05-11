@@ -97,15 +97,11 @@ std::string Cgi::executeCgi()
 	{
 		dup2(fd_out, 1);
 		dup2(fd_in, 0);
-		if (request.getFile_extention() == "cgi")
-			execve("ressources/script.cgi", n, env);
-		if (request.getFile_extention() == "up")
-		{
-
-		}
+		execve("./website/ressources/script.cgi", n, env);
 		std::cerr << "execve error" << std::endl; // ?
 		exit (1); // ?
 	}
+
 	else
 	{
 		char buff[50] = {0}; // A REMPLACER

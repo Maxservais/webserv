@@ -89,7 +89,6 @@ void Request::fill_default_variables()
 	this->_index = this->config.get_servers()[this->_server_index]->get_index();
 	this->_methods = this->config.get_servers()[this->_server_index]->get_methods();
 	this->_directory_listing = true;
-	this->_uploads = this->_root;
 }
 
 void Request::replace_default_variables(std::map<std::string,Location *>::iterator it, std::string uri)
@@ -107,7 +106,12 @@ void Request::replace_default_variables(std::map<std::string,Location *>::iterat
 	if ( !it->second->get_uploads().empty())
 		this->_uploads = it->second->get_uploads();
 	else
-		this->_uploads = this->_root;
+	{
+		if ( !it->second->get_root().empty())
+			this->_uploads = it->second->get_root();
+		else
+			this->_uploads = this->_root;
+	}
 }
 
 void Request::fill_variables()
@@ -259,7 +263,7 @@ std::string Request::getPostImput()
 	return (std::string());
 }
 
-std::string ft_upload(std::string up, std::string buff)
+std::string Request::ft_upload(std::string up, std::string buff)
 {
 	std::string a(buff);
 	size_t i = a.rfind("filename=\"");
@@ -272,7 +276,12 @@ std::string ft_upload(std::string up, std::string buff)
 			a = std::string((a.begin() + i), a.begin() + j);
 		}
 	}
-	int fd = open(("ressources/download/" + a).c_str(), O_RDWR | O_CREAT, 00777); // NOOOOOON
+	int fd;
+	if (this->get_uploads().empty())
+		fd = open((this->get_root() + "/" + a).c_str(), O_RDWR | O_CREAT | O_TRUNC, 00777);
+	else
+		/// HERE NEED TO CREATE TEST UP IN this->get root if doens't exist yet
+		fd = open((this->get_root() + "/" + this->get_uploads() + "/" + a).c_str(), O_RDWR | O_CREAT | O_TRUNC, 00777);
 	if (fd == -1)
 		exit (1); // throw une erreur --> plus tard
 	write(fd, up.c_str(), up.size());
@@ -297,6 +306,26 @@ std::string Request::getUploadImput()
 		}
 	}
 	return (std::string());
+}
+
+int Request::getUpBody()
+{
+	if (getMethod() != "POST")
+		return (0);
+	std::string a(buff);
+	size_t i = a.rfind("Content-Type:");
+	if (i != std::string::npos)
+		i = a.find("\n", i);
+	if (i != std::string::npos)
+	{
+		size_t j = a.find("------WebKitFormBoundary", i);
+		if (j != std::string::npos)
+		{
+			std::string b((a.begin() + i + 3), a.begin() + j - 2);
+			return (b.size());
+		}
+	}
+	return (0);
 }
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */

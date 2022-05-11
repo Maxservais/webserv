@@ -120,7 +120,7 @@ class	Request
 		Request &operator=(const Request &obj);
 		~Request();
 
-		/* Getters */
+		/* Utils */
 		std::string getBuff() const;
 		std::string getMethod();
 		std::string setFile();
@@ -130,7 +130,9 @@ class	Request
 		std::string getQuery();
 		std::string getPostImput();
 		std::string getUploadImput();
+		int getUpBody();
 		std::vector<std::string> split_words(std::string buffer);
+		std::string ft_upload(std::string up, std::string buff);
 
 		/* Utils to fill the variables to be used in response */
 		std::string getHost();
