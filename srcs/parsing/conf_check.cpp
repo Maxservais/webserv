@@ -80,6 +80,13 @@ void Scheck_server_name(Config &obj, int i) // illegal chars in server_name
 /* ************************************************************************** */
 /*  CHECK LOCATION BLOCKS                                                     */
 /* ************************************************************************** */
+void Lcheck_nested(std::map<std::string,Location*>::iterator it) // check if nested location inside location
+{
+	std::string tmp = it->second->get_ALL();
+	// std::cout << "HEREEEE ||| " <<it->second->get_ALL() << std::endl << std::endl;
+	if (tmp.find("\tlocation ", 5) != std::string::npos)
+		throw EmbErr();
+}
 
 void Lcheck_root_index(std::map<std::string,Location*>::iterator it) // check index and index
 {
@@ -128,6 +135,29 @@ void Ccheck(Config &obj)
 /* ************************************************************************** */
 /*  GLOBAL CHECKS                                                             */
 /* ************************************************************************** */
+bool check_brackets(std::string file)
+{
+	std::ifstream input(file);
+	std::string str = std::string((std::istreambuf_iterator<char>(input)), std::istreambuf_iterator<char>());
+	input.close();
+	
+	int i = -1, opened = 0, closed = 0;
+	if (str.empty())
+		return 0;
+	while (str[++i])
+	{
+		if (str.find("server {", i) == static_cast<unsigned int>(i) && opened != closed)
+			return 0;
+		if (str[i] == '}')
+			closed++;
+		if (str[i] == '{')
+			opened++;
+	}
+	if (opened != closed)
+		return 0;
+	return 1;
+}
+
 void check_Server_blocks(Config &obj) 
 {
 	if (obj.get_servers().empty())
@@ -146,6 +176,7 @@ void check_Server_blocks(Config &obj)
 		{
 			Lcheck_root_index(it);
 			Lcheck_methods(it);
+			Lcheck_nested(it);
 		}
 	}
 
@@ -167,6 +198,9 @@ Config &conf_check(int argc, char **argv, Config &config)
 		throw ConfOpenErr();
 	else
 		conf_file.close();
+
+	if (!check_brackets(argv[1]))
+		throw UnevenErr();
 
 	Config tmp(argv[1]); // SUPER INEFFICIENT, LET'S FIX IT LATER
 	config = tmp;
