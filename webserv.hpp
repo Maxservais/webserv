@@ -6,6 +6,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <sys/ioctl.h>
+#include <sys/wait.h> 
 #include <stdlib.h>
 #include <unistd.h>
 #include <fcntl.h>
@@ -20,6 +21,8 @@
 #include <dirent.h>
 #include <signal.h>
 #include <sys/stat.h>
+#include <cstring>
+#include <iterator>
 
 /* 1. MACROS*/
 
