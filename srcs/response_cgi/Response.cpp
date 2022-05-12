@@ -3,6 +3,14 @@
 /* ************************************************************************** */
 /*  CANON                                                                     */
 /* ************************************************************************** */
+
+std::string to_string(unsigned int i)
+{
+    std::stringstream ss;
+    ss << (i);
+    return ss.str();
+}
+
 Response::Response(Request &request) : req(request)
 {
 
@@ -25,7 +33,7 @@ Response::~Response()
 bool Response::exists()
 {
 	const std::string &path = req.get_root() + this->req.get_file();
-	std::ifstream input_file(path);
+	std::ifstream input_file(path.c_str());
 	if (!input_file.is_open())
 		return false;
 	input_file.close();
@@ -152,14 +160,14 @@ std::string Response::content_type(std::string file)
 
 std::string Response::compose_error_message(int code)
 {
-	std::string error_code = std::to_string(code);
+	std::string error_code = to_string(code);
 	std::string html = "<html><body><center><h1>Error</h1></center><center><h2>" + full_code(code) + "<h2></center><hr></body></html>";
-	return ("Content-Type: text/html\nContent-Length: " + std::to_string(html.size()) + "\n\n" + html);
+	return ("Content-Type: text/html\nContent-Length: " + to_string(html.size()) + "\n\n" + html);
 }
 
 std::string Response::body(std::string file)
 {
-	std::ifstream input_file(file);
+	std::ifstream input_file(file.c_str());
 	std::stringstream	buffer;
 	std::string ret;
 	buffer << input_file.rdbuf();
@@ -182,17 +190,17 @@ void Response::get_methode()
 		{
 			std::string tmp = check_error_custom(403);
 			if (!tmp.empty())
-				this->response = req.getVersion() + full_code(403) + content_type(tmp) + "Content-Length: " + std::to_string(body(tmp).size()) + "\r\n\r\n" + body(tmp) + "\r\n";
+				this->response = req.getVersion() + full_code(403) + content_type(tmp) + "Content-Length: " + to_string(body(tmp).size()) + "\r\n\r\n" + body(tmp) + "\r\n";
 			else
 				this->response = req.getVersion() + full_code(403) + compose_error_message(403);
 		}
 		else
-			this->response = req.getVersion() + full_code(200) + content_type(a) + "Content-Length: " + std::to_string(a.size()) + "\r\n\r\n" + a + "\r\n";
+			this->response = req.getVersion() + full_code(200) + content_type(a) + "Content-Length: " + to_string(a.size()) + "\r\n\r\n" + a + "\r\n";
 	}
 	else if (req.get_file() == "/")
 	{
 		s = this->req.get_root() + "/" + this->req.get_index();
-		this->response = req.getVersion() + full_code(200) + content_type(s) + "Content-Length: " + std::to_string(body(s).size()) + "\r\n\r\n" + body(s) + "\r\n";
+		this->response = req.getVersion() + full_code(200) + content_type(s) + "Content-Length: " + to_string(body(s).size()) + "\r\n\r\n" + body(s) + "\r\n";
 	}
 	else if (ft_try_dir(req) != "")
 	{
@@ -200,23 +208,23 @@ void Response::get_methode()
 		{
 			std::string tmp = check_error_custom(403);
 			if (!tmp.empty())
-				this->response = req.getVersion() + full_code(403) + content_type(tmp) + "Content-Length: " + std::to_string(body(tmp).size()) + "\r\n\r\n" + body(tmp) + "\r\n";
+				this->response = req.getVersion() + full_code(403) + content_type(tmp) + "Content-Length: " + to_string(body(tmp).size()) + "\r\n\r\n" + body(tmp) + "\r\n";
 			else
 				this->response = req.getVersion() + full_code(403) + compose_error_message(403);
 		}
 		else
-			this->response = req.getVersion() + full_code(200) + content_type(ft_try_dir(req)) + "Content-Length: " + std::to_string(ft_try_dir(req).size()) + "\r\n\r\n" + ft_try_dir(req) + "\r\n";
+			this->response = req.getVersion() + full_code(200) + content_type(ft_try_dir(req)) + "Content-Length: " + to_string(ft_try_dir(req).size()) + "\r\n\r\n" + ft_try_dir(req) + "\r\n";
 	}
 	else if (exists())
 	{
 		s = this->req.get_root() + req.get_file();
-		this->response = req.getVersion() + full_code(200) + content_type(s) + "Content-Length: " + std::to_string(body(s).size()) + "\r\n\r\n" + body(s) + "\r\n";
+		this->response = req.getVersion() + full_code(200) + content_type(s) + "Content-Length: " + to_string(body(s).size()) + "\r\n\r\n" + body(s) + "\r\n";
 	}
 	else
 	{
 		std::string tmp = check_error_custom(404);
 		if (!tmp.empty())
-			this->response = req.getVersion() + full_code(404) + content_type(tmp) + "Content-Length: " + std::to_string(body(tmp).size()) + "\r\n\r\n" + body(tmp) + "\r\n";
+			this->response = req.getVersion() + full_code(404) + content_type(tmp) + "Content-Length: " + to_string(body(tmp).size()) + "\r\n\r\n" + body(tmp) + "\r\n";
 		else
 			this->response = req.getVersion() + full_code(404) + compose_error_message(404);
 		}
@@ -231,7 +239,7 @@ void Response::post_methode()
 		{
 			std::string tmp = check_error_custom(413);
 			if (!tmp.empty())
-				this->response = req.getVersion() + full_code(413) + content_type(tmp) + "Content-Length: " + std::to_string(body(tmp).size()) + "\r\n\r\n" + body(tmp) + "\r\n";
+				this->response = req.getVersion() + full_code(413) + content_type(tmp) + "Content-Length: " + to_string(body(tmp).size()) + "\r\n\r\n" + body(tmp) + "\r\n";
 			else
 				this->response = req.getVersion() + full_code(413) + compose_error_message(413);
 			return ;
@@ -247,7 +255,7 @@ void Response::post_methode()
 				std::cerr << e.what() << std::endl;
 				std::string tmp = check_error_custom(403);
 				if (!tmp.empty())
-					this->response = req.getVersion() + full_code(403) + content_type(tmp) + "Content-Length: " + std::to_string(body(tmp).size()) + "\r\n\r\n" + body(tmp) + "\r\n";
+					this->response = req.getVersion() + full_code(403) + content_type(tmp) + "Content-Length: " + to_string(body(tmp).size()) + "\r\n\r\n" + body(tmp) + "\r\n";
 				else
 					this->response = req.getVersion() + full_code(403) + compose_error_message(403);
 				return ;
@@ -256,7 +264,7 @@ void Response::post_methode()
 			std::string b("<h1>File " + a + " has been uploaded successfully</h1>");
 			if (a.empty() == 0)
 			{
-				response = req.getVersion() + full_code(200) + "Content-Type: text/html\nContent-Length: " + std::to_string(b.size()) + "\r\n\r\n" + "<h1>File " + a + " has been uploaded successfully</h1>";
+				response = req.getVersion() + full_code(200) + "Content-Type: text/html\nContent-Length: " + to_string(b.size()) + "\r\n\r\n" + "<h1>File " + a + " has been uploaded successfully</h1>";
 				return ;
 			}
 		}
@@ -266,7 +274,7 @@ void Response::post_methode()
 	{
 		std::string tmp = check_error_custom(413);
 		if (!tmp.empty())
-			this->response = req.getVersion() + full_code(413) + content_type(tmp) + "Content-Length: " + std::to_string(body(tmp).size()) + "\r\n\r\n" + body(tmp) + "\r\n";
+			this->response = req.getVersion() + full_code(413) + content_type(tmp) + "Content-Length: " + to_string(body(tmp).size()) + "\r\n\r\n" + body(tmp) + "\r\n";
 		else
 			this->response = req.getVersion() + full_code(413) + compose_error_message(413);
 		return ;
@@ -279,19 +287,19 @@ void Response::post_methode()
 		{
 			std::string tmp = check_error_custom(403);
 			if (!tmp.empty())
-				this->response = req.getVersion() + full_code(403) + content_type(tmp) + "Content-Length: " + std::to_string(body(tmp).size()) + "\r\n\r\n" + body(tmp) + "\r\n";
+				this->response = req.getVersion() + full_code(403) + content_type(tmp) + "Content-Length: " + to_string(body(tmp).size()) + "\r\n\r\n" + body(tmp) + "\r\n";
 			else
 				this->response = req.getVersion() + full_code(403) + compose_error_message(403);
 		}
 		else
-			this->response = req.getVersion() + full_code(200) + content_type(a) + "Content-Length: " + std::to_string(a.size()) + "\r\n\r\n" + a + "\r\n";
+			this->response = req.getVersion() + full_code(200) + content_type(a) + "Content-Length: " + to_string(a.size()) + "\r\n\r\n" + a + "\r\n";
 	}
 
 	else
 	{
 		std::string tmp = check_error_custom(204);
 		if (!tmp.empty())
-			this->response = req.getVersion() + full_code(204) + content_type(tmp) + "Content-Length: " + std::to_string(body(tmp).size()) + "\r\n\r\n" + body(tmp) + "\r\n";
+			this->response = req.getVersion() + full_code(204) + content_type(tmp) + "Content-Length: " + to_string(body(tmp).size()) + "\r\n\r\n" + body(tmp) + "\r\n";
 		else
 			this->response = req.getVersion() + full_code(204) + compose_error_message(204);
 	}
@@ -308,7 +316,7 @@ void Response::delete_methode()
 	{
 		std::string tmp = check_error_custom(404);
 		if (!tmp.empty())
-			this->response = req.getVersion() + full_code(404) + content_type(tmp) + "Content-Length: " + std::to_string(body(tmp).size()) + "\r\n\r\n" + body(tmp) + "\r\n";
+			this->response = req.getVersion() + full_code(404) + content_type(tmp) + "Content-Length: " + to_string(body(tmp).size()) + "\r\n\r\n" + body(tmp) + "\r\n";
 		else
 			this->response = req.getVersion() + full_code(404) + compose_error_message(404);
 	}
@@ -332,7 +340,7 @@ std::string Response::compose_response()
 	{
 		std::string tmp = check_error_custom(501);
 		if (!tmp.empty())
-			this->response = req.getVersion() + full_code(501) + content_type(tmp) + "Content-Length: " + std::to_string(body(tmp).size()) + "\r\n\r\n" + body(tmp) + "\r\n";
+			this->response = req.getVersion() + full_code(501) + content_type(tmp) + "Content-Length: " + to_string(body(tmp).size()) + "\r\n\r\n" + body(tmp) + "\r\n";
 		else
 			this->response = req.getVersion() + full_code(501) + compose_error_message(501);
 	}

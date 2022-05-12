@@ -155,7 +155,7 @@ size_t Server::fill_location(std::vector<std::string> vec, size_t i)
 	loc_tmp = new Location(token);
 	tmp.clear();
 	tmp.assign(token.begin() + token.find("/"), token.begin() + token.find("{"));
-	tmp.pop_back();
+	tmp.erase(tmp.end() - 1);
 	this->_locations.insert(std::pair<std::string, Location*>(tmp,loc_tmp));
 	return i;
 }
@@ -220,7 +220,7 @@ Config::Config() { return; }
 
 Config::Config(std::string conf_file)
 {
-	std::ifstream input(conf_file);
+	std::ifstream input(conf_file.c_str());
 	std::string ALL = std::string((std::istreambuf_iterator<char>(input)), std::istreambuf_iterator<char>());
 	size_t pos = 0;
 	std::string token;
