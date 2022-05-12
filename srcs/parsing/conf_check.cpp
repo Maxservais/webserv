@@ -83,7 +83,6 @@ void Scheck_server_name(Config &obj, int i) // illegal chars in server_name
 void Lcheck_nested(std::map<std::string,Location*>::iterator it) // check if nested location inside location
 {
 	std::string tmp = it->second->get_ALL();
-	// std::cout << "HEREEEE ||| " <<it->second->get_ALL() << std::endl << std::endl;
 	if (tmp.find("\tlocation ", 5) != std::string::npos)
 		throw EmbErr();
 }

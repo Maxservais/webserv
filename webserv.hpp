@@ -105,13 +105,13 @@ class Config
 		~Config();
 		Config& operator=(const Config &rhs);
 		std::vector<Server*> get_servers(void) const;
-		int get_nb_port(void) const;
 
-		void set_nb_port(void);
+		// int get_nb_port(void) const;
+		// void set_nb_port(void);
 		void free_all_server(void);
 
 	private:
-		int _nb_port;
+		// int _nb_port;
 		std::vector<Server*> _servers;
 };
 

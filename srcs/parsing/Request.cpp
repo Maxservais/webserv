@@ -58,76 +58,78 @@ std::string Request::getHost()
 
 void Request::fill_server_index()
 {
-	// get_server pointeur sur serveur prend port et serveur name
-	// vecteur temp -> tous serveurs s'appliquent au port, 
-	//	-->si un seul --> renvoie celui la
-	//	-->si plusieurs parcours vecteur et compare name 
-	// 			--> trouve server name --> renvoie celui qu'on trouve
-	//			--> sinon renvoie premier
-
-	// this->_server_index = 0;
-	// std::string tmp = getHost();
-	// size_t pos = tmp.find(":");
-	// int port_tmp = atoi(tmp.substr(pos + 1).c_str());
-
-	// for(size_t i = 0; i < this->config.get_servers().size(); i++)
-	// {
-	// 	if (this->config.get_servers()[i]->get_port() == port_tmp)
-	// 		this->_server_index = i;
-	// }
 
 	this->_server_index = 0;
-	std::string temp = getHost();
-	// first we get the server_name
-	int i = 0;
-	std::string requested_server_name = "";
-	if (temp.find(":") == std::string::npos)
-		throw HostNameErr();
+	std::string tmp = getHost();
+	size_t pos = tmp.find(":");
+	int port_tmp = atoi(tmp.substr(pos + 1).c_str());
 
-	while(temp[i] && temp[i] != ':')
-	{
-		requested_server_name += temp[i];
-		i++;
-	}
-
-	// then we get the port number
-	int requested_port = atoi(temp.substr(temp.find(":") + 1).c_str());
-
-	std::map<int, Server *> server_map; // in this map we store all the vectors which have the requested port number. The key is the index in the config vector
 	for(size_t i = 0; i < this->config.get_servers().size(); i++)
 	{
-		if (this->config.get_servers()[i]->get_port() == requested_port)
-			server_map.insert(std::pair<int, Server *>(i, this->config.get_servers()[i]));
+		if (this->config.get_servers()[i]->get_port() == port_tmp)
+			this->_server_index = i;
 	}
+
+	// get_server pointeur sur serveur prend port et serveur name
+	// vecteur temp -> tous serveurs s'appliquent au port, 
+	// 	-->si un seul --> renvoie celui la
+	// 	-->si plusieurs parcours vecteur et compare name 
+	// 			--> trouve server name --> renvoie celui qu'on trouve
+	// 			--> sinon renvoie premier
+
+	// this->_server_index = 0;
+	// std::string temp = getHost();
+	// // first we get the server_name
+	// int i = 0;
+	// std::string requested_server_name = "";
+	// if (temp.find(":") == std::string::npos)
+	// 	throw HostNameErr();
+
+	// while(temp[i] && temp[i] != ':')
+	// {
+	// 	requested_server_name += temp[i];
+	// 	i++;
+	// }
+
+	// // then we get the port number
+	// int requested_port = atoi(temp.substr(temp.find(":") + 1).c_str());
+
+	// std::map<int, Server *> server_map; // in this map we store all the vectors which have the requested port number. The key is the index in the config vector
+	// for(size_t i = 0; i < this->config.get_servers().size(); i++)
+	// {
+	// 	if (this->config.get_servers()[i]->get_port() == requested_port)
+	// 		server_map.insert(std::pair<int, Server *>(i, this->config.get_servers()[i]));
+	// }
 	
-	// if only one element in map --> the index is the key of this element
-	if (server_map.size() == 1)
-	{
-		this->_server_index = server_map.begin()->first;
-		std::cout << "check --> " << server_map.begin()->first << std::endl;
-	}
+	// // if only one element in map --> the index is the key of this element
+	// if (server_map.size() == 1)
+	// {
+	// 	this->_server_index = server_map.begin()->first;
+	// 	std::cout << "check --> " << server_map.begin()->first << std::endl;
+	// }
 
-	else // A TESTER !!!!!!!!!!! (pourra pas tester tant que fail to bind)
-	{
-		std::map<int, Server *>::iterator it;
-		for(it = server_map.begin(); it != server_map.end(); ++it)
-		{
-			if ((*it).second->get_server_name() == requested_server_name)
-			{
-				this->_server_index = (*it).first;
-				return;
-			}
-		}
+	// else // A TESTER !!!!!!!!!!! (pourra pas tester tant que fail to bind)
+	// {
+	// 	std::map<int, Server *>::iterator it;
+	// 	for(it = server_map.begin(); it != server_map.end(); ++it)
+	// 	{
+	// 		if ((*it).second->get_server_name() == requested_server_name)
+	// 		{
+	// 			this->_server_index = (*it).first;
+	// 			return;
+	// 		}
+	// 	}
 
-		it = server_map.begin();
-		int j = (*it).first;
-		for(it = server_map.begin(); it != server_map.end(); ++it)
-		{
-			if ((*it).first < j)
-				j = (*it).first;
-		}
-		this->_server_index = j;
-	}
+	// 	it = server_map.begin();
+	// 	int j = (*it).first;
+	// 	for(it = server_map.begin(); it != server_map.end(); ++it)
+	// 	{
+	// 		if ((*it).first < j)
+	// 			j = (*it).first;
+	// 	}
+	// 	this->_server_index = j;
+	// }
+	///////////
 }
 
 void Request::fill_default_variables()
