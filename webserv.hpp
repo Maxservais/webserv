@@ -370,10 +370,10 @@ bool exists (Request request);
 Config &conf_check(int argc, char **argv, Config &config);
 
 /* 4.1 SETUP SERVER */
-void	close_sockets(int *sockets, int len);
-void	setup_server(int *sockets, Config &config, std::vector<struct sockaddr_in> &sockaddr);
+void	close_sockets(std::vector<int> sockets);
+void	setup_server(std::vector<int> &sockets, Config &config, std::vector<struct sockaddr_in> &sockaddr);
 
 /* 4.2 HANDLE CLIENTS */
-void	handle_clients(int *sockets, Config &config, Log log, std::vector<struct sockaddr_in> &sockaddr);
+void	handle_clients(std::vector<int> &sockets, Config &config, Log log, std::vector<struct sockaddr_in> &sockaddr);
 
 #endif
