@@ -11,6 +11,7 @@ Request::Request(std::string buffer, Config &conf): buff(buffer), config(conf)
 {
 	this->_file = setFile();
 	fill_variables();
+	std::cout << buff << std::endl;
 }
 
 Request::Request(const Request &obj): config(obj.config)

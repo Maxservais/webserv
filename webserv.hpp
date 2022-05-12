@@ -264,6 +264,11 @@ class ConfOpenErr : public std::exception
 	const char * what () const throw () { return ("Cannot open configuration file!"); }
 };
 
+class UnevenErr : public std::exception
+{
+	const char * what () const throw () { return ("Uneven bracket number in the configuration file!"); }
+};
+
 class ExtErr : public std::exception
 {
 	const char * what () const throw () { return ("Wrong extension for the configuration file!"); }
@@ -302,6 +307,11 @@ class RootErr : public std::exception
 class IndexErr : public std::exception
 {
 	const char * what () const throw () { return ("Cannot open the index file requested!"); }
+};
+
+class EmbErr : public std::exception
+{
+	const char * what () const throw () { return ("Nested location not supported"); }
 };
 
 class CodeErr : public std::exception
