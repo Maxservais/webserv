@@ -72,9 +72,9 @@ void Location::fill_variables(std::vector<std::string> vec)
 		}
 		else if (vec[i].find("directory_listing ") != std::string::npos)
 		{
-			if (vec[i].find(" off ") != std::string::npos)
+			if (vec[i].find(" off") != std::string::npos)
 				this->_directory_listing = false;
-			if (vec[i].find(" on ") != std::string::npos)
+			if (vec[i].find(" on") != std::string::npos)
 				this->_directory_listing = true;
 		}	
 		i++;
@@ -246,6 +246,8 @@ Config::Config(std::string conf_file)
 Config::Config(Config const & src)
 {
 	this->_servers = src._servers;
+	this->_ports_vector = src._ports_vector;
+	this->_nb_port = src._nb_port;
 	return;
 }
 
@@ -253,14 +255,16 @@ Config::~Config() { return; }
 
 Config& Config::operator=(const Config &rhs)
 {
-	if (this != &rhs)
-		this->_servers = rhs.get_servers();
+	this->_servers = rhs.get_servers();
+	this->_nb_port = rhs.get_nb_port();
+	this->_ports_vector = rhs.get_ports_vector();
 	return (*this);
 }
 
 /* Getters */
 std::vector<Server*> Config::get_servers(void) const { return this->_servers; }
 int Config::get_nb_port(void) const { return this->_nb_port; }
+std::vector<int> Config::get_ports_vector(void) const { return this->_ports_vector; }
 
 /* Utils */
 void Config::set_nb_port(void)
@@ -268,6 +272,14 @@ void Config::set_nb_port(void)
 	std::map<int,int> tmp;
 	for(int i = 0; i < static_cast<int>(this->get_servers().size()); i++)
 		tmp.insert(std::pair<int, int>(this->get_servers()[i]->get_port(), 0));
+
+	std::map<int,int>::iterator ite = tmp.end();
+	for (std::map<int,int>::iterator it = tmp.begin(); it != ite; ++it)
+		this->_ports_vector.push_back((*it).first);
+
+	std::vector<int>::iterator iteb = this->_ports_vector.end();
+	for (std::vector<int>::iterator itb = this->_ports_vector.begin(); itb != iteb; ++itb)
+
 	this->_nb_port = tmp.size();
 }
 

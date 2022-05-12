@@ -6,9 +6,9 @@
 
 std::string to_string(unsigned int i)
 {
-    std::stringstream ss;
-    ss << (i);
-    return ss.str();
+	std::stringstream ss;
+	ss << (i);
+	return ss.str();
 }
 
 Response::Response(Request &request) : req(request)
@@ -63,7 +63,6 @@ std::string Response::full_code(int code)
 		case 413:
 			ret = " 413 Request Entity Too Large\n";
 			break;
-		
 	}
 	return (ret);
 }
@@ -85,7 +84,7 @@ std::string Response::check_error_custom(int code)
 std::string   	get_link(Request &req, const std::string &dir_ent, std::string &dir_name)
 {
 	std::stringstream ss;
-	std::string a(req.getHost()); //  a("localhost"); 
+	std::string a(req.getHost());
 	if (dir_ent == ".")
 	ss << "<p><a href=\"http://" + a << dir_name + "\">" + dir_ent + "</a></p>\n";
 	else if (dir_ent == "..")
@@ -95,7 +94,6 @@ std::string   	get_link(Request &req, const std::string &dir_ent, std::string &d
 		std::string::iterator ite = str.end();
 		str.erase(it, ite);
 		ss << "<p><a href=\"http://" + a << str + "\">" + dir_ent + "</a></p>\n";
-		std::cout << "<p><a href=\"http://" + a << str + "\">" + dir_ent + "</a></p>\n" << std::endl;
 	}
 	else
 		ss << "<p><a href=\"http://" + a << dir_name + "/" + dir_ent + "\">" + dir_ent + "</a></p>\n";
@@ -173,7 +171,6 @@ std::string Response::body(std::string file)
 	std::string ret;
 	buffer << input_file.rdbuf();
 	ret = buffer.str();
-
 	return (ret);
 }
 
@@ -271,7 +268,7 @@ void Response::post_methode()
 		}
 	}
 
-	if (req.get_max_body_size() < req.getPostInputLen()) // post with form, max size check
+	if (req.get_max_body_size() < req.getPostInputLen())
 	{
 		std::string tmp = check_error_custom(413);
 		if (!tmp.empty())
@@ -281,7 +278,7 @@ void Response::post_methode()
 		return ;
 	}
 
-	if (req.getFile_extention() == "cgi") // post with form
+	if (req.getFile_extention() == "cgi")
 	{
 		std::string	a = html_code_cgi(req);
 		if (a.empty())

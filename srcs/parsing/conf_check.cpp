@@ -22,7 +22,7 @@ void Scheck_methods(Config &obj, int i) // check if the methods are one of the 8
 	for (size_t j = 0; j < obj.get_servers()[i]->get_methods().size(); j++) 
 	{
 		std::string tmp = obj.get_servers()[i]->get_methods()[j];
-		if (std::find(std::begin(method_list), std::end(method_list), tmp) == std::end(method_list))
+		if (std::find(method_list.begin(), method_list.end(), tmp) == method_list.end())
 			throw MethErr();
 	}
 }
@@ -83,7 +83,6 @@ void Scheck_server_name(Config &obj, int i) // illegal chars in server_name
 void Lcheck_nested(std::map<std::string,Location*>::iterator it) // check if nested location inside location
 {
 	std::string tmp = it->second->get_ALL();
-	// std::cout << "HEREEEE ||| " <<it->second->get_ALL() << std::endl << std::endl;
 	if (tmp.find("\tlocation ", 5) != std::string::npos)
 		throw EmbErr();
 }
@@ -113,15 +112,25 @@ void Lcheck_methods(std::map<std::string,Location*>::iterator it) // check if th
 		for (size_t j = 0; j < it->second->get_methods().size(); j++) 
 		{
 			std::string tmp = it->second->get_methods()[j];
-			if (std::find(std::begin(method_list), std::end(method_list), tmp) == std::end(method_list))
+			if (std::find(method_list.begin(), method_list.end(), tmp) == method_list.end())
 				throw MethErr();
 		}
 	}
 }
 
 /* ************************************************************************** */
-/*  GLOBAL CHECKS                                                             */
+/*  CONFIG CHECK                                                             */
 /* ************************************************************************** */
+void Ccheck(Config &obj)
+{
+	std::vector< std::pair<int,std::string> > vec;
+	for (size_t i = 0; i < obj.get_servers().size(); i++)
+		vec.push_back(std::pair<int,std::string>(obj.get_servers()[i]->get_port(), obj.get_servers()[i]->get_server_name()));
+	std::vector<std::pair<int,std::string> >::iterator it = std::unique(vec.begin(), vec.end());
+	if (it != vec.end())
+		throw DoubleErr();
+}
+
 bool check_brackets(std::string file)
 {
 	std::ifstream input(file);
@@ -144,13 +153,16 @@ bool check_brackets(std::string file)
 		return 0;
 	return 1;
 }
+/* ************************************************************************** */
+/*  GLOBAL CHECKS                                                             */
+/* ************************************************************************** */
 
 void check_Server_blocks(Config &obj) 
 {
-	if (obj.get_servers().empty()) 
+	if (obj.get_servers().empty())
 		throw EmptyConfErr();
 
-	for (size_t i = 0; i < obj.get_servers().size(); i++) 
+	for (size_t i = 0; i < obj.get_servers().size(); i++)
 	{
 		Scheck_info(obj, i);
 		Scheck_methods(obj, i);
@@ -166,6 +178,8 @@ void check_Server_blocks(Config &obj)
 			Lcheck_nested(it);
 		}
 	}
+
+	Ccheck(obj);
 }
 
 Config &conf_check(int argc, char **argv, Config &config)
@@ -187,7 +201,7 @@ Config &conf_check(int argc, char **argv, Config &config)
 	if (!check_brackets(argv[1]))
 		throw UnevenErr();
 
-	Config tmp(argv[1]); // SUPER INEFFICIENT, LET'S FIX IT LATER
+	Config tmp(argv[1]);
 	config = tmp;
 	check_Server_blocks(config);
 	return config;

@@ -2,7 +2,6 @@
 
 Cgi::Cgi(Request a) : request(a)
 {
-	// request = a;
 	setEnv();
 	return ;
 }
@@ -98,7 +97,6 @@ std::string Cgi::executeCgi()
 		dup2(fd_out, 1);
 		dup2(fd_in, 0);
 		execve((request.get_root() + "/script.cgi").c_str(), n, env);
-		// throw OpenErr();
 		exit (1); // ?
 	}
 
