@@ -11,8 +11,8 @@ SRC_FILES	=	main.cpp						\
 				srcs/server/setup_server.cpp	\
 				srcs/server/handle_clients.cpp	\
 				srcs/response_cgi/Cgi.cpp		\
-				#srcs/response_cgi/Response.cpp#
-				#srcs/parsing/conf_check.cpp#	
+				srcs/response_cgi/Response.cpp	\
+				srcs/parsing/conf_check.cpp		\
 
 OBJ_FILES	=	$(SRC_FILES:.cpp=.o)
 

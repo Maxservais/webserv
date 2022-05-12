@@ -22,7 +22,7 @@ void Scheck_methods(Config &obj, int i) // check if the methods are one of the 8
 	for (size_t j = 0; j < obj.get_servers()[i]->get_methods().size(); j++) 
 	{
 		std::string tmp = obj.get_servers()[i]->get_methods()[j];
-		if (std::find(std::begin(method_list), std::end(method_list), tmp) == std::end(method_list))
+		if (std::find(method_list.begin(), method_list.end(), tmp) == method_list.end())
 			throw MethErr();
 	}
 }
@@ -112,7 +112,7 @@ void Lcheck_methods(std::map<std::string,Location*>::iterator it) // check if th
 		for (size_t j = 0; j < it->second->get_methods().size(); j++) 
 		{
 			std::string tmp = it->second->get_methods()[j];
-			if (std::find(std::begin(method_list), std::end(method_list), tmp) == std::end(method_list))
+			if (std::find(method_list.begin(), method_list.end(), tmp) == method_list.end())
 				throw MethErr();
 		}
 	}

@@ -6,9 +6,9 @@
 
 std::string to_string(unsigned int i)
 {
-    std::stringstream ss;
-    ss << (i);
-    return ss.str();
+	std::stringstream ss;
+	ss << (i);
+	return ss.str();
 }
 
 Response::Response(Request &request) : req(request)
@@ -63,7 +63,6 @@ std::string Response::full_code(int code)
 		case 413:
 			ret = " 413 Request Entity Too Large\n";
 			break;
-		
 	}
 	return (ret);
 }
@@ -172,7 +171,6 @@ std::string Response::body(std::string file)
 	std::string ret;
 	buffer << input_file.rdbuf();
 	ret = buffer.str();
-
 	return (ret);
 }
 
