@@ -36,7 +36,7 @@ void Scheck_root_index(Config &obj, int i) // check root and index
 	else
 		closedir(dir);
 
-	std::ifstream stream(obj.get_servers()[i]->get_root() + "/" + obj.get_servers()[i]->get_index());
+	std::ifstream stream((obj.get_servers()[i]->get_root() + "/" + obj.get_servers()[i]->get_index()).c_str());
 	if (stream.fail())
 		throw IndexErr();
 	else
@@ -56,7 +56,7 @@ void Scheck_errors(Config &obj, int i) // check errors pages
 	{
 		if (it->first < 100 || it->first > 599)
 			throw CodeErr();
-		std::ifstream stream(obj.get_servers()[i]->get_root() + "/" + it->second);
+		std::ifstream stream((obj.get_servers()[i]->get_root() + "/" + it->second).c_str());
 		if (stream.fail())
 			throw Code_fileErr();
 		else
@@ -97,7 +97,7 @@ void Lcheck_root_index(std::map<std::string,Location*>::iterator it) // check in
 	else
 		closedir(dir);
 
-	std::ifstream stream(it->second->get_root() + "/" + it->second->get_index()); 
+	std::ifstream stream((it->second->get_root() + "/" + it->second->get_index()).c_str()); 
 	if (stream.fail())
 		throw IndexErr();
 	else
