@@ -74,22 +74,23 @@ std::string Response::check_error_custom(int code)
 /* ************************************************************************** */
 /*  AUTO INDEX                                                                */
 /* ************************************************************************** */
-std::string   	get_link(const std::string &dir_ent, std::string &dir_name, int port)
+std::string   	get_link(Request &req, const std::string &dir_ent, std::string &dir_name)
 {
 	std::stringstream ss;
-	std::string a("localhost");
+	std::string a(req.getHost()); //  a("localhost"); 
 	if (dir_ent == ".")
-	ss << "<p><a href=\"http://" + a + ":" << port << dir_name + "\">" + dir_ent + "</a></p>\n";
+	ss << "<p><a href=\"http://" + a << dir_name + "\">" + dir_ent + "</a></p>\n";
 	else if (dir_ent == "..")
 	{
 		std::string str(dir_name);
 		std::string::iterator it = str.begin() + str.rfind("/");
 		std::string::iterator ite = str.end();
 		str.erase(it, ite);
-		ss << "<p><a href=\"http://" + a + ":" << port << str + "\">" + dir_ent + "</a></p>\n";
+		ss << "<p><a href=\"http://" + a << str + "\">" + dir_ent + "</a></p>\n";
+		std::cout << "<p><a href=\"http://" + a << str + "\">" + dir_ent + "</a></p>\n" << std::endl;
 	}
 	else
-		ss << "<p><a href=\"http://" + a + ":" << port << dir_name + "/" + dir_ent + "\">" + dir_ent + "</a></p>\n";
+		ss << "<p><a href=\"http://" + a << dir_name + "/" + dir_ent + "\">" + dir_ent + "</a></p>\n";
 	return (ss.str());
 }
 
@@ -106,7 +107,7 @@ std::string Response::ft_try_dir(Request &request)
 		dir_name = "/" + dir_name;
 	for (struct dirent *dir_buff = readdir(dir); dir_buff; dir_buff = readdir(dir))
 	{
-		ret += get_link(std::string(dir_buff->d_name), dir_name, this->req.get_port());
+		ret += get_link(this->req, std::string(dir_buff->d_name), dir_name);
 	}
 	ret +="</p>\n</body>\n</html>\n";
 	closedir(dir);
