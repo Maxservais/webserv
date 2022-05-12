@@ -268,7 +268,7 @@ void Response::post_methode()
 		}
 	}
 
-	if (req.get_max_body_size() < req.getPostInputLen()) // post with form, max size check
+	if (req.get_max_body_size() < req.getPostInputLen())
 	{
 		std::string tmp = check_error_custom(413);
 		if (!tmp.empty())
@@ -278,7 +278,7 @@ void Response::post_methode()
 		return ;
 	}
 
-	if (req.getFile_extention() == "cgi") // post with form
+	if (req.getFile_extention() == "cgi")
 	{
 		std::string	a = html_code_cgi(req);
 		if (a.empty())

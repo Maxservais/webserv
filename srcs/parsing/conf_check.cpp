@@ -201,7 +201,7 @@ Config &conf_check(int argc, char **argv, Config &config)
 	if (!check_brackets(argv[1]))
 		throw UnevenErr();
 
-	Config tmp(argv[1]); // SUPER INEFFICIENT, LET'S FIX IT LATER
+	Config tmp(argv[1]);
 	config = tmp;
 	check_Server_blocks(config);
 	return config;

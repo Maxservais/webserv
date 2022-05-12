@@ -9,7 +9,7 @@ int read_connection(int i, std::string &buff)
 	memset(buffer, 0, BUFFER_SIZE);
 	int ret = recv(i, buffer, BUFFER_SIZE, 0);
 	x += ret;
-	// buffer[ret] = '\0';
+
 	if (ret < 0)
 		throw ConnectionErr();
 	if (ret == 0)
@@ -63,7 +63,7 @@ void	handle_clients(int *sockets, Config &config, Log log, std::vector<struct so
 {
 	(void)log;
 	int				err;
-	int				len = config.get_nb_port(); // config.get_servers().size()
+	int				len = config.get_nb_port();
 	int				max_socket_val = sockets[len - 1];
 	fd_set			current_sockets;
 	fd_set			ready_sockets;

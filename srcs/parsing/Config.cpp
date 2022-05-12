@@ -72,9 +72,9 @@ void Location::fill_variables(std::vector<std::string> vec)
 		}
 		else if (vec[i].find("directory_listing ") != std::string::npos)
 		{
-			if (vec[i].find(" off ") != std::string::npos)
+			if (vec[i].find(" off") != std::string::npos)
 				this->_directory_listing = false;
-			if (vec[i].find(" on ") != std::string::npos)
+			if (vec[i].find(" on") != std::string::npos)
 				this->_directory_listing = true;
 		}	
 		i++;

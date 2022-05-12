@@ -58,18 +58,6 @@ std::string Request::getHost()
 
 void Request::fill_server_index()
 {
-
-	// this->_server_index = 0;
-	// std::string tmp = getHost();
-	// size_t pos = tmp.find(":");
-	// int port_tmp = atoi(tmp.substr(pos + 1).c_str());
-
-	// for(size_t i = 0; i < this->config.get_servers().size(); i++)
-	// {
-	// 	if (this->config.get_servers()[i]->get_port() == port_tmp)
-	// 		this->_server_index = i;
-	// }
-
 	// get_server pointeur sur serveur prend port et serveur name
 	// vecteur temp -> tous serveurs s'appliquent au port, 
 	// 	-->si un seul --> renvoie celui la
@@ -79,11 +67,12 @@ void Request::fill_server_index()
 
 	this->_server_index = 0;
 	std::string temp = getHost();
+
 	// first we get the server_name
 	int i = 0;
 	std::string requested_server_name = "";
-	if (temp.find(":") == std::string::npos)
-		throw HostNameErr();
+	// if (temp.find(":") == std::string::npos)
+	// 	throw HostNameErr();
 
 	while(temp[i] && temp[i] != ':')
 	{
@@ -93,6 +82,8 @@ void Request::fill_server_index()
 
 	// then we get the port number
 	int requested_port = atoi(temp.substr(temp.find(":") + 1).c_str());
+	if (requested_port == 0)
+		requested_port = 80;
 
 	std::map<int, Server *> server_map; // in this map we store all the vectors which have the requested port number. The key is the index in the config vector
 	for(size_t i = 0; i < this->config.get_servers().size(); i++)
@@ -105,7 +96,7 @@ void Request::fill_server_index()
 	if (server_map.size() == 1)
 		this->_server_index = server_map.begin()->first;
 
-	else // A TESTER !!!!!!!!!!! (pourra pas tester tant que fail to bind)
+	else // A TESTER !!!!!!!!!!!
 	{
 		std::map<int, Server *>::iterator it;
 		for(it = server_map.begin(); it != server_map.end(); ++it)
@@ -118,11 +109,11 @@ void Request::fill_server_index()
 		}
 
 		it = server_map.begin();
-		int j = (*it).first;
+		int j = it->first;
 		for(it = server_map.begin(); it != server_map.end(); ++it)
 		{
-			if ((*it).first < j)
-				j = (*it).first;
+			if (it->first < j)
+				j = it->first;
 		}
 		this->_server_index = j;
 	}
@@ -167,7 +158,6 @@ void Request::replace_default_variables(std::map<std::string,Location *>::iterat
 void Request::fill_variables()
 {
 	// setting the index of the server (all the server blocks are stored in a vector)
-	// std::cout << buff << std::endl;
 	fill_server_index();
 
 	// we fill the variables with the elements of the global scope from the server block
