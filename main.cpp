@@ -19,7 +19,8 @@ int main(int argc, char **argv)
 	}
 
 	/* Initialize some variables to handle later listening on multiple ports */
-	int	len = config.get_servers().size();
+	int	len = config.get_nb_port();
+
 	std::vector<struct sockaddr_in>	sockaddr(len);
 	int sockets[len];
 
@@ -27,7 +28,7 @@ int main(int argc, char **argv)
 	for (int i = 0; i < len; ++i)
 	{
 		sockaddr[i].sin_family = PF_INET;
-		sockaddr[i].sin_port = htons(config.get_servers()[i]->get_port());
+		sockaddr[i].sin_port = htons(config.get_ports_vector()[i]);
 		sockaddr[i].sin_addr.s_addr = INADDR_ANY;
 		memset(sockaddr[i].sin_zero, '\0', sizeof sockaddr[i].sin_zero);
 	}
