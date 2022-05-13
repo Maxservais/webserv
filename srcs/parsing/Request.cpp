@@ -71,8 +71,6 @@ void Request::fill_server_index()
 	// first we get the server_name
 	int i = 0;
 	std::string requested_server_name = "";
-	// if (temp.find(":") == std::string::npos)
-	// 	throw HostNameErr();
 
 	while(temp[i] && temp[i] != ':')
 	{
@@ -96,7 +94,7 @@ void Request::fill_server_index()
 	if (server_map.size() == 1)
 		this->_server_index = server_map.begin()->first;
 
-	else // A TESTER !!!!!!!!!!!
+	else
 	{
 		std::map<int, Server *>::iterator it;
 		for(it = server_map.begin(); it != server_map.end(); ++it)
@@ -200,6 +198,7 @@ void Request::fill_variables()
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 /*  UTILS                                                                     */
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+
 // split a string with spaces without care of allocations and returns it into a vector
 std::vector<std::string> Request::split_words(std::string s)
 {
@@ -387,6 +386,7 @@ int Request::getUpBody()
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 /*  GETTERS                                                                   */
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+
 int Request::get_server_index(void) const { return this->_server_index; }
 std::string Request::get_root(void) const { return this->_root; }
 std::string Request::get_index(void) const { return this->_index; }

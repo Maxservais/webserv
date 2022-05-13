@@ -30,6 +30,7 @@ Response::~Response()
 /* ************************************************************************** */
 /*  UTILS                                                                     */
 /* ************************************************************************** */
+
 bool Response::exists()
 {
 	const std::string &path = req.get_root() + this->req.get_file();
@@ -81,6 +82,7 @@ std::string Response::check_error_custom(int code)
 /* ************************************************************************** */
 /*  AUTO INDEX                                                                */
 /* ************************************************************************** */
+
 std::string   	get_link(Request &req, const std::string &dir_ent, std::string &dir_name)
 {
 	std::stringstream ss;
@@ -123,6 +125,7 @@ std::string Response::ft_try_dir(Request &request)
 /* ************************************************************************** */
 /*  CGI                                                                       */
 /* ************************************************************************** */
+
 std::string Response::html_code_cgi(Request &req)
 {
 	Cgi a(req);
@@ -132,6 +135,7 @@ std::string Response::html_code_cgi(Request &req)
 /* ************************************************************************** */
 /*  RESPONSE COMPOSITION                                                      */
 /* ************************************************************************** */
+
 std::string Response::content_type(std::string file)
 {
 	size_t pos = file.find_last_of(".");
@@ -177,6 +181,7 @@ std::string Response::body(std::string file)
 /* ************************************************************************** */
 /*  COMPOSE RESPONSE                                                          */
 /* ************************************************************************** */
+
 void Response::get_methode()
 {
 	std::string s;
@@ -231,7 +236,7 @@ void Response::get_methode()
 void Response::post_methode()
 {
 
-	if (req.getFile_extention() == "up") // upload de fichers
+	if (req.getFile_extention() == "up")
 	{
 		if (req.get_max_body_size() < req.getUpBody())
 		{

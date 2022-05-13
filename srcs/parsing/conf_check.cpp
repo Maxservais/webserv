@@ -80,6 +80,7 @@ void Scheck_server_name(Config &obj, int i) // illegal chars in server_name
 /* ************************************************************************** */
 /*  CHECK LOCATION BLOCKS                                                     */
 /* ************************************************************************** */
+
 void Lcheck_nested(std::map<std::string,Location*>::iterator it) // check if nested location inside location
 {
 	std::string tmp = it->second->get_ALL();
@@ -121,6 +122,7 @@ void Lcheck_methods(std::map<std::string,Location*>::iterator it) // check if th
 /* ************************************************************************** */
 /*  CONFIG CHECK                                                              */
 /* ************************************************************************** */
+
 std::vector<std::pair<int,std::string> >::iterator is_unique(std::vector<std::pair<int,std::string> >::iterator first, std::vector<std::pair<int,std::string> >::iterator last)
 {
 	if (first == last)
@@ -201,7 +203,7 @@ Config &conf_check(int argc, char **argv, Config &config)
 	if (argc != 2) // check two args
 		throw ArgvErr();
 
-	std::string str = argv[1]; // check config fiel extension
+	std::string str = argv[1]; // check config file extension
 	int position= str.find_last_of(".");
 	if (str.substr(position + 1) != "conf")
 		throw ExtErr();
