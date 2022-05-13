@@ -1,5 +1,5 @@
 body {
-	background-color: lightblue;
+	background-color: rgb(252, 240, 232);
 	font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   }
 
@@ -11,16 +11,16 @@ body {
   }
 
   h1 {
-	color: blue;
+	color: rgb(2, 247, 47);
 	text-align: center;
   }
   
   p {
 	text-align: center;
-	color: rgb(44, 191, 73);
+	color: blue;
   }
 
   a {
 	text-align: center;
-	color: hotpink;
+	color: rgb(2, 247, 47);
   }
