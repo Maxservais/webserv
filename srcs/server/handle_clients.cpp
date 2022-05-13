@@ -12,8 +12,8 @@ int read_connection(int i, std::string &buff)
 
 	if (ret < 0)
 		throw ConnectionErr();
-	if (ret == 0)
-		throw ConnectionClosedErr();
+	// if (ret == 0)
+	// 	throw ConnectionClosedErr();
 	buff += std::string(buffer, ret);
 
 	/* Check whether "\r\n\r\n" was found */

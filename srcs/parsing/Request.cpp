@@ -338,7 +338,7 @@ std::string Request::ft_upload(std::string up, std::string buff)
 		fd = open((this->get_root() + "/" + this->get_uploads() + "/" + a).c_str(), O_RDWR | O_CREAT | O_TRUNC, 00777);
 	}
 	if (fd == -1)
-		throw OpenErr();
+		return (std::string());
 	write(fd, up.c_str(), up.size());
 	close(fd);
 	return (a);
