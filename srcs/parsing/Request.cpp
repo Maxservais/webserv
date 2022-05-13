@@ -7,11 +7,6 @@
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 /*  CANON                                                                     */
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-Request::Request(Config &conf) : config(conf)
-{
-	return ;
-}
-
 Request::Request(std::string buffer, Config &conf): buff(buffer), config(conf)
 {
 	this->_file = setFile();

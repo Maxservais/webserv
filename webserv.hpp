@@ -128,7 +128,6 @@ class	Request
 {
 	public:
 		/* Canon */
-		Request(Config &conf);
 		Request(std::string buffer, Config &conf);
 		Request(const Request &obj);
 		Request &operator=(const Request &obj);

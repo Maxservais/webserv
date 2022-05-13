@@ -340,13 +340,12 @@ void Response::delete_methode()
 std::string Response::compose_response()
 {
 	std::vector<std::string> v = req.get_methods();
+	
 	if (req.getMethod() == "GET" && std::find(v.begin(), v.end(), "GET") != v.end())
 		get_methode();
 
 	else if (req.getMethod() == "POST" && std::find(v.begin(), v.end(), "POST") != v.end())
-	{
 		post_methode();
-	}
 
 	else if (req.getMethod() == "DELETE" && std::find(v.begin(), v.end(), "DELETE") != v.end())
 		delete_methode();
