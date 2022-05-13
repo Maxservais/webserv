@@ -273,7 +273,7 @@ std::string Request::getVersion()
 // return an empty string in case of error
 std::string Request::getFile_clean()
 {
-	std::string str = get_file();
+	std::string str = setFile();
 	if (str.find("/") == 0)
 		str.erase(0, 1);
 	return (str);
