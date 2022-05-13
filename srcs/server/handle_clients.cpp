@@ -56,33 +56,41 @@ void	disconnect_client(int client_fd, fd_set *current_sockets)
 	FD_CLR(client_fd, current_sockets);
 }
 
-void	handle_clients(std::vector<int> &sockets, Config &config, Log log, std::vector<struct sockaddr_in> &sockaddr) // Retirer log
+void	handle_clients(std::vector<int> &sockets, Config &config, std::vector<struct sockaddr_in> &sockaddr)
 {
-	(void)log; // Retirer log
 	int					err;
 	int					max_socket_val = sockets[config.get_servers().size() - 1];
-	fd_set				current_sockets;
-	fd_set				read_sockets;
 	struct timeval		timeout;
 	std::string			buff;
 	std::vector<int>	clients;
+	// std::vector<int>	writer;
+	// Request				req(config);
 
-	/* Initiliaze current set */
+	/* Timeout specifies how long we're willing to wait for a fd to become ready */
+	timeout.tv_sec  = 3 * 60;
+	timeout.tv_usec = 0;
+
+	/* Declare fd_sets and zero out current_sockets */
+	fd_set	current_sockets;
+	fd_set	read_sockets;
+	// fd_set	write_sockets;
 	FD_ZERO(&current_sockets);
 
-	/* Add each socket to the current set of file descriptors */
+	/* Add each server socket to the current set of file descriptors */
 	for (std::vector<int>::iterator it = sockets.begin(); it != sockets.end(); ++it)
 		FD_SET(*it, &current_sockets);
 
 	/* Loop, waiting for incoming connects or for incoming data on any of the connected sockets */
 	while(true)
 	{
-		/* Timeout specifies how long we're willing to wait for a fd to become ready */
-		timeout.tv_sec  = 3 * 60;
-		timeout.tv_usec = 0;
 
-		/* Copy sockets and fill write_sockets */
+		/* Copy sockets */
 		read_sockets = current_sockets;
+
+		/* Add each client socket to the set of writing file descriptors */
+		// FD_ZERO(&write_sockets);
+		// for (std::vector<int>::iterator it = writer.begin(); it != writer.end(); ++it)
+		// 	FD_SET(*it, &write_sockets);
 
 		/* Select to read and write without blocking */
 		err = select(max_socket_val + 1, &read_sockets, NULL, NULL, &timeout);
@@ -90,8 +98,26 @@ void	handle_clients(std::vector<int> &sockets, Config &config, Log log, std::vec
 			throw SelectErr();
 		else if (err == 0)
 			throw TimeOutErr();
-		
-		/* Handle the client connection and then remove the socket from the set of FDs */
+
+		// /* Write through the client connection and then remove the socket from the set of FDs */
+		// for (std::vector<int>::iterator it = writer.begin(); it != writer.end(); ++it)
+		// {
+		// 	if(FD_ISSET(*it, &write_sockets))
+		// 	{
+		// 		Response resp(req);
+		// 		std::string response = resp.get_response();
+		// 		int len = response.size();
+		// 		const char *ret = response.c_str();
+		// 		send_data(*it, ret, len); // send_data(i, response.c_str(), response.size());
+		// 		memset((void *)ret, 0, len);
+		// 		// clients.erase(it);
+		// 		// writer.erase(it);
+		// 		// disconnect_client(*it, &current_sockets);
+		// 		break ;
+		// 	}
+		// }
+
+		/* Read from the client connection and then remove the socket from the set of FDs */
 		for (std::vector<int>::iterator it = clients.begin(); it != clients.end(); ++it)
 		{
 			if(FD_ISSET(*it, &read_sockets))
@@ -106,21 +132,16 @@ void	handle_clients(std::vector<int> &sockets, Config &config, Log log, std::vec
 					{
 						Request request(buff, config);
 						buff.clear();
+						// req = request;
+						// writer.push_back(*it);
 
 						Response resp(request);
 						std::string response = resp.get_response();
 						int len = response.size();
-						std::cout << len << std::endl;
 						const char *ret = response.c_str();
 						send_data(*it, ret, len); // send_data(i, response.c_str(), response.size());
 						memset((void *)ret, 0, len);
 						disconnect_client(*it, &current_sockets);
-						clients.erase(it); // clients.erase(*it) ?
-					}
-					else if (err == -1)
-					{
-						FD_CLR(*it, &current_sockets);
-						FD_CLR(*it, &read_sockets);
 						clients.erase(it);
 					}
 					break ;
@@ -129,8 +150,10 @@ void	handle_clients(std::vector<int> &sockets, Config &config, Log log, std::vec
 				{
 					disconnect_client(*it, &current_sockets);
 					close_sockets(sockets);
+					// clients.erase(it);
 					std::cerr << e.what() << std::endl;
-					return ;
+					// return ;
+					continue ;
 				}
 			}
 		}
@@ -142,7 +165,7 @@ void	handle_clients(std::vector<int> &sockets, Config &config, Log log, std::vec
 		{
 			if(FD_ISSET(*it, &read_sockets))
 			{
-				socklen_t	addrlen = sizeof(sockaddr[i]);
+				socklen_t addrlen = sizeof(sockaddr[i]);
 				int	connection = accept(*it, (struct sockaddr*)&sockaddr[i], &addrlen);
 				if (connection < 0)
 					throw AcceptErr();

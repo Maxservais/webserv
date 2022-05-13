@@ -120,6 +120,7 @@ class	Request
 {
 	public:
 		/* Canon */
+		Request(Config &conf);
 		Request(std::string buffer, Config &conf);
 		Request(const Request &obj);
 		Request &operator=(const Request &obj);
@@ -374,6 +375,6 @@ void	close_sockets(std::vector<int> sockets);
 void	setup_server(std::vector<int> &sockets, Config &config, std::vector<struct sockaddr_in> &sockaddr);
 
 /* 4.2 HANDLE CLIENTS */
-void	handle_clients(std::vector<int> &sockets, Config &config, Log log, std::vector<struct sockaddr_in> &sockaddr);
+void	handle_clients(std::vector<int> &sockets, Config &config, std::vector<struct sockaddr_in> &sockaddr);
 
 #endif
