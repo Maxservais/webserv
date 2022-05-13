@@ -10,6 +10,8 @@
 			<li>CHECK MAX BODY SIZE —> curl -X POST -H "Content-Type: plain/text" --data "123" http://localhost:8080/</li>
 			<li>CHECK NON IMPLEMENTED COMMANDS—> curl -X  HEAD  http://localhost:9999</li>
 			<li>CHECK NAMES—> curl --resolve yolo.be:80:127.0.0.1 http://yolo.be/<br>curl --resolve sitedanimauxpuissant.be:80:127.0.0.1 http://sitedanimauxpuissant.be/<br>curl --resolve okapi:80:127.0.0.1 http://okapi/</li>
+			<br>
+			<li>siege -b --reps=1000000000 127.0.0.1:8080</li>
 		  </ul>
     </body>
 </html>
