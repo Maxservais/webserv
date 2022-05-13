@@ -89,27 +89,27 @@ std::string Cgi::executeCgi()
 	int pid = fork();
 	if (pid == -1)
 	{
-		std::cerr << "CGI forking has failed" << std::endl; // ?
-		exit(1); // ?
+		std::cerr << "CGI forking has failed" << std::endl;
+		exit(1);
 	}
 	if (pid == 0)
 	{
 		dup2(fd_out, 1);
 		dup2(fd_in, 0);
 		execve((request.get_root() + "/script.cgi").c_str(), n, env);
-		exit (1); // ?
+		exit (1);
 	}
 
 	else
 	{
-		char buff[50] = {0}; // A REMPLACER
+		char buff[50] = {0};
 		waitpid(-1, NULL, 0);
 		lseek(fd_out, 0, 0);
 		int readen = 1;
 		while (readen > 0)
 		{
-			memset(buff, 0, 50); // A REMPLACER
-			readen = read(fd_out, buff, 50 - 1); // A REMPLACER
+			memset(buff, 0, 50);
+			readen = read(fd_out, buff, 50 - 1);
 			ret += buff;
 		}
 	}
