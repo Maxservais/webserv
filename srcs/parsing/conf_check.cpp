@@ -119,21 +119,35 @@ void Lcheck_methods(std::map<std::string,Location*>::iterator it) // check if th
 }
 
 /* ************************************************************************** */
-/*  CONFIG CHECK                                                             */
+/*  CONFIG CHECK                                                              */
 /* ************************************************************************** */
+std::vector<std::pair<int,std::string> >::iterator is_unique(std::vector<std::pair<int,std::string> >::iterator first, std::vector<std::pair<int,std::string> >::iterator last)
+{
+	if (first == last)
+		return last;
+ 
+	std::vector<std::pair<int,std::string> >::iterator result = first;
+	while (++first != last) 
+	{
+		if (!(*result == *first) && ++result != first)
+			*result = std::move(*first);
+	}
+	return ++result;
+}
+
 void Ccheck(Config &obj)
 {
 	std::vector< std::pair<int,std::string> > vec;
 	for (size_t i = 0; i < obj.get_servers().size(); i++)
 		vec.push_back(std::pair<int,std::string>(obj.get_servers()[i]->get_port(), obj.get_servers()[i]->get_server_name()));
-	std::vector<std::pair<int,std::string> >::iterator it = std::unique(vec.begin(), vec.end());
+	std::vector<std::pair<int,std::string> >::iterator it = is_unique(vec.begin(), vec.end());
 	if (it != vec.end())
 		throw DoubleErr();
 }
 
 bool check_brackets(std::string file)
 {
-	std::ifstream input(file);
+	std::ifstream input(file.c_str());
 	std::string str = std::string((std::istreambuf_iterator<char>(input)), std::istreambuf_iterator<char>());
 	input.close();
 	
