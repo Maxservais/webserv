@@ -1,15 +1,12 @@
 #include "../../webserv.hpp"
 
-int read_connection(int i, std::string &buff)
+int read_connection(int socket, std::string &buff)
 {
 	char	buffer[BUFFER_SIZE + 1];
-	static int x;
 
 	/* Read from client' socket and add it to the buff string */
 	memset(buffer, 0, BUFFER_SIZE);
-	int ret = recv(i, buffer, BUFFER_SIZE, 0);
-	x += ret;
-
+	int ret = recv(socket, buffer, BUFFER_SIZE, 0);
 	if (ret < 0)
 		throw ConnectionErr();
 	// if (ret == 0)
@@ -21,10 +18,10 @@ int read_connection(int i, std::string &buff)
 	if (res != std::string::npos)
 	{
 		if (buff.find("Content-Length: ") == std::string::npos)
-			return 0;
-		
+			return (0);
+	
 		/* Find the content length */
-		size_t len = std::atoi(buff.substr(buff.find("Content-Length: ") + 16, 10).c_str());
+		size_t len = std::atoi(buff.substr(buff.find("Content-Length: ") + strlen("Content-Length: "), 10).c_str());
 		
 		/* If buff' size is bigger or equal to what the client told us he would send, then we are good */
 		if (buff.size() >= len + res + strlen("\r\n\r\n"))
@@ -59,92 +56,102 @@ void	disconnect_client(int client_fd, fd_set *current_sockets)
 	FD_CLR(client_fd, current_sockets);
 }
 
-void	handle_clients(int *sockets, Config &config, std::vector<struct sockaddr_in> &sockaddr)
+void	handle_clients(std::vector<int> &sockets, Config &config, std::vector<struct sockaddr_in> &sockaddr)
 {
-	int				err;
-	int				len = config.get_nb_port();
-	int				max_socket_val = sockets[len - 1];
-	fd_set			current_sockets;
-	fd_set			ready_sockets;
-	struct timeval	timeout;
-	std::string		buff;
+	int					err;
+	std::string			buff;
+	std::vector<int>	clients;
 
-	/* Initiliaze current set */
+	/* Timeout specifies how long we're willing to wait for a fd to become ready */
+	struct timeval	timeout;
+
+	/* Find value max */
+	int				len_port = config.get_nb_port();
+	int				max_socket_val = sockets[len_port- 1];
+
+	/* Declare fd_sets and zero out current_sockets */
+	fd_set	current_sockets;
+	fd_set	read_sockets;
 	FD_ZERO(&current_sockets);
 
-	/* Add each socket to the current set of file descriptors */
-	for (int i = 0; i < len; ++i)
-		FD_SET(sockets[i], &current_sockets);
+	/* Add each server socket to the current set of file descriptors */
+	for (std::vector<int>::iterator it = sockets.begin(); it != sockets.end(); ++it)
+		FD_SET(*it, &current_sockets);
 
 	/* Loop, waiting for incoming connects or for incoming data on any of the connected sockets */
 	while(true)
 	{
-		/* Timeout specifies how long we're willing to wait for a fd to become ready */
 		timeout.tv_sec  = 3 * 60;
 		timeout.tv_usec = 0;
-		ready_sockets = current_sockets;
-		err = select(max_socket_val + 1, &ready_sockets, NULL, NULL, &timeout);
+		/* Copy sockets */
+		read_sockets = current_sockets;
+
+		/* Select to read and write without blocking */
+		err = select(max_socket_val + 1, &read_sockets, NULL, NULL, &timeout);
 		if (err < 0)
 			throw SelectErr();
 		else if (err == 0)
 			throw TimeOutErr();
-		for (int i = 0; i <= max_socket_val; i++)
+
+		/* Read from the client connection and then remove the socket from the set of FDs */
+		for (std::vector<int>::iterator it = clients.begin(); it != clients.end(); ++it)
 		{
-			if(FD_ISSET(i, &ready_sockets))
+			if(FD_ISSET(*it, &read_sockets))
 			{
-				for (int j = 0; j < len; ++j)
+				try
 				{
-					/* If there is a new connection, accept it and add the new client socket
-					to the current set of file descriptors */
-					if (i == sockets[j])
-					{
-						socklen_t	addrlen = sizeof(sockaddr[j]);
-						int	connection = accept(sockets[j], (struct sockaddr*)&sockaddr[j], &addrlen);
-						if (connection < 0)
-							throw AcceptErr();
-						FD_SET(connection, &current_sockets);
-						if (connection > max_socket_val)
-							max_socket_val = connection;
-						break ;
-					}
-					/* Else, handle the connection and then remove the socket from the set of FDs */
-					else if (j == len - 1)
-					{
-						try
-						{
-							/* Read from client' socket */
-							err = read_connection(i, buff);
+					/* Read from client' socket */
+					err = read_connection(*it, buff);
 
-							/* If the full request could be read, we parse it, build a response and send it */
-							if (err == 0)
-							{
-								Request request(buff, config);
-								buff.clear();
-								Response resp(request);
+					/* If the full request could be read, we parse it, build a response and send it */
+					if (err == 0)
+					{
+						Request request(buff, config);
+						buff.clear();
 
-								std::string response = resp.get_response();
-								int len = response.size();
-								const char *ret = response.c_str();
-								send_data(i, ret, len); // send_data(i, response.c_str(), response.size());
-								memset((void *)ret, 0, len);
-								disconnect_client(i, &current_sockets);
-							}
-							else if (err == 1)
-								break ;
-						}
-						catch (std::exception &e)
-						{
-							disconnect_client(i, &current_sockets);
-							close_sockets(sockets, len);
-							std::cerr << e.what() << std::endl;
-							return ;
-						}
+						Response resp(request);
+						std::string response = resp.get_response();
+						int len = response.size();
+						const char *ret = response.c_str();
+						send_data(*it, ret, len); // send_data(i, response.c_str(), response.size());
+						memset((void *)ret, '\0', len);
+						disconnect_client(*it, &current_sockets);
+						clients.erase(it);
 					}
+					break ;
+				}
+				catch (std::exception &e)
+				{
+					disconnect_client(*it, &current_sockets);
+					close_sockets(sockets);
+					// clients.erase(it);
+					std::cerr << e.what() << std::endl;
+					// return ;
+					continue ;
 				}
 			}
 		}
+
+		/* If there is a new connection, accept it and add the new client socket
+		to the current set of file descriptors */
+		int i = 0;
+		for (std::vector<int>::iterator it = sockets.begin(); it != sockets.end(); ++it, ++i)
+		{
+			if(FD_ISSET(*it, &read_sockets))
+			{
+				socklen_t addrlen = sizeof(sockaddr[i]);
+				int	connection = accept(*it, (struct sockaddr*)&sockaddr[i], &addrlen);
+				if (connection < 0)
+					throw AcceptErr();
+				FD_SET(connection, &current_sockets);
+				clients.push_back(connection);
+				if (connection > max_socket_val)
+					max_socket_val = connection;
+				break ;
+			}
+		}
 	}
-	close_sockets(sockets, len);
+	close_sockets(sockets);
 }
 
 /* DOCUMENTATION:

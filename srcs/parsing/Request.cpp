@@ -7,6 +7,11 @@
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 /*  CANON                                                                     */
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+Request::Request(Config &conf) : config(conf)
+{
+	return ;
+}
+
 Request::Request(std::string buffer, Config &conf): buff(buffer), config(conf)
 {
 	this->_file = setFile();
@@ -33,7 +38,20 @@ Request::Request(const Request &obj): config(obj.config)
 
 Request	&Request::operator=(const Request &obj)
 {
-	buff = obj.buff;
+	this->buff = obj.buff;
+	this->config = obj.config;
+	this->_file = obj._file;
+	this->_server_index = obj._server_index;
+	this->_max_body_size = obj._max_body_size;
+	this->_port = obj._port;
+	this->_errors = obj._errors;
+	this->_server_name = obj._server_name;
+	this->_root = obj._root;
+	this->_errors_root = obj._errors_root;
+	this->_index = obj._index;
+	this->_methods = obj._methods;
+	this->_directory_listing = obj._directory_listing;
+	this->_uploads = obj._uploads;
 	return (*this);
 }
 

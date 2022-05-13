@@ -1,14 +1,14 @@
 #include "../../webserv.hpp"
 
-void	close_sockets(int *sockets, int len)
+void	close_sockets(std::vector<int> sockets)
 {
-	for (int i = 0; i < len; ++i)
+	for (std::vector<int>::iterator it = sockets.begin(); it != sockets.end(); ++it)
 	{
-		close(*(sockets + i));
+		close(*(it));
 	}
 }
 
-void	setup_server(int *sockets, Config &config, std::vector<struct sockaddr_in> &sockaddr)
+void	setup_server(std::vector<int> &sockets, Config &config, std::vector<struct sockaddr_in> &sockaddr)
 {
 	int	optval;
 	int	len = config.get_nb_port();
@@ -19,7 +19,7 @@ void	setup_server(int *sockets, Config &config, std::vector<struct sockaddr_in> 
 		sockets[i] = socket(AF_INET, SOCK_STREAM, 0);
 		if (sockets[i] < 0)
 		{
-			close_sockets(sockets, i);
+			close_sockets(sockets);
 			throw SocketErr();
 		}
 
@@ -27,7 +27,7 @@ void	setup_server(int *sockets, Config &config, std::vector<struct sockaddr_in> 
 		will also be nonblocking since they will inherit that state from the listening socket. */
 		if (fcntl(sockets[i], F_SETFL, O_NONBLOCK) < 0)
 		{
-			close_sockets(sockets, i);
+			close_sockets(sockets);
 			throw SocketErr();
 		}
 
@@ -35,21 +35,21 @@ void	setup_server(int *sockets, Config &config, std::vector<struct sockaddr_in> 
 		optval = 1;
 		if (setsockopt(sockets[i], SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval)) == -1)
 		{
-			close_sockets(sockets, i);
+			close_sockets(sockets);
 			throw SocketErr();
 		}
 
 		/* Bind each socket to the corresponding port */	
 		if (bind(sockets[i], (struct sockaddr*)&sockaddr[i], sizeof(sockaddr[i])) < 0)
 		{
-			close_sockets(sockets, i);
+			close_sockets(sockets);
 			throw BindErr();
 		}
 
 		/* Wait for incoming connections */
 		if (listen(sockets[i], SOMAXCONN) < 0)
 		{
-			close_sockets(sockets, i);
+			close_sockets(sockets);
 			throw ListenErr();
 		}
 	}

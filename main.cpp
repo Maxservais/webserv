@@ -21,7 +21,7 @@ int main(int argc, char **argv)
 	int	len = config.get_nb_port();
 
 	std::vector<struct sockaddr_in>	sockaddr(len);
-	int sockets[len];
+	std::vector<int> sockets(len);
 
 	/* Fill in sockaddr structs (1 per socket) */
 	for (int i = 0; i < len; ++i)
