@@ -59,9 +59,8 @@ void	disconnect_client(int client_fd, fd_set *current_sockets)
 	FD_CLR(client_fd, current_sockets);
 }
 
-void	handle_clients(int *sockets, Config &config, Log log, std::vector<struct sockaddr_in> &sockaddr)
+void	handle_clients(int *sockets, Config &config, std::vector<struct sockaddr_in> &sockaddr)
 {
-	(void)log;
 	int				err;
 	int				len = config.get_nb_port();
 	int				max_socket_val = sockets[len - 1];

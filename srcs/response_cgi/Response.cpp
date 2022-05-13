@@ -64,6 +64,9 @@ std::string Response::full_code(int code)
 		case 413:
 			ret = " 413 Request Entity Too Large\n";
 			break;
+		case 409:
+			ret = " 409 Conflict\n";
+			break;
 	}
 	return (ret);
 }
@@ -310,11 +313,25 @@ void Response::post_methode()
 
 void Response::delete_methode()
 {
-	if (exists())
+	if (access(((this->req.get_root() + req.get_file()).c_str()), F_OK) == 0)
 	{
-		remove((this->req.get_root() + req.get_file()).c_str());
-		this->response = req.getVersion() + full_code(200) + "Content-Type: text/html\nContent-Length: 48\n\n <html><body><h1>File deleted.</h1></body></html>" + "\r\n";
+		if (!exists())
+		{
+			std::string tmp = check_error_custom(409);
+			if (!tmp.empty())
+				this->response = req.getVersion() + full_code(409) + content_type(tmp) + "Content-Length: " + to_string(body(tmp).size()) + "\r\n\r\n" + body(tmp) + "\r\n";
+			else
+				this->response = req.getVersion() + full_code(409) + compose_error_message(409);
+		}
+
+		else
+		{
+			remove((this->req.get_root() + req.get_file()).c_str());
+			this->response = req.getVersion() + full_code(200) + "Content-Type: text/html\nContent-Length: 48\n\n <html><body><h1>File deleted.</h1></body></html>" + "\r\n";
+		}
+
 	}
+
 	else
 	{
 		std::string tmp = check_error_custom(404);

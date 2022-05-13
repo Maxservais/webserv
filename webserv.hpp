@@ -187,29 +187,6 @@ class	Request
 		std::string _uploads;
 };
 
-class	Log
-{
-	public:
-		/* Canon */
-		Log();
-		Log( const Log &obj );
-		Log &operator=( const Log &obj );
-		~Log();
-
-		/* Getters */
-		Request getFirst() const;
-		Request getLast() const;
-		std::vector<Request> getLog() const;
-
-		/* Utils */
-		void	add_one(Request newone);
-		void	clear();
-		size_t	size() const;
-
-	private:
-		std::vector<Request> v;
-};
-
 /* 2.3 FORMULATION OF THE RESPONSE */
 class Response
 {
@@ -402,6 +379,6 @@ void	close_sockets(int *sockets, int len);
 void	setup_server(int *sockets, Config &config, std::vector<struct sockaddr_in> &sockaddr);
 
 /* 4.2 HANDLE CLIENTS */
-void	handle_clients(int *sockets, Config &config, Log log, std::vector<struct sockaddr_in> &sockaddr);
+void	handle_clients(int *sockets, Config &config, std::vector<struct sockaddr_in> &sockaddr);
 
 #endif

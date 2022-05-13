@@ -11,7 +11,7 @@ Request::Request(std::string buffer, Config &conf): buff(buffer), config(conf)
 {
 	this->_file = setFile();
 	fill_variables();
-	std::cout << buff << std::endl;
+	// std::cout << buff << std::endl; // UNCOMMENT ME TO DISPLAY THE REQUESTS
 }
 
 Request::Request(const Request &obj): config(obj.config)
@@ -330,7 +330,7 @@ std::string Request::ft_upload(std::string up, std::string buff)
 		}
 	}
 	int fd;
-	if (this->get_uploads().empty())
+	if (this->get_uploads() == this->get_root())
 		fd = open((this->get_root() + "/" + a).c_str(), O_RDWR | O_CREAT | O_TRUNC, 00777);
 	else
 	{

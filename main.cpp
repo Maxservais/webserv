@@ -3,7 +3,6 @@
 int main(int argc, char **argv)
 {
 	Config		config;
-	Log			log;
 
 	/* Parse the config file */
 	try
@@ -48,7 +47,7 @@ int main(int argc, char **argv)
 	/* Handle clients' requests */
 	try
 	{
-		handle_clients(sockets, config, log, sockaddr);
+		handle_clients(sockets, config, sockaddr);
 	}
 	catch (std::exception &e)
 	{
