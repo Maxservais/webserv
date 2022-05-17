@@ -2,7 +2,7 @@ NAME		=	webserv
 
 CXX			=	c++
 
-CXXFLAGS	=	-Wall -Wextra -Werror -std=c++98 -fsanitize=address -g
+CXXFLAGS	=	-Wall -Wextra -Werror -std=c++98
 
 SRC_FILES	=	main.cpp						\
 				srcs/parsing/Config.cpp			\
