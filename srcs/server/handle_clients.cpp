@@ -4,13 +4,14 @@ int read_connection(int socket, std::string &buff)
 {
 	char	buffer[BUFFER_SIZE + 1];
 
+	std::cout << "Reading ..." << std::endl;
 	/* Read from client' socket and add it to the buff string */
 	memset(buffer, 0, BUFFER_SIZE);
 	int ret = recv(socket, buffer, BUFFER_SIZE, 0);
 	if (ret < 0)
 		throw ConnectionErr();
 	if (ret == 0)
-		throw ConnectionClosedErr();
+		return (-1); // throw ConnectionClosedErr();
 	buff += std::string(buffer, ret);
 
 	/* Check whether "\r\n\r\n" was found */
@@ -97,8 +98,8 @@ void	handle_clients(std::vector<int> &sockets, Config &config, std::vector<struc
 		{
 			if(FD_ISSET(*it, &read_sockets))
 			{
-				try
-				{
+				// try
+				// {
 					/* Read from client' socket */
 					err = read_connection(*it, buff);
 
@@ -114,20 +115,30 @@ void	handle_clients(std::vector<int> &sockets, Config &config, std::vector<struc
 						const char *ret = response.c_str();
 						send_data(*it, ret, len); // send_data(i, response.c_str(), response.size());
 						memset((void *)ret, 0, len);
+						std::cout << "Got here" << std::endl;
 						disconnect_client(*it, &current_sockets);
 						clients.erase(it);
 					}
+					if (err == -1)
+					{
+						std::cout << "Got here this time" << std::endl;
+						close(*it);
+						FD_CLR(*it, &current_sockets);
+						FD_CLR(*it, &read_sockets);
+						clients.erase(it);
+						// disconnect_client(*it, &current_sockets);
+					}
 					break ;
-				}
-				catch (std::exception &e)
-				{
-					disconnect_client(*it, &current_sockets);
-					close_sockets(sockets);
-					// clients.erase(it);
-					std::cerr << e.what() << std::endl;
-					// return ;
-					continue ;
-				}
+				// }
+				// catch (std::exception &e)
+				// {
+				// 	disconnect_client(*it, &current_sockets);
+				// 	close_sockets(sockets);
+				// 	// clients.erase(it);
+				// 	std::cerr << e.what() << std::endl;
+				// 	// return ;
+				// 	return ;
+				// }
 			}
 		}
 
